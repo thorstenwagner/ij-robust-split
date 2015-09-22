@@ -17,6 +17,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 	public int setup(String arg, ImagePlus imp) {
 		if(imp==null){
 			IJ.error("No image open");
+			//testing commit
 			return DONE;
 		}
 		
