@@ -1,21 +1,16 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.Polygon;
 
-import ij.gui.Roi;
-import ij.gui.PolygonRoi;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
-import ij.gui.Overlay;
+
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.process.ImageProcessor;
-import ij.process.ImageStatistics;
-import ij.blob.*;
+
 
 public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 
@@ -41,7 +36,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 		//IJ.showMessage("");
 		//IJ.showMessage("The arbitraryNumber is: " + arbitraryNumber);
 		ImagePlus imp=IJ.getImage();
-		BoundaryArcsAdministration.drawPolygons(imp);
+		BoundaryArcAdministration.administrate(imp);
 		
 	}
 
@@ -103,7 +98,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 	}*/
 	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
-		GenericDialog gd = new GenericDialog(command + "...");
+		/*GenericDialog gd = new GenericDialog(command + "...");
 		gd.addMessage("Hello world!");
 		gd.addNumericField("Some arbitrary positive number:", 0, 0);
 		gd.addDialogListener(this);
@@ -111,7 +106,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 		gd.showDialog();
 		if (gd.wasCanceled()) {
 			return DONE;
-		}
+		}*/
 		return IJ.setupDialog(imp, DOES_8G);
 	}
 
