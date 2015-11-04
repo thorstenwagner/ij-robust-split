@@ -1,9 +1,13 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.AWTEvent;
+import java.awt.Polygon;
+import java.util.ArrayList;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.blob.Blob;
+import ij.blob.ManyBlobs;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 
@@ -32,11 +36,35 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 
 	@Override
 	public void run(ImageProcessor ip) {
+		ArrayList<Clump> clumpList=new ArrayList<Clump>();
 		// TODO Auto-generated method stub
 		//IJ.showMessage("");
 		//IJ.showMessage("The arbitraryNumber is: " + arbitraryNumber);
 		ImagePlus imp=IJ.getImage();
-		BoundaryArcAdministration.administrate(imp);
+		//BoundaryArcAdministration.administrate(imp);
+		ManyBlobs blobList=new ManyBlobs(imp);
+		blobList.findConnectedComponents();
+		Clump clump=null;
+		for(Blob b: blobList)
+		{
+			Polygon p=b.getOuterContour();
+			clump=new Clump(p,imp);
+			clumpList.add(clump);
+		//	BoundaryArc outer=computeBoundaryArc(p);
+			//IJ.showMessage(outer.getNumber());
+		//	controlBoundaryArcs(outer);
+			ArrayList<Polygon> innerContours=new ArrayList<Polygon>();
+	    	   innerContours=b.getInnerContours();
+	    	   
+	    	   for(Polygon inner:innerContours)
+	    	   {
+	    		   clump=new Clump(inner,imp);
+	   			clumpList.add(clump);   
+	    		//  BoundaryArc innerba= computeBoundaryArc(inner);
+	    		 //  IJ.showMessage(innerba.getNumber());
+	    		//   controlBoundaryArcs(innerba);
+	    	   }
+		}
 		
 	}
 

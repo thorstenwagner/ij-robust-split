@@ -3,6 +3,8 @@ package de.biomedical_imaging.ij.clumpsplitting;
 import java.awt.Color;
 
 import java.awt.Polygon;
+
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
 
 import ij.IJ;
@@ -19,21 +21,58 @@ public class BoundaryArcAdministration {
 	public static void administrate(ImagePlus imp)
 	{
 		ManyBlobs blobList=new ManyBlobs(imp);
-		computeBoundaryArcs(blobList);
+	//	computeBoundaryArcs(blobList);
 		drawPolygons(blobList,imp);
 	}
-	public static void computeBoundaryArc(int[] startingPoint,int[] endPoint)
-	{
-		//*TODO* zwischenBogen zwischen den beiden Punkten berechnen*//
+	public static BoundaryArc computeBoundaryArc(int[] startingPoint,int[] endPoint, Polygon p)
+	{	
+		IJ.showMessage("compute");
+		BoundaryArc ba=new BoundaryArc();
+		boolean started=false;
+		boolean ended=false;
+		ba.setStartingPoint(startingPoint[0], startingPoint[1]);
+		Path2D path= new Path2D.Double();
+		int i=0;
+		while(i<p.npoints&&!ended)
+		{
+			if(p.xpoints[i]==startingPoint[0]&& p.ypoints[i]==startingPoint[1]&&!started)
+			{
+				path.moveTo(p.xpoints[i], p.ypoints[i]);
+				started=true;
+			}
+			else
+			{
+				/** *TODO* überdenken!!
+			*/
+				if(started&&(p.xpoints[i]!=endPoint[0]|| p.ypoints[i]!=endPoint[1]))
+				{
+					path.lineTo(p.xpoints[i], p.ypoints[i]);
+				}
+				else
+				{
+					if(p.xpoints[i]==endPoint[0]&& p.ypoints[i]==endPoint[1])
+					{
+						path.lineTo(p.xpoints[i], p.ypoints[i]);
+						ended=true;
+					}
+					
+				}
+			}
+			i++;
+		}
+		ba.setPath(path);
+		ba.computeBoundaryArcNumber();
+		return ba;
+		
 	}
-	public static void computeBoundaryArcs(ManyBlobs blobList)
+	/*public static void computeBoundaryArcs(ManyBlobs blobList)
 	{
 	//	ManyBlobs blobList= new ManyBlobs(imp);
 		blobList.findConnectedComponents();
 		for(Blob b: blobList)
 		{
 			Polygon p=b.getOuterContour();
-			BoundaryArc outer=computeBoundaryArc(p);
+		//	BoundaryArc outer=computeBoundaryArc(p);
 			IJ.showMessage(outer.getNumber());
 			controlBoundaryArcs(outer);
 			ArrayList<Polygon> innerContours=new ArrayList<Polygon>();
@@ -47,7 +86,7 @@ public class BoundaryArcAdministration {
 	    	   }
 		}
 		
-	}
+	}*/
 	public static void controlBoundaryArcs(BoundaryArc ba)
 	{int j=0;
 		for(int i=0;i<ba.getNumber().length()-1;i++)
@@ -96,97 +135,4 @@ public class BoundaryArcAdministration {
 	}
 	
 
-	public static BoundaryArc computeBoundaryArc(Polygon p)
-	{
-		BoundaryArc ba=new BoundaryArc();
-		
-		
-		ba.setStartingPoint(0, p.xpoints[0]);
-		ba.setStartingPoint(1,p.ypoints[1]);
-		int[] deltaX=new int[p.npoints];
-		int[] deltaY=new int[p.npoints];
-		//IJ.showMessage(p.xpoints[0]+" xkoord "+p.ypoints[0]+" ykoord "+ "letzter: " + p.xpoints[p.npoints-2] +" x "+ p.ypoints[p.npoints-2]+" y ");
-		for(int i=0;i<p.npoints-1;i++)
-		{
-			
-				deltaX[i]= p.xpoints[i+1]-p.xpoints[i];
-				deltaY[i]=p.ypoints[i+1]-p.ypoints[i];
-				switch(deltaX[i])
-			{
-			case -1:
-				switch(deltaY[i])
-				{
-				case -1:
-					
-					ba.concatNumber(3);
-					//IJ.showMessage("3"+" "+number);
-					
-					break;
-				case 0:
-					ba.concatNumber(4);
-					//IJ.showMessage("4"+" "+number);
-					
-					break;
-				case 1:
-					ba.concatNumber(5);
-				//IJ.showMessage("5"+" "+number);
-					
-					break;
-				default:
-					IJ.error("unvorhergesehenes Ereignis1");
-					break;
-				}
-				break;
-			case 0:
-				switch(deltaY[i])
-				{
-				case -1:
-					ba.concatNumber(2);
-					
-					//IJ.showMessage("2"+" "+number);
-					
-					break;
-				case 1:	
-					ba.concatNumber(6);
-				
-					//IJ.showMessage("6"+" "+number);
-					
-					break;
-				default:
-					IJ.error("unvorhergesehenes Ereignis2"+deltaY[i]);
-					break;
-				}
-				break;
-			case 1:
-				switch(deltaY[i])
-				{
-				case -1:
-					ba.concatNumber(1);
-				//	IJ.showMessage("1"+" "+number);
-					
-					break;
-				case 0:
-					ba.concatNumber(0);
-					//IJ.showMessage("0"+" "+number);
-					
-					break;
-				case 1:
-					ba.concatNumber(7);
-				//	IJ.showMessage("7"+" "+number);
-					
-					break;
-				default:
-					IJ.error("unvorhergesehenes Ereignis3");
-					break;
-				}
-				break;
-			default:
-				IJ.error("unvorhergesehenes Ereignis4");
-				break;
-			}
-			
-				
-		}
-		return ba;
-	}
 }
