@@ -27,10 +27,10 @@ public class BoundaryArcAdministration {
 	public static BoundaryArc computeBoundaryArc(int[] startingPoint,int[] endPoint, Polygon p)
 	{	
 		IJ.showMessage("compute");
-		BoundaryArc ba=new BoundaryArc();
+		BoundaryArc ba=new BoundaryArc(startingPoint[0],startingPoint[1],endPoint[0],endPoint[1]);
 		boolean started=false;
 		boolean ended=false;
-		ba.setStartingPoint(startingPoint[0], startingPoint[1]);
+		//ba.setStartingPoint(startingPoint[0], startingPoint[1]);
 		Path2D path= new Path2D.Double();
 		int i=0;
 		while(i<p.npoints&&!ended)
@@ -50,7 +50,7 @@ public class BoundaryArcAdministration {
 				}
 				else
 				{
-					if(p.xpoints[i]==endPoint[0]&& p.ypoints[i]==endPoint[1])
+					if(started&&p.xpoints[i]==endPoint[0]&& p.ypoints[i]==endPoint[1])
 					{
 						path.lineTo(p.xpoints[i], p.ypoints[i]);
 						ended=true;
