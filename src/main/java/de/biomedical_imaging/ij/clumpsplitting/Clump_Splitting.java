@@ -13,6 +13,8 @@ import ij.gui.GenericDialog;
 
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
+import ij.process.BinaryProcessor;
+import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 
@@ -41,9 +43,19 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 		//IJ.showMessage("");
 		//IJ.showMessage("The arbitraryNumber is: " + arbitraryNumber);
 		ImagePlus imp=IJ.getImage();
+		//ImageProcessor impr=imp.getProcessor();
+		//impr.autoThreshold();
+	    //log.log(Level.FINEST, "Creating Binary Image");
+      //  BinaryProcessor proc = new BinaryProcessor(new ByteProcessor(imp.getImage()));
+      //  proc.autoThreshold();
+     //   ImagePlus imgp= new ImagePlus(imp.getTitle(), proc);
+       
+       // log.log(Level.FINEST, "Created Binary Image"); 
 		//BoundaryArcAdministration.administrate(imp);
 		ManyBlobs blobList=new ManyBlobs(imp);
 		blobList.findConnectedComponents();
+		
+		 
 		Clump clump=null;
 		for(Blob b: blobList)
 		{
