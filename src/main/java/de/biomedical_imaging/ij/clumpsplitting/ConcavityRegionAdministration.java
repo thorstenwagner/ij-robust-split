@@ -1,5 +1,7 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
+import ij.IJ;
+
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -28,9 +30,12 @@ public ArrayList<ConcavityRegion> computeConcavityRegions()
 		startY=convexHull.ypoints[i-1];
 		endX=convexHull.xpoints[i];
 		endY=convexHull.ypoints[i];
+
 		ArrayList<Point2D> pointList=getAllEmbeddedPointsFromBoundaryArc(startX,startY,endX,endY);
 		ConcavityRegion concavityRegion=new ConcavityRegion(startX,startY,endX,endY,pointList);
 		concavityRegionList.add(concavityRegion);
+	
+	
 	}
 	return concavityRegionList;
 }

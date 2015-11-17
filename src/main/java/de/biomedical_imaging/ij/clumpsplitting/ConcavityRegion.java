@@ -52,7 +52,12 @@ public ArrayList<Double> computeDistance()
 	}
 	return doubleList;
 }
-public void getMaxDist(ArrayList<Double> distList)
+ 
+public double getMaxDist(){
+	return max;
+}
+
+private void getMaxDist(ArrayList<Double> distList)
 {
 	
 	int index=0;

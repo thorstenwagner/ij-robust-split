@@ -15,6 +15,8 @@ private ArrayList<ConcavityRegionAdministration> concavityRegionList;
 private Polygon boundary;
 private Polygon convexHull;
 
+final double CONCAVITY_DEPTH_THRESHOLD = 2;
+
 public Clump(Polygon boundary,ImagePlus imp)
 {
 	this.boundary=boundary;
@@ -33,7 +35,9 @@ private void computeConcavityRegions(ImagePlus imp)
 	for(ConcavityRegion cr:conList)
 	{
 		//IJ.showMessage(cr.getMaxDistCoord().getX()+" "+cr.getMaxDistCoord().getY());
-		cr.markMax(imp);
+		if(cr.getMaxDist()>CONCAVITY_DEPTH_THRESHOLD){
+			cr.markMax(imp);
+		}
 	}
 	this.convexHull=convexHull;
 	/**for(int i=0;i<convexHull.npoints;i++)
