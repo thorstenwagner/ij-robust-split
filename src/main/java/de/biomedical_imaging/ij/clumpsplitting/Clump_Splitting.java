@@ -13,14 +13,17 @@ import ij.gui.GenericDialog;
 
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
-import ij.process.BinaryProcessor;
-import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-
+/**
+ * 
+ * @author Louise
+ *
+ */
 
 public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
-
+	int backgroundColor=1;
 	int arbitraryNumber;
+	ImagePlus imp;
 	@Override
 	public int setup(String arg, ImagePlus imp) {
 		if(imp==null){
@@ -32,50 +35,31 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 			IJ.error("Only binary images are supported");
 			return DONE;
 		}
-		
+		this.imp=imp;
 		return DOES_8G + DOES_STACKS + FINAL_PROCESSING + PARALLELIZE_STACKS;
 	}
 
 	@Override
 	public void run(ImageProcessor ip) {
 		ArrayList<Clump> clumpList=new ArrayList<Clump>();
-		// TODO Auto-generated method stub
-		//IJ.showMessage("");
-		//IJ.showMessage("The arbitraryNumber is: " + arbitraryNumber);
-		ImagePlus imp=IJ.getImage();
-		//ImageProcessor impr=imp.getProcessor();
-		//impr.autoThreshold();
-	    //log.log(Level.FINEST, "Creating Binary Image");
-      //  BinaryProcessor proc = new BinaryProcessor(new ByteProcessor(imp.getImage()));
-      //  proc.autoThreshold();
-     //   ImagePlus imgp= new ImagePlus(imp.getTitle(), proc);
-       
-       // log.log(Level.FINEST, "Created Binary Image"); 
-		//BoundaryArcAdministration.administrate(imp);
 		ManyBlobs blobList=new ManyBlobs(imp);
-		blobList.findConnectedComponents();
-		
-		 
+		blobList.setBackground(backgroundColor);
+		blobList.findConnectedComponents(); 
 		Clump clump=null;
+		ImageProcessor ipr=imp.getProcessor();
 		for(Blob b: blobList)
 		{
 			Polygon p=b.getOuterContour();
-			clump=new Clump(p,imp);
+			clump=new Clump(p,ipr);
 			clumpList.add(clump);
-		//	BoundaryArc outer=computeBoundaryArc(p);
-			//IJ.showMessage(outer.getNumber());
-		//	controlBoundaryArcs(outer);
 			ArrayList<Polygon> innerContours=new ArrayList<Polygon>();
-	    	   innerContours=b.getInnerContours();
+	    	innerContours=b.getInnerContours();
 	    	   
-	    	   for(Polygon inner:innerContours)
-	    	   {
-	    		   clump=new Clump(inner,imp);
-	   			clumpList.add(clump);   
-	    		//  BoundaryArc innerba= computeBoundaryArc(inner);
-	    		 //  IJ.showMessage(innerba.getNumber());
-	    		//   controlBoundaryArcs(innerba);
-	    	   }
+	    	  for(Polygon inner:innerContours)
+	    	  {
+	    		  clump=new Clump(inner,ipr);
+	    		  clumpList.add(clump);   
+	    	  }
 		}
 		
 	}
@@ -138,6 +122,32 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 	}*/
 	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
+		GenericDialog gd=new GenericDialog("Choose Background");
+		gd.addMessage("What ist your Background Color?");
+		String[] checkboxValues={"black", "white"};
+		boolean[] checkBoxChoose={false,true};
+		gd.addRadioButtonGroup("BackgroundColor", checkboxValues,2,1,"white");
+		
+		gd.showDialog();
+		if(gd.wasCanceled())
+		{
+			return DONE;
+		}
+		if(gd.wasOKed())
+		{
+			String ausw=gd.getNextRadioButton();
+			if(ausw.equals("black"))
+			{
+				backgroundColor=1;
+			}
+			else{
+				if(ausw.equals("white"))
+				{
+					backgroundColor=0;
+				}
+			}
+		}
+		
 		/*GenericDialog gd = new GenericDialog(command + "...");
 		gd.addMessage("Hello world!");
 		gd.addNumericField("Some arbitrary positive number:", 0, 0);

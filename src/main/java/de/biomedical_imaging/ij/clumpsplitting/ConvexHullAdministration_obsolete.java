@@ -1,8 +1,8 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.Point;
+
 import java.awt.Polygon;
-import java.awt.Rectangle;
+
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
@@ -11,16 +11,19 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+
 
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
-
-public class ConvexHullAdministration {
+/**
+ * klasse vermutlich überflüssig wird später gel
+ * @author Louise
+ *
+ */
+public class ConvexHullAdministration_obsolete {
 	
 	public Polygon computeConvexHull(Polygon p)
 	{
@@ -28,10 +31,10 @@ public class ConvexHullAdministration {
 		Polygon convexHull=pr.getConvexHull();
 		return convexHull;
 	}
-	public ArrayList<ConvexHull> computeConvexHullsForPolygon(ImagePlus imp, Polygon p)
+	public ArrayList<ConvexHull_obsolete> computeConvexHullsForPolygon(ImagePlus imp, Polygon p)
 	{
 		
-		ArrayList<ConvexHull> hullList=new ArrayList<ConvexHull>();
+		ArrayList<ConvexHull_obsolete> hullList=new ArrayList<ConvexHull_obsolete>();
 		Rectangle2D r=p.getBounds2D();
 		ImageProcessor i=imp.getProcessor();
 		i.drawRect((int)r.getX(), (int)r.getY(), (int)r.getWidth(), (int)r.getHeight());
@@ -115,7 +118,7 @@ public class ConvexHullAdministration {
 					}
 				}
 				
-				ConvexHull convexHull=new ConvexHull(/*xCoord,yCoord,pointx,pointy*/);
+				ConvexHull_obsolete convexHull=new ConvexHull_obsolete(/*xCoord,yCoord,pointx,pointy*/);
 				xCoord=pointx;
 				yCoord=pointy;
 				angle=0;

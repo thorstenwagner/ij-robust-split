@@ -1,6 +1,5 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.Color;
 
 import java.awt.Polygon;
 
@@ -14,16 +13,22 @@ import ij.blob.ManyBlobs;
 import ij.gui.Overlay;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-
+/**
+ * 
+ * @author Louise
+ *
+ */
 
 public class BoundaryArcAdministration {
 	
-	public static void administrate(ImagePlus imp)
-	{
-		ManyBlobs blobList=new ManyBlobs(imp);
-	//	computeBoundaryArcs(blobList);
-		drawPolygons(blobList,imp);
-	}
+	
+	/**
+	 * wandelt Teile eines Polygons in einen Pfad2D um
+	 * @param startingPoint Anfangspunkt des Pfades
+	 * @param endPoint Endpunkt des Pfades
+	 * @param p Polygon
+	 * @return *TODO*
+	 */
 	public static BoundaryArc computeBoundaryArc(int[] startingPoint,int[] endPoint, Polygon p)
 	{	
 		IJ.showMessage("compute");
@@ -87,7 +92,7 @@ public class BoundaryArcAdministration {
 		}
 		
 	}*/
-	public static void controlBoundaryArcs(BoundaryArc ba)
+	/*public static void controlBoundaryArcs(BoundaryArc ba)
 	{int j=0;
 		for(int i=0;i<ba.getNumber().length()-1;i++)
 		{	
@@ -101,7 +106,12 @@ public class BoundaryArcAdministration {
 		}
 		IJ.showMessage(j+"nicht gerade Bereiche");
 	}
-	
+	*/
+	/**
+	 * Zeichnet Umrandungen um alle Clumps
+	 * @param allBlobs *TODO*
+	 * @param imp Eingabebild
+	 */
 	public static void drawPolygons(ManyBlobs allBlobs,ImagePlus imp)
 	{
 	//	ManyBlobs allBlobs= new ManyBlobs(imp);
@@ -115,7 +125,7 @@ public class BoundaryArcAdministration {
 	    	  
 	    	  
 	    	   roi.setImage(imp);
-	    	   roi.setColor(Color.RED);
+	    	   
 	    	//   ImageProcessor ip=imp.getProcessor();
 	    	   o.add(roi);
 	    	   
@@ -126,7 +136,7 @@ public class BoundaryArcAdministration {
 	    	   {
 	    		   PolygonRoi proi=new PolygonRoi(inner,Roi.POLYGON);
 	    		   proi.setImage(imp);
-	    		   proi.setColor(Color.BLUE);
+	    		   
 	    		   o.add(proi);
 	    	   }
 	    	   

@@ -1,11 +1,16 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
-public class RationalNumber implements Comparable<RationalNumber>{
+/**
+ * klasse ist überflüssig
+ * @author Louise
+ *
+ */
+public class RationalNumber_obsolete implements Comparable<RationalNumber_obsolete>{
 private int x;
 private int y;
 private final double value;
 
-public RationalNumber(int x, int y, int largestValue)
+public RationalNumber_obsolete(int x, int y, int largestValue)
 {
 	this.x=x;
 	this.y=y;
@@ -19,7 +24,7 @@ public RationalNumber(int x, int y, int largestValue)
 		this.value=largestValue+1;
 	}
 }
-public boolean equals(RationalNumber r)
+public boolean equals(RationalNumber_obsolete r)
 {
 	if(r.getValue()==this.getValue())
 	{
@@ -41,7 +46,7 @@ public double getValue()
 	return this.value;
 }
 @Override
-public int compareTo(RationalNumber r) {
+public int compareTo(RationalNumber_obsolete r) {
 	if(this.getValue()==r.getValue())
 	{
 		return 0;

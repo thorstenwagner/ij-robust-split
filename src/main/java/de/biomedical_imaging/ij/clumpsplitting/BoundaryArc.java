@@ -1,12 +1,17 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.Polygon;
+
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
+
+
 
 import ij.IJ;
+/**
+ * 
+ * @author Louise
+ *
+ */
 
 public class BoundaryArc 
 {
@@ -14,7 +19,6 @@ public class BoundaryArc
 	private int[] endPoint=new int[2];
 	private Path2D path;
 	
-	private Polygon p;
 	private String number="";
 	
 	public BoundaryArc(int startingPointx,int startingPointy,int endPointx,int endPointy)
@@ -24,8 +28,8 @@ public class BoundaryArc
 		endPoint[0]=endPointx;
 		endPoint[1]=endPointy;
 	}
-	
-	public ArrayList<Double> getGradient()
+	/*
+	private ArrayList<Double> getGradient()
 	{
 		PathIterator pit=path.getPathIterator(null);
 		double[] first=new double[6];
@@ -54,7 +58,7 @@ public class BoundaryArc
 			
 		}
 		return angleList;
-	}
+	}*/
 	public void setEndPoint(int x,int y)
 	{
 		endPoint[0]=x;
@@ -73,10 +77,10 @@ public class BoundaryArc
 	public void concatNumber(int number)
 	{
 		this.number=this.number + ((Integer)number).toString();
-		//IJ.showMessage(this.number+"number");
+		
 	}
 	public String getNumber()
-	{	//IJ.showMessage(this.number);
+	{	
 		return this.number;
 	}
 	public int getDigit(int position)

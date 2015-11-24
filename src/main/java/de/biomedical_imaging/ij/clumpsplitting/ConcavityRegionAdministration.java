@@ -1,20 +1,31 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
+
+
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-
+/**
+ * 
+ * @author Louise
+ *
+ */
 public class ConcavityRegionAdministration {
 private Polygon boundaryArc;
 private Polygon convexHull;
 
+final double CONCAVITY_DEPTH_THRESHOLD = 10;
 
 public ConcavityRegionAdministration(Polygon boundaryArc,Polygon convexHull)
 {
 	this.boundaryArc=boundaryArc;
 	this.convexHull=convexHull;
 }
+/**
+ * ermittelt alle ConcavityRegions eines Clumps
+ * @return Liste mit allen Regionen
+ */
 public ArrayList<ConcavityRegion> computeConcavityRegions()
 {
 	ArrayList<ConcavityRegion> concavityRegionList=new ArrayList<ConcavityRegion>();
@@ -28,22 +39,28 @@ public ArrayList<ConcavityRegion> computeConcavityRegions()
 		startY=convexHull.ypoints[i-1];
 		endX=convexHull.xpoints[i];
 		endY=convexHull.ypoints[i];
+
 		ArrayList<Point2D> pointList=getAllEmbeddedPointsFromBoundaryArc(startX,startY,endX,endY);
 		ArrayList<Double> doubleList= computeDistance(pointList,startX,startY,endX,endY);
 		double[] maxData= getMaxDist(doubleList);
-		
-		if(maxData[0]!=0)
+		if(maxData[0]>CONCAVITY_DEPTH_THRESHOLD)
 		{
-			/**
-			 * INDEX!!!!! sonst probleme
-			 */
-		ConcavityRegion concavityRegion=new ConcavityRegion(startX,startY,endX,endY,pointList,doubleList,maxData[0],maxData[1]);
-		
-		concavityRegionList.add(concavityRegion);
+			ConcavityRegion concavityRegion=new ConcavityRegion(startX,startY,endX,endY,pointList,doubleList,maxData[0],(int)maxData[1]);
+			concavityRegionList.add(concavityRegion);
 		}
+		
 	}
 	return concavityRegionList;
 }
+/**
+ * ermittelt alle Punkte, die zwischen 2 werten eingeschlossen werden
+ * d.h. es werden alle Punkte ermittelt, die auf dem BoundaryArc liegen und sich innerhalb einer ConcavityRegion befinden
+ * @param startX Anfangswert X
+ * @param startY Anfangswert Y
+ * @param endX Endwert X
+ * @param endY Endwert Y
+ * @return Liste mit allen Eingeschlossenen Punkten im Raster
+ */
 private ArrayList<Point2D> getAllEmbeddedPointsFromBoundaryArc(int startX,int startY,int endX,int endY){
 	int i=0;
 	boolean ended=false;
@@ -59,7 +76,7 @@ private ArrayList<Point2D> getAllEmbeddedPointsFromBoundaryArc(int startX,int st
 		else
 		{
 			
-			if(started&&(boundaryArc.xpoints[i]!=endX|| boundaryArc.ypoints[i]!=endY))
+			if(started&&(boundaryArc.xpoints[i]!=endX|| boundaryArc.ypoints[i]!=endY)&&!ended)
 			{
 				pointList.add(new Point2D.Double(boundaryArc.xpoints[i],boundaryArc.ypoints[i]));
 				
@@ -75,7 +92,8 @@ private ArrayList<Point2D> getAllEmbeddedPointsFromBoundaryArc(int startX,int st
 			}
 		}
 		i++;
-	}	return pointList;
+	}
+	return pointList;
 	
 }
 
@@ -88,19 +106,34 @@ public void setBoundaryArc(Polygon boundaryArc)
 {
 	this.boundaryArc=boundaryArc;
 }
-public ArrayList<Double> computeDistance(ArrayList<Point2D> boundaryPointList,int startX,int startY, int endX,int endY)
+/**
+ * berechnet die Distanz zwischen den Punkten der BoundaryPoint List und der COnvexHull
+ * @param boundaryPointList Liste mit allen zu berechnenden Punkten
+ * @param startX Anfangswert X der Geraden
+ * @param startY AnfangswertY der Geraden
+ * @param endX EndwertX der Geraden
+ * @param endY EndwertY der Geraden
+ * @return Liste, die alle Abstände enthält
+ */
+private ArrayList<Double> computeDistance(ArrayList<Point2D> boundaryPointList,int startX,int startY, int endX,int endY)
 {
 	ArrayList<Double> doubleList=new ArrayList<Double>();
 	Line2D.Double line=new Line2D.Double(startX, startY, endX, endY);
 	Double dist;
 	for(Point2D point:boundaryPointList)
 	{
-		dist=line.ptLineDist(point);
+		dist=line.ptSegDistSq(point);
+		//dist=Math.abs(line.ptLineDist(point));
 		doubleList.add(dist);
 	}
 	return doubleList;
 }
-public double[] getMaxDist(ArrayList<Double> distList)
+/**
+ * durchläuft die mitgegebene Liste und berechnet den größten Wert
+ * @param distList Liste mit Abständen zwischen Punkt und Gerade
+ * @return Array der Länge 2 mit an Stelle 0 dem max. Abstand und an Stelle 1 den Index, bezogen auf die Liste an dem dieser Abstand auftritt
+ */
+private double[] getMaxDist(ArrayList<Double> distList)
 {
 	int indexMax=0;
 	double max=0;

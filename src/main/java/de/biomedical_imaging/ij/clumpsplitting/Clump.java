@@ -1,59 +1,60 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.Color;
+
 import java.awt.Polygon;
 import java.util.ArrayList;
 
 import ij.IJ;
-import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
-
+/**
+ * 
+ * @author Louise
+ *
+ */
 public class Clump {
-private ArrayList<ConcavityRegionAdministration> concavityRegionList;
+private ArrayList<ConcavityRegion> concavityRegionList;
 private Polygon boundary;
 private Polygon convexHull;
 
-public Clump(Polygon boundary,ImagePlus imp)
+
+/**
+ * erzeugt einen Clump, ein Clump repräsentiert zusammenhängende Partikel
+ * @param boundary Umrandungen des Clumps
+ * @param imp Bild
+ */
+public Clump(Polygon boundary,ImageProcessor ip)
 {
 	this.boundary=boundary;
 	IJ.showMessage("Clump Konstruktor");
-	this.computeConcavityRegions(imp);
+	this.computeConcavityRegions(ip);
 	
 }
-private void computeConcavityRegions(ImagePlus imp)
+/**
+ * Ermittelt die Bereiche mit großer Konkavität dabei wird zunächst die konvexe Hülle bestimmt und dann die Konvexen Bereiche
+ * @param imp Bild wird benötigt um konkavitätspixel einzuzeichnen
+ */
+private void computeConcavityRegions(ImageProcessor ip)
 {
-	//für jeden Clump
 	IJ.showMessage("computeConcavityRegions");
-	ConvexHullAdministration cha=new ConvexHullAdministration();
-	Polygon convexHull=cha.computeConvexHull(boundary);
-	ConcavityRegionAdministration cra=new ConcavityRegionAdministration(boundary,convexHull);
-	ArrayList<ConcavityRegion> conList=cra.computeConcavityRegions();
-	for(ConcavityRegion cr:conList)
+	PolygonRoi pr=new PolygonRoi(boundary,Roi.POLYGON);
+	Polygon convexHull=pr.getConvexHull();
+	this.convexHull=convexHull;
+	
+	ConcavityRegionAdministration cra=new ConcavityRegionAdministration(boundary,this.convexHull);
+	concavityRegionList=cra.computeConcavityRegions();
+	for(ConcavityRegion cr:concavityRegionList)
 	{
-		//IJ.showMessage(cr.getMaxDistCoord().getX()+" "+cr.getMaxDistCoord().getY());
-		cr.markMax(imp);
+			cr.markMax(ip);
+		
 	}
 	this.convexHull=convexHull;
-	/**for(int i=0;i<convexHull.npoints;i++)
-	{
-	IJ.showMessage("Hull:"+convexHull.xpoints[i]+ " "+ convexHull.ypoints[i]);
-	}*/
-
-	ImageProcessor ip=imp.getProcessor();
+	
+	
 	PolygonRoi polygonRoi=new PolygonRoi(convexHull,Roi.POLYGON);
 	ip.draw(polygonRoi);
-/*	for(ConvexHull convexHull:convexHullList)
-	{
-		ip.setColor(Color.MAGENTA);
-		ip.drawLine(convexHull.getStartingPoint()[0], convexHull.getStartingPoint()[1], convexHull.getEndPoint()[0], convexHull.getEndPoint()[1]);
-		IJ.showMessage(convexHull.getStartingPoint()[0]+" "+convexHull.getStartingPoint()[1] +"\n"+convexHull.getEndPoint()[0]+ " "+convexHull.getEndPoint()[1]);
-		/*BoundaryArc boundaryArc=BoundaryArcAdministration.computeBoundaryArc(convexHull.getStartingPoint(),convexHull.getEndPoint(),boundary);
-		ConcavityRegion concavityRegion=new ConcavityRegion();
-		concavityRegion.setConvexHull(convexHull);
-		concavityRegion.setBoundaryArc(boundaryArc);
-		concavityRegionList.add(concavityRegion);*/
+
 	}
 }
 
