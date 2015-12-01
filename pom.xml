@@ -47,9 +47,14 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
   	 		<version>1.49r</version>
 		</dependency>
 		<dependency>
-    		<groupId>de.biomedical-imaging.ij</groupId>
-    		<artifactId>ij_blob</artifactId>
-    		<version>1.4.1</version>
+    			<groupId>de.biomedical-imaging.ij</groupId>
+    			<artifactId>ij_blob</artifactId>
+    			<version>1.4.1</version>
+		</dependency>
+		<dependency>
+    			<groupId>javax.vecmath</groupId>
+    			<artifactId>vecmath</artifactId>
+    			<version>1.5.2</version>
 		</dependency>
 	</dependencies>
 	<developers>

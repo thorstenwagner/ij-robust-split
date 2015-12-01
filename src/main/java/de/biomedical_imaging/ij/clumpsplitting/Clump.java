@@ -1,6 +1,7 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
 
+import java.awt.Color;
 import java.awt.Polygon;
 import java.util.ArrayList;
 
@@ -22,7 +23,7 @@ private Polygon convexHull;
 /**
  * erzeugt einen Clump, ein Clump repräsentiert zusammenhängende Partikel
  * @param boundary Umrandungen des Clumps
- * @param imp Bild
+ * @param ip Bild
  */
 public Clump(Polygon boundary,ImageProcessor ip)
 {
@@ -47,12 +48,22 @@ private void computeConcavityRegions(ImageProcessor ip)
 	for(ConcavityRegion cr:concavityRegionList)
 	{
 			cr.markMax(ip);
+			
 		
+	}
+	AbstractSplitLineCalculator sslc=new StraightSplitLineCalculator();
+	ArrayList<AbstractSplitLine> possibleSplitLines=sslc.calculatePossibleSplitLines(concavityRegionList);
+	for(AbstractSplitLine asl:possibleSplitLines)
+	{
+		StraightSplitLine ssl=(StraightSplitLine)asl;
+		ssl.drawLine(ip);
 	}
 	this.convexHull=convexHull;
 	
 	
 	PolygonRoi polygonRoi=new PolygonRoi(convexHull,Roi.POLYGON);
+	//ip.setLineWidth(10);
+	ip.setColor(Color.CYAN);
 	ip.draw(polygonRoi);
 
 	}

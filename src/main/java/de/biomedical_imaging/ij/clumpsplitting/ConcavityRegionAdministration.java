@@ -15,7 +15,7 @@ public class ConcavityRegionAdministration {
 private Polygon boundaryArc;
 private Polygon convexHull;
 
-final double CONCAVITY_DEPTH_THRESHOLD = 10;
+private final double CONCAVITY_DEPTH_THRESHOLD = 3;
 
 public ConcavityRegionAdministration(Polygon boundaryArc,Polygon convexHull)
 {

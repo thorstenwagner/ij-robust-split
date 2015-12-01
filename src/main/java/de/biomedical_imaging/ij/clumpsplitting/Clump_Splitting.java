@@ -49,9 +49,9 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 		ImageProcessor ipr=imp.getProcessor();
 		for(Blob b: blobList)
 		{
-			Polygon p=b.getOuterContour();
+			/*Polygon p=b.getOuterContour();
 			clump=new Clump(p,ipr);
-			clumpList.add(clump);
+			clumpList.add(clump);*/
 			ArrayList<Polygon> innerContours=new ArrayList<Polygon>();
 	    	innerContours=b.getInnerContours();
 	    	   
@@ -125,7 +125,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 		GenericDialog gd=new GenericDialog("Choose Background");
 		gd.addMessage("What ist your Background Color?");
 		String[] checkboxValues={"black", "white"};
-		boolean[] checkBoxChoose={false,true};
+		//boolean[] checkBoxChoose={false,true};
 		gd.addRadioButtonGroup("BackgroundColor", checkboxValues,2,1,"white");
 		
 		gd.showDialog();

@@ -23,7 +23,7 @@ private ArrayList<Double> doubleList;
 private ArrayList<Point2D> boundaryPointList;
 /**
  * Markiert den Pixel mit der größten Distanz zur konvexenHülle
- * @param imp
+ * @param ip 
  */
 public void markMax(ImageProcessor ip)
 {	IJ.showMessage(max+" "+indexMax+ " "+ boundaryPointList.get(indexMax).getX()+ " "+ boundaryPointList.get(indexMax).getY());
@@ -32,6 +32,7 @@ public void markMax(ImageProcessor ip)
 	ip.setColor(Color.BLUE);
 	ip.setLineWidth(10);
 	ip.drawDot((int)p.getX(), (int)p.getY());
+	ip.drawDot((int)this.getMidPointOfConvexHull().getX(), (int)this.getMidPointOfConvexHull().getY());
 	ip.setLineWidth(1);
 }
 /**
@@ -81,6 +82,15 @@ public ArrayList<Double> getDistList()
 public Point2D getMaxDistCoord()
 {
 	return boundaryPointList.get(indexMax);
+}
+public Point2D getMidPointOfConvexHull()
+{
+	double xDist= ((double)endX-(double)startX)/2;
+	double yDist=((double)endY-(double)startY)/2;
+	double xCoord=startX + xDist;
+	double yCoord=startY+yDist;
+	Point2D.Double midPoint=new Point2D.Double(xCoord, yCoord);
+	return midPoint;
 }
 
  
