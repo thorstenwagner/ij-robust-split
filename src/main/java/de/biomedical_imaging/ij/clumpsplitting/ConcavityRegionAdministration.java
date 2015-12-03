@@ -62,11 +62,11 @@ public ArrayList<ConcavityRegion> computeConcavityRegions()
  * @return Liste mit allen Eingeschlossenen Punkten im Raster
  */
 private ArrayList<Point2D> getAllEmbeddedPointsFromBoundaryArc(int startX,int startY,int endX,int endY){
-	int i=0;
+	int i=boundaryArc.npoints-1;
 	boolean ended=false;
 	boolean started=false;
 	ArrayList<Point2D> pointList=new ArrayList<Point2D>();
-	while(i<boundaryArc.npoints&&!ended)
+	while(i>=0&&!ended)
 	{
 		if(boundaryArc.xpoints[i]==startX&& boundaryArc.ypoints[i]==startY&&!started)
 		{
@@ -91,7 +91,7 @@ private ArrayList<Point2D> getAllEmbeddedPointsFromBoundaryArc(int startX,int st
 				
 			}
 		}
-		i++;
+		i--;
 	}
 	return pointList;
 	
