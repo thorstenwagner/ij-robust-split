@@ -28,7 +28,7 @@ private Polygon convexHull;
 public Clump(Polygon boundary,ImageProcessor ip)
 {
 	this.boundary=boundary;
-	IJ.showMessage("Clump Konstruktor");
+	//IJ.showMessage("Clump Konstruktor");
 	this.computeConcavityRegions(ip);
 	
 }
@@ -38,7 +38,7 @@ public Clump(Polygon boundary,ImageProcessor ip)
  */
 private void computeConcavityRegions(ImageProcessor ip)
 {
-	IJ.showMessage("computeConcavityRegions");
+	//IJ.showMessage("computeConcavityRegions");
 	PolygonRoi pr=new PolygonRoi(boundary,Roi.POLYGON);
 	Polygon convexHull=pr.getConvexHull();
 	this.convexHull=convexHull;

@@ -49,17 +49,17 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 		ImageProcessor ipr=imp.getProcessor();
 		for(Blob b: blobList)
 		{
-			/*Polygon p=b.getOuterContour();
+			Polygon p=b.getOuterContour();
 			clump=new Clump(p,ipr);
-			clumpList.add(clump);*/
-			ArrayList<Polygon> innerContours=new ArrayList<Polygon>();
+			clumpList.add(clump);
+			/*ArrayList<Polygon> innerContours=new ArrayList<Polygon>();
 	    	innerContours=b.getInnerContours();
 	    	   
 	    	  for(Polygon inner:innerContours)
 	    	  {
 	    		  clump=new Clump(inner,ipr);
 	    		  clumpList.add(clump);   
-	    	  }
+	    	  }*/
 		}
 		
 	}
@@ -138,12 +138,12 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener {
 			String ausw=gd.getNextRadioButton();
 			if(ausw.equals("black"))
 			{
-				backgroundColor=1;
+				backgroundColor=0;
 			}
 			else{
 				if(ausw.equals("white"))
 				{
-					backgroundColor=0;
+					backgroundColor=1;
 				}
 			}
 		}

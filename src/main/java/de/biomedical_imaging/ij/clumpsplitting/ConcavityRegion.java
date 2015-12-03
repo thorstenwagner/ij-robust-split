@@ -26,7 +26,7 @@ private ArrayList<Point2D> boundaryPointList;
  * @param ip 
  */
 public void markMax(ImageProcessor ip)
-{	IJ.showMessage(max+" "+indexMax+ " "+ boundaryPointList.get(indexMax).getX()+ " "+ boundaryPointList.get(indexMax).getY());
+{	//IJ.showMessage(max+" "+indexMax+ " "+ boundaryPointList.get(indexMax).getX()+ " "+ boundaryPointList.get(indexMax).getY());
 	Point2D p=boundaryPointList.get(indexMax);
 	//ImageProcessor ip=imp.getProcessor();
 	ip.setColor(Color.BLUE);

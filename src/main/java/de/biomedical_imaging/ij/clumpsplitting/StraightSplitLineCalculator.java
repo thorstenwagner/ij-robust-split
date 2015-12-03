@@ -30,7 +30,7 @@ public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<Concav
 				double saliency=this.computeSaliency(cOne,cTwo);
 				double concavityConcavityAlignment= this.computeConcavityConcavityAlignment(cOne, cTwo);
 				double concavityLineAlignment=this.computeConcavityLineAlignment(cOne, cTwo);
-				IJ.showMessage("Saliency:"+ saliency+"ConcavityConcavityAlignment:"+concavityConcavityAlignment+"ConcavityLineAlignment"+ concavityLineAlignment);
+				//IJ.showMessage("Saliency:"+ saliency+"ConcavityConcavityAlignment:"+concavityConcavityAlignment+"ConcavityLineAlignment"+ concavityLineAlignment);
 				if(saliency>SALIENCY_THRESHOLD)
 				{
 					if(concavityConcavityAlignment<CONCAVITYCONCAVITY_THRESHOLD)
@@ -109,7 +109,7 @@ private double computeConcavityLineAlignment(ConcavityRegion cOne, ConcavityRegi
 	vOne.normalize();
 	vTwo.normalize();
 	Vector2d muij=new Vector2d(-uij.getX(),-uij.getY());
-	IJ.showMessage("vekt"+uij.getX()+"/"+ uij.getY()+"vekt-"+muij.getX()+"/"+ muij.getY());
+	//IJ.showMessage("vekt"+uij.getX()+"/"+ uij.getY()+"vekt-"+muij.getX()+"/"+ muij.getY());
 	double phiOne= Math.acos(vOne.dot(uij));
 	double phiTwo=Math.acos(vTwo.dot(muij));
 	if(phiOne>phiTwo)
