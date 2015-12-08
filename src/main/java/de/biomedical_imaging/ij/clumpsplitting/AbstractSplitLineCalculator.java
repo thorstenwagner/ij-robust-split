@@ -3,6 +3,6 @@ package de.biomedical_imaging.ij.clumpsplitting;
 import java.util.ArrayList;
 
 public interface AbstractSplitLineCalculator {
-public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList);
+public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,Clump c);
 
 }

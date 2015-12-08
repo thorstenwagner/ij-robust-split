@@ -1,5 +1,7 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
+import java.awt.Polygon;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import javax.vecmath.Vector2d;
@@ -12,9 +14,11 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator{
 private final double SALIENCY_THRESHOLD=0.12;
 private final double CONCAVITYCONCAVITY_THRESHOLD=1.8325957;
 private final double CONCAVITYLINE_THRESHOLD=1.2217305;
+private final double CONCAVITYANGLE_THRESHOLD=1.5707963;
+private final double CONCAVITYRATIO_THRESHOLD=6;
 
 
-public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList)
+public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList, Clump c)
 {
 	ArrayList<AbstractSplitLine> possibleSplitLines=new ArrayList<AbstractSplitLine>();
 	for(int i=0;i<concavityRegionList.size()-1;i++)
@@ -37,10 +41,30 @@ public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<Concav
 					{
 						if(concavityLineAlignment<CONCAVITYLINE_THRESHOLD)
 						{
-							StraightSplitLine ssl=new StraightSplitLine(cOne,cTwo,saliency,concavityConcavityAlignment,concavityLineAlignment);
+							StraightSplitLineBetweenTwoConcavityRegions ssl=new StraightSplitLineBetweenTwoConcavityRegions(cOne,cTwo,saliency,concavityConcavityAlignment,concavityLineAlignment);
 							possibleSplitLines.add(ssl);
 						}
 					}
+				}
+				
+			}
+		}
+	}
+	if(possibleSplitLines.size()==0)
+	{
+		if(concavityRegionList.size()>0)
+		{
+		
+			ConcavityRegion concavityRegion=c.getRegionOfMaxConcavityDepth();
+			double concavityAngle=this.computeConcavityAngle(concavityRegion);
+			double concavityRatio=this.computeConcavityRatio(c, concavityRegion);
+			IJ.log("concavityAngle:"+concavityAngle+ "concavityRatio"+concavityRatio);
+			if(concavityAngle<CONCAVITYANGLE_THRESHOLD)
+			{
+				if(concavityRatio>CONCAVITYRATIO_THRESHOLD)
+				{
+					StraightSplitLineBetweenConcavityRegionAndPoint ssl=this.computeSplitLineBetweenConcavityPointAndPoint(concavityRegion,c,concavityAngle,concavityRatio);
+					possibleSplitLines.add(ssl);
 				}
 			}
 		}
@@ -122,4 +146,50 @@ private double computeConcavityLineAlignment(ConcavityRegion cOne, ConcavityRegi
 	}
 	return concavityLineAlignment;
 }
+	private double computeConcavityAngle(ConcavityRegion cOne)
+	{
+		Point2D.Double a=new Point2D.Double(cOne.getStartX(),cOne.getStartY());
+		Point2D.Double b=new Point2D.Double(cOne.getEndX(), cOne.getEndY());
+		Point2D c=cOne.getMaxDistCoord();
+		
+		double clength=Math.sqrt((b.getX()-a.getX())*(b.getX()-a.getX())+(b.getY()-a.getY())*(b.getY()-a.getY()));
+		double alength=Math.sqrt((b.getX()-c.getX())*(b.getX()-c.getX())+(b.getY()-c.getY())*(b.getY()-c.getY()));
+		double blength=Math.sqrt((c.getX()-a.getX())*(c.getX()-a.getX())+(c.getY()-a.getY())*(c.getY()-a.getY()));
+		
+		double gamma=Math.acos(((clength*clength)-(alength*alength)-(blength*blength))/(-2*alength*blength));
+		return gamma;
+	}
+	private double computeConcavityRatio(Clump c, ConcavityRegion cOne)
+	{
+		double concavityRatio;
+		IJ.log(cOne.getMaxDist()+"");
+		
+		concavityRatio= ((cOne.getMaxDist())/(c.getSecondMaxConcavityRegionDepth()));
+		return concavityRatio;
+	}
+	private StraightSplitLineBetweenConcavityRegionAndPoint computeSplitLineBetweenConcavityPointAndPoint(ConcavityRegion cOne, Clump c,double concavityAngle, double concavityRatio)
+	{
+		Point2D midPoint=cOne.getMidPointOfConvexHull();
+		Point2D concavityPoint=cOne.getMaxDistCoord();
+		Line2D.Double line =new Line2D.Double(midPoint,concavityPoint);
+		Polygon p=c.getBoundary();
+		double minDist=line.ptLineDist(p.xpoints[0],p.ypoints[0]);
+		int indexMinDist=0;
+		double dist=0;
+		for(int i=0;i<p.npoints;i++)
+		{
+			Point2D.Double point=new Point2D.Double(p.xpoints[i], p.ypoints[i]);
+			if(point.getX()!=concavityPoint.getX()&&point.getY()!=concavityPoint.getY())
+			{
+				dist=line.ptLineDist(point);
+				if(dist<minDist)
+				{
+					minDist=dist;
+					indexMinDist=i;
+				}
+			}
+		}
+		StraightSplitLineBetweenConcavityRegionAndPoint s=new StraightSplitLineBetweenConcavityRegionAndPoint(cOne,concavityAngle,concavityRatio,new Point2D.Double(p.xpoints[indexMinDist],p.ypoints[indexMinDist]));
+		return s;
+	}
 }

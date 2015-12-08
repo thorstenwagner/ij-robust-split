@@ -18,7 +18,8 @@ public class Clump {
 private ArrayList<ConcavityRegion> concavityRegionList;
 private Polygon boundary;
 private Polygon convexHull;
-
+private int indexOfMaxConcavityRegion;
+private double secondMaxConcavityDepth;
 
 /**
  * erzeugt einen Clump, ein Clump repräsentiert zusammenhängende Partikel
@@ -38,6 +39,7 @@ public Clump(Polygon boundary,ImageProcessor ip)
  */
 private void computeConcavityRegions(ImageProcessor ip)
 {
+	
 	//IJ.showMessage("computeConcavityRegions");
 	PolygonRoi pr=new PolygonRoi(boundary,Roi.POLYGON);
 	Polygon convexHull=pr.getConvexHull();
@@ -45,20 +47,22 @@ private void computeConcavityRegions(ImageProcessor ip)
 	
 	ConcavityRegionAdministration cra=new ConcavityRegionAdministration(boundary,this.convexHull);
 	concavityRegionList=cra.computeConcavityRegions();
+	IJ.log("CRL.length"+concavityRegionList.size());
 	for(ConcavityRegion cr:concavityRegionList)
 	{
 			cr.markMax(ip);
 			
-		
 	}
+	this.computeFirstAndSecondLargestConcavityDepth();
+	
 	AbstractSplitLineCalculator sslc=new StraightSplitLineCalculator();
-	ArrayList<AbstractSplitLine> possibleSplitLines=sslc.calculatePossibleSplitLines(concavityRegionList);
+	ArrayList<AbstractSplitLine> possibleSplitLines=sslc.calculatePossibleSplitLines(concavityRegionList,this);
 	for(AbstractSplitLine asl:possibleSplitLines)
 	{
 		StraightSplitLine ssl=(StraightSplitLine)asl;
 		ssl.drawLine(ip);
 	}
-	this.convexHull=convexHull;
+
 	
 	
 	PolygonRoi polygonRoi=new PolygonRoi(convexHull,Roi.POLYGON);
@@ -66,6 +70,48 @@ private void computeConcavityRegions(ImageProcessor ip)
 	ip.setColor(Color.CYAN);
 	ip.draw(polygonRoi);
 
+	}
+	private void computeFirstAndSecondLargestConcavityDepth()
+	{
+		double[] max= {0,0,0,0};
+		int i=0;
+		for(ConcavityRegion cr: concavityRegionList)
+		{
+			if(cr.getMaxDist()>=max[0])
+			{
+				max[0]=cr.getMaxDist();
+				max[1]=i;
+			}	
+			else
+			{
+				if(cr.getMaxDist()>=max[2])
+				{
+					max[2]=cr.getMaxDist();
+					max[3]=i;
+				}
+			}
+			i++;
+		}
+		if(max[2]<ConcavityRegionAdministration.CONCAVITY_DEPTH_THRESHOLD)
+		{
+			max[2]=ConcavityRegionAdministration.CONCAVITY_DEPTH_THRESHOLD;
+		}
+		indexOfMaxConcavityRegion= (int)max[1];
+		secondMaxConcavityDepth=max[2];
+		IJ.log(secondMaxConcavityDepth+"");
+	}
+	public ConcavityRegion getRegionOfMaxConcavityDepth()
+	{
+		IJ.log(indexOfMaxConcavityRegion+"");
+		return concavityRegionList.get(indexOfMaxConcavityRegion);
+	}
+	public double getSecondMaxConcavityRegionDepth()
+	{
+		return secondMaxConcavityDepth;
+	}
+	public Polygon getBoundary()
+	{
+		return boundary;
 	}
 }
 
