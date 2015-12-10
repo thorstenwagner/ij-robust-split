@@ -5,9 +5,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import javax.vecmath.Vector2d;
-
 import ij.IJ;
-import ij.process.ImageProcessor;
 
 
 public class StraightSplitLineCalculator implements AbstractSplitLineCalculator{

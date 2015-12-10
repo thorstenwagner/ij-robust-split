@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import ij.IJ;
 import ij.process.ImageProcessor;
 /**
  * 
