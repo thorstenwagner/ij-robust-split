@@ -1,5 +1,7 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
-public interface AbstractSplitLine {
+import ij.process.ImageProcessor;
 
+public interface AbstractSplitLine {
+	public void drawLine(ImageProcessor ip);
 }

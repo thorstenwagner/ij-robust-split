@@ -1,154 +1,205 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
-
-
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+
 /**
+ * administrates the concavityRegions
  * 
  * @author Louise
  *
  */
-public class ConcavityRegionAdministration {
-private Polygon boundaryArc;
-private Polygon convexHull;
-
-public static final double CONCAVITY_DEPTH_THRESHOLD = 3;
-
-public ConcavityRegionAdministration(Polygon boundaryArc,Polygon convexHull)
+public class ConcavityRegionAdministration
 {
-	this.boundaryArc=boundaryArc;
-	this.convexHull=convexHull;
-}
-/**
- * ermittelt alle ConcavityRegions eines Clumps
- * @return Liste mit allen Regionen
- */
-public ArrayList<ConcavityRegion> computeConcavityRegions()
-{
-	ArrayList<ConcavityRegion> concavityRegionList=new ArrayList<ConcavityRegion>();
-	int startX;
-	int startY;
-	int endX;
-	int endY;
-	for(int i=1;i<convexHull.npoints;i++)
+	/**
+	 * represents the bounds of the affiliated Clump
+	 */
+	private Polygon boundaryArc;
+	/**
+	 * represents the convexHull of the affiliated Clump
+	 */
+	private Polygon convexHull;
+
+	/**
+	 * the threshold defines if a ConcavityRegion is valid or not. If the
+	 * largest concavityDepth of a concavityRegion is larger than the threshold
+	 * the concavityRegion is accepted as a valid concavityRegion
+	 */
+
+	public static final double CONCAVITY_DEPTH_THRESHOLD = 3;
+
+	/**
+	 * 
+	 * @param boundaryArc
+	 *            bounds of the affiliated Clump
+	 * @param convexHull
+	 *            convexHull of the affiliated Clump
+	 */
+	public ConcavityRegionAdministration(Polygon boundaryArc, Polygon convexHull)
 	{
-		startX=convexHull.xpoints[i-1];
-		startY=convexHull.ypoints[i-1];
-		endX=convexHull.xpoints[i];
-		endY=convexHull.ypoints[i];
-
-		ArrayList<Point2D> pointList=getAllEmbeddedPointsFromBoundaryArc(startX,startY,endX,endY);
-		ArrayList<Double> doubleList= computeDistance(pointList,startX,startY,endX,endY);
-		double[] maxData= getMaxDist(doubleList);
-		if(maxData[0]>CONCAVITY_DEPTH_THRESHOLD)
-		{
-			ConcavityRegion concavityRegion=new ConcavityRegion(startX,startY,endX,endY,pointList,doubleList,maxData[0],(int)maxData[1]);
-			concavityRegionList.add(concavityRegion);
-		}
-		
+		this.boundaryArc = boundaryArc;
+		this.convexHull = convexHull;
 	}
-	return concavityRegionList;
-}
-/**
- * ermittelt alle Punkte, die zwischen 2 werten eingeschlossen werden
- * d.h. es werden alle Punkte ermittelt, die auf dem BoundaryArc liegen und sich innerhalb einer ConcavityRegion befinden
- * @param startX Anfangswert X
- * @param startY Anfangswert Y
- * @param endX Endwert X
- * @param endY Endwert Y
- * @return Liste mit allen Eingeschlossenen Punkten im Raster
- */
-private ArrayList<Point2D> getAllEmbeddedPointsFromBoundaryArc(int startX,int startY,int endX,int endY){
-	int i=boundaryArc.npoints-1;
-	boolean ended=false;
-	boolean started=false;
-	ArrayList<Point2D> pointList=new ArrayList<Point2D>();
-	while(i>=0&&!ended)
+
+	/**
+	 * computes the valid concavityRegions of a Clump. A concavityRegion is a
+	 * valid ConcavityRegion if the largest ConcavityDepth is larger than the
+	 * CONCAVITY_DEPTH_THRESHOLD
+	 * 
+	 * @return List of all valid concavityRegions
+	 */
+	public ArrayList<ConcavityRegion> computeConcavityRegions()
 	{
-		if(boundaryArc.xpoints[i]==startX&& boundaryArc.ypoints[i]==startY&&!started)
+		ArrayList<ConcavityRegion> concavityRegionList = new ArrayList<ConcavityRegion>();
+		int startX;
+		int startY;
+		int endX;
+		int endY;
+		for (int i = 1; i < convexHull.npoints; i++)
 		{
-			pointList.add(new Point2D.Double(boundaryArc.xpoints[i],boundaryArc.ypoints[i]));
-			started=true;
-		}
-		else
-		{
-			
-			if(started&&(boundaryArc.xpoints[i]!=endX|| boundaryArc.ypoints[i]!=endY)&&!ended)
+			startX = convexHull.xpoints[i - 1];
+			startY = convexHull.ypoints[i - 1];
+			endX = convexHull.xpoints[i];
+			endY = convexHull.ypoints[i];
+
+			ArrayList<Point2D> pointList = getAllEmbeddedPointsFromBoundaryArc(startX, startY, endX, endY);
+			ArrayList<Double> doubleList = computeDistance(pointList, startX, startY, endX, endY);
+			double[] maxData = getMaxDist(doubleList);
+			if (maxData[0] > CONCAVITY_DEPTH_THRESHOLD)
 			{
-				pointList.add(new Point2D.Double(boundaryArc.xpoints[i],boundaryArc.ypoints[i]));
-				
+				ConcavityRegion concavityRegion = new ConcavityRegion(startX, startY, endX, endY, pointList, doubleList,
+						maxData[0], (int) maxData[1]);
+				concavityRegionList.add(concavityRegion);
 			}
-			else
+
+		}
+		return concavityRegionList;
+	}
+
+	/**
+	 * computes all Points, which are on the boundary and are embedded from the
+	 * start and end Coordinates. Note: The convexHull is definded
+	 * counterClockWise, the outerContours of a Blob clockwise don't use for
+	 * inner Contours they are computed counterclockwise, in this case i has to
+	 * increase from 0 to boundaryArc.npoints
+	 * 
+	 * @param startX
+	 *            X-Coordinate of the startValue of the Possible ConcavityRegion
+	 * @param startY
+	 *            Y-Coordinate of the startValue of the Possible ConcavityRegion
+	 * @param endX
+	 *            X-Coordinate of the endValue of the Possible ConcavityRegion
+	 * @param endY
+	 *            Y-Coordinate of the endValue of the Possible ConcavityRegion
+	 * @return List with all embedded Points on the grid
+	 */
+	private ArrayList<Point2D> getAllEmbeddedPointsFromBoundaryArc(int startX, int startY, int endX, int endY)
+	{
+		int i = boundaryArc.npoints - 1;
+		boolean ended = false;
+		boolean started = false;
+		ArrayList<Point2D> pointList = new ArrayList<Point2D>();
+		while (i >= 0 && !ended)
+		{
+			if (boundaryArc.xpoints[i] == startX && boundaryArc.ypoints[i] == startY && !started)
 			{
-				if(started&&boundaryArc.xpoints[i]==endX&& boundaryArc.ypoints[i]==endY)
+				pointList.add(new Point2D.Double(boundaryArc.xpoints[i], boundaryArc.ypoints[i]));
+				started = true;
+			} else
+			{
+
+				if (started && (boundaryArc.xpoints[i] != endX || boundaryArc.ypoints[i] != endY) && !ended)
 				{
-					pointList.add(new Point2D.Double(boundaryArc.xpoints[i],boundaryArc.ypoints[i]));
-					ended=true;
+					pointList.add(new Point2D.Double(boundaryArc.xpoints[i], boundaryArc.ypoints[i]));
+
+				} else
+				{
+					if (started && boundaryArc.xpoints[i] == endX && boundaryArc.ypoints[i] == endY)
+					{
+						pointList.add(new Point2D.Double(boundaryArc.xpoints[i], boundaryArc.ypoints[i]));
+						ended = true;
+					}
+
 				}
-				
 			}
+			i--;
 		}
-		i--;
-	}
-	return pointList;
-	
-}
+		return pointList;
 
-public void setConvexHull(Polygon convexHull)
-{
-	this.convexHull=convexHull;
-}
-
-public void setBoundaryArc(Polygon boundaryArc)
-{
-	this.boundaryArc=boundaryArc;
-}
-/**
- * berechnet die Distanz zwischen den Punkten der BoundaryPoint List und der COnvexHull
- * @param boundaryPointList Liste mit allen zu berechnenden Punkten
- * @param startX Anfangswert X der Geraden
- * @param startY AnfangswertY der Geraden
- * @param endX EndwertX der Geraden
- * @param endY EndwertY der Geraden
- * @return Liste, die alle Abstände enthält
- */
-private ArrayList<Double> computeDistance(ArrayList<Point2D> boundaryPointList,int startX,int startY, int endX,int endY)
-{
-	ArrayList<Double> doubleList=new ArrayList<Double>();
-	Line2D.Double line=new Line2D.Double(startX, startY, endX, endY);
-	Double dist;
-	for(Point2D point:boundaryPointList)
-	{
-		dist=line.ptSegDistSq(point);
-		//dist=Math.abs(line.ptLineDist(point));
-		doubleList.add(dist);
 	}
-	return doubleList;
-}
-/**
- * durchläuft die mitgegebene Liste und berechnet den größten Wert
- * @param distList Liste mit Abständen zwischen Punkt und Gerade
- * @return Array der Länge 2 mit an Stelle 0 dem max. Abstand und an Stelle 1 den Index, bezogen auf die Liste an dem dieser Abstand auftritt
- */
-private double[] getMaxDist(ArrayList<Double> distList)
-{
-	int indexMax=0;
-	double max=0;
-	int index=0;
-	for(double d:distList)
+
+	public void setConvexHull(Polygon convexHull)
 	{
-		if(d>max)
+		this.convexHull = convexHull;
+	}
+
+	public void setBoundaryArc(Polygon boundaryArc)
+	{
+		this.boundaryArc = boundaryArc;
+	}
+
+	/**
+	 * computes the concavityDepth of all points on the boundaryList
+	 * 
+	 * @param boundaryPointList
+	 *            List with all points embedded by the boundary of the Clump and
+	 *            contains to the possible concavityRegion
+	 * @param startX
+	 *            x-Coordinate of the start-Point of the possible
+	 *            ConcavityRegion
+	 * @param startY
+	 *            y-Coordinate of the start-Point of the possible
+	 *            ConcavityRegion
+	 * @param endX
+	 *            x-Coordinate of the end-Point of the possible ConcavityRegion
+	 * @param endY
+	 *            y-Coordinate of the end-Point of the possible ConcavityRegion
+	 * @return List with all concavityDepth of the possible ConcavityRegion
+	 */
+	private ArrayList<Double> computeDistance(ArrayList<Point2D> boundaryPointList, int startX, int startY, int endX,
+			int endY)
+	{
+		ArrayList<Double> doubleList = new ArrayList<Double>();
+		Line2D.Double line = new Line2D.Double(startX, startY, endX, endY);
+		Double dist;
+		for (Point2D point : boundaryPointList)
 		{
-			max=d;
-			indexMax=index;
+			dist = line.ptSegDistSq(point);
+			// dist=Math.abs(line.ptLineDist(point));
+			doubleList.add(dist);
 		}
-		index++;
+		return doubleList;
 	}
-	double[] tmp={max, indexMax};
-	return tmp;
-}
+
+	/**
+	 * filters the List for the largest Value
+	 * 
+	 * @param distList
+	 *            List with all concavityDepths of the possible ConcavityRegion
+	 * @return array with length=2 of type double array[0]= largest
+	 *         concavityDepth of the possible ConcavityRegion, array[1]= index
+	 *         of the Point with the largest concavityDepth based on the input
+	 *         List
+	 */
+	private double[] getMaxDist(ArrayList<Double> distList)
+	{
+		int indexMax = 0;
+		double max = 0;
+		int index = 0;
+		for (double d : distList)
+		{
+			if (d > max)
+			{
+				max = d;
+				indexMax = index;
+			}
+			index++;
+		}
+		double[] tmp =
+		{ max, indexMax };
+		return tmp;
+	}
 
 }
