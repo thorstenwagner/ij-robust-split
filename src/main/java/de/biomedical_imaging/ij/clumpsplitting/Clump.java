@@ -178,9 +178,9 @@ public class Clump
 			}
 			i++;
 		}
-		if (max[2] < ConcavityRegionAdministration.CONCAVITY_DEPTH_THRESHOLD)
+		if (max[2] < Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
 		{
-			max[2] = ConcavityRegionAdministration.CONCAVITY_DEPTH_THRESHOLD;
+			max[2] = Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD;
 		}
 		this.indexOfMaxConcavityRegion = (int) max[1];
 		this.secondMaxConcavityDepth = max[2];

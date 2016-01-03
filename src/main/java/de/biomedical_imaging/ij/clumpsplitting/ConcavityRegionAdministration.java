@@ -22,13 +22,9 @@ public class ConcavityRegionAdministration
 	 */
 	private Polygon convexHull;
 
-	/**
-	 * the threshold defines if a ConcavityRegion is valid or not. If the
-	 * largest concavityDepth of a concavityRegion is larger than the threshold
-	 * the concavityRegion is accepted as a valid concavityRegion
-	 */
+	
 
-	public static final double CONCAVITY_DEPTH_THRESHOLD = 3;
+	
 
 	/**
 	 * 
@@ -67,7 +63,7 @@ public class ConcavityRegionAdministration
 			ArrayList<Point2D> pointList = getAllEmbeddedPointsFromBoundaryArc(startX, startY, endX, endY);
 			ArrayList<Double> doubleList = computeDistance(pointList, startX, startY, endX, endY);
 			double[] maxData = getMaxDist(doubleList);
-			if (maxData[0] > CONCAVITY_DEPTH_THRESHOLD)
+			if (maxData[0] > Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
 			{
 				ConcavityRegion concavityRegion = new ConcavityRegion(startX, startY, endX, endY, pointList, doubleList,
 						maxData[0], (int) maxData[1]);

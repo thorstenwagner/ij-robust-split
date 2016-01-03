@@ -16,43 +16,7 @@ import javax.vecmath.Vector2d;
 
 public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 {
-	/**
-	 * used for SplitLinesBetweenTwoConcavityRegions. SALIENCY evaluates, if the
-	 * concavityRegion has a large Concaveness and the possible Line is short
-	 * enough. If the Value is larger than the threshold the possible Split Line
-	 * could be a valid SplitLine
-	 */
-	private final double SALIENCY_THRESHOLD = 0.12;
-	/**
-	 * used for SplitLinesBetweenTwoConcavityRegions.
-	 * CONCAVITYCONCAVITYALIGNMENT evaluates the angle between the
-	 * concavityRegionorientations. If the angle is smaller than the threshold
-	 * the possible SplitLine could be a valid SplitLine
-	 */
-	private final double CONCAVITYCONCAVITY_THRESHOLD = 1.8325957;
-	/**
-	 * used for SplitLinesBetweenTwoConcavityRegions. CONCAVITYLINEALIGNMENT
-	 * evaluates the largest angle between the concavityRegion Orientation and
-	 * the Possible Splitline. If the angle is smaller than the threshold the
-	 * possible SplitLine could be a valid SplitLine
-	 */
-	private final double CONCAVITYLINE_THRESHOLD = 1.2217305;
-	/**
-	 * used for SplitLinesBetweenConcavityRegionAndPoint. angle between
-	 * startPoint of the concavityRegion, endPoint of the concavityRegion and
-	 * the Point with the largest concavityDepth of the concavityRegion. If the
-	 * angle is smaller than the threshold the possible SplitLine could be a
-	 * valid SplitLine
-	 */
-	private final double CONCAVITYANGLE_THRESHOLD = 1.5707963;
-	/**
-	 * used for SplitLinesBetweenConcavityRegionAndPoint. ratio between the
-	 * actual largest concavityDepth and the second largest concavityDepth. If
-	 * the ratio is larger than the threshold the possible SplitLine could be a
-	 * valid SplitLine
-	 */
-	private final double CONCAVITYRATIO_THRESHOLD = 6;
-
+	
 	public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
 			Clump c)
 	{
@@ -94,11 +58,11 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 					double saliency = this.computeSaliency(cOne, cTwo);
 					double concavityConcavityAlignment = this.computeConcavityConcavityAlignment(cOne, cTwo);
 					double concavityLineAlignment = this.computeConcavityLineAlignment(cOne, cTwo);
-					if (saliency > SALIENCY_THRESHOLD)
+					if (saliency > Clump_Splitting.SALIENCY_THRESHOLD)
 					{
-						if (concavityConcavityAlignment < CONCAVITYCONCAVITY_THRESHOLD)
+						if (concavityConcavityAlignment < Clump_Splitting.CONCAVITYCONCAVITY_THRESHOLD)
 						{
-							if (concavityLineAlignment < CONCAVITYLINE_THRESHOLD)
+							if (concavityLineAlignment < Clump_Splitting.CONCAVITYLINE_THRESHOLD)
 							{
 								StraightSplitLineBetweenTwoConcavityRegions ssl = new StraightSplitLineBetweenTwoConcavityRegions(
 										cOne, cTwo, saliency, concavityConcavityAlignment, concavityLineAlignment);
@@ -141,9 +105,9 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 			ConcavityRegion concavityRegion = c.getRegionOfMaxConcavityDepth();
 			double concavityAngle = this.computeConcavityAngle(concavityRegion);
 			double concavityRatio = this.computeConcavityRatio(c, concavityRegion);
-			if (concavityAngle < CONCAVITYANGLE_THRESHOLD)
+			if (concavityAngle < Clump_Splitting.CONCAVITYANGLE_THRESHOLD)
 			{
-				if (concavityRatio > CONCAVITYRATIO_THRESHOLD)
+				if (concavityRatio > Clump_Splitting.CONCAVITYRATIO_THRESHOLD)
 				{
 					StraightSplitLineBetweenConcavityRegionAndPoint ssl = this
 							.computeSplitLineBetweenConcavityPointAndPoint(concavityRegion, c, concavityAngle,
