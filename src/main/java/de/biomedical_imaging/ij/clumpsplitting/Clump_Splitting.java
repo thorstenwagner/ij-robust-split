@@ -94,18 +94,19 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 		
 		ArrayList<Clump> clumpList = new ArrayList<Clump>();
-		ManyBlobs blobList = new ManyBlobs(imp);
+		
+		ManyBlobs blobList = new ManyBlobs(new ImagePlus("", ip));
 		// if the background is white backgroundColor must be 1
 		blobList.setBackground(backgroundColor);
 		// Clumps of the Image will be detected
 		blobList.findConnectedComponents();
 		Clump clump = null;
-		ImageProcessor ipr = imp.getProcessor();
+		//ImageProcessor ipr = imp.getProcessor();
 		for (Blob b : blobList)
 		{
 			// right now only the outer contours are considered
 			Polygon p = b.getOuterContour();
-			clump = new Clump(p, ipr);
+			clump = new Clump(p, ip);
 			clumpList.add(clump);
 		}
 
