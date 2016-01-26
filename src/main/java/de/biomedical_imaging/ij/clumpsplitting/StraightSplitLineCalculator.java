@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import javax.vecmath.Vector2d;
 
 
+
+
 /**
  * calculates Straight SplitLines
  * 
@@ -276,7 +278,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				.sqrt((c.getX() - a.getX()) * (c.getX() - a.getX()) + (c.getY() - a.getY()) * (c.getY() - a.getY()));
 
 		double gamma = Math
-				.acos(((clength * clength) - (alength * alength) - (blength * blength)) / (-2 * alength * blength));
+				.acos(((clength * clength) - (alength * alength) - (blength * blength)) / (-2 * Math.abs(alength) * Math.abs(blength)));
 		return gamma;
 	}
 

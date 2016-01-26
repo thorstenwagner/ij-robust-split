@@ -73,6 +73,7 @@ public class ConcavityRegion
 		ip.drawDot((int) p.getX(), (int) p.getY());
 		ip.setLineWidth(1);
 	}
+	
 
 	/**
 	 * marks the Pixel in the middle of the ConvexHull
@@ -86,7 +87,16 @@ public class ConcavityRegion
 		ip.drawDot((int) this.getMidPointOfConvexHull().getX(), (int) this.getMidPointOfConvexHull().getY());
 		ip.setLineWidth(1);
 	}
-
+	/**
+	 * marks the Distance between the MidPointOfConvexHull and the maxDistCoord
+	 * @param ip
+	 * 				ImageProcessor to mark the Line
+	 */
+	public void markConcavityDepth(ImageProcessor ip)
+	{
+		ip.setLineWidth(1);
+		ip.drawLine((int)this.getMidPointOfConvexHull().getX(),(int)this.getMidPointOfConvexHull().getY() , (int)this.getMaxDistCoord().getX(), (int) this.getMaxDistCoord().getY());
+	}
 	/**
 	 * produces a ConcavityRegion
 	 * 

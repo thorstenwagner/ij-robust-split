@@ -1,6 +1,8 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.geom.Point2D;
+
+
 import ij.process.ImageProcessor;
 
 /**
@@ -71,5 +73,7 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint implements Straight
 		ip.setLineWidth(10);
 		ip.drawDot((int) point.getX(), (int) point.getY());
 		ip.setLineWidth(1);
+		
+		
 	}
 }

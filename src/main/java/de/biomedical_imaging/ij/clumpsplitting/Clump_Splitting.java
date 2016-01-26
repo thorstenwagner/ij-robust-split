@@ -65,6 +65,10 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * valid SplitLine
 	 */
 	public static double CONCAVITYRATIO_THRESHOLD = 6;
+	
+	public static boolean SHOWCONCAVITYDEPTH=true;
+	public static boolean SHOWCONVEXHULL=true;
+	
 
 	int backgroundColor = 1;
 	int arbitraryNumber;
@@ -100,15 +104,15 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		// Clumps of the Image will be detected
 		blobList.findConnectedComponents();
 		Clump clump = null;
-		ImageProcessor ipr = imp.getProcessor();
+		//ImageProcessor ipr = imp.getProcessor();
 		for (Blob b : blobList)
 		{
 			// right now only the outer contours are considered
 			Polygon p = b.getOuterContour();
-			clump = new Clump(p, ipr);
+			clump = new Clump(p, ip);
 			clumpList.add(clump);
 		}
-
+		
 	}
 
 	@Override
@@ -116,13 +120,15 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	{
 
 		String selection=gd.getNextRadioButton();
+		boolean showConvexHull=gd.getNextBoolean();
+		boolean showConcavityDepth=gd.getNextBoolean();
 		double concavityDepthThreshold=gd.getNextNumber();
 		double saliencyThreshold=gd.getNextNumber();
 		double concavityConcavityAlignmentThreshold=gd.getNextNumber();
 		double concavityLineAlignmentThreshold=gd.getNextNumber();
 		double concavityAngleThreshold=gd.getNextNumber();
 		double concavityRatioThreshold=gd.getNextNumber();
-		
+	
 		if(gd.getErrorMessage()==null)
 		{
 			if (selection.equals("black"))
@@ -135,6 +141,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 						backgroundColor = 1;
 					}
 				}
+			SHOWCONCAVITYDEPTH=showConcavityDepth;
+			SHOWCONVEXHULL=showConvexHull;
 			SALIENCY_THRESHOLD=saliencyThreshold;
 			CONCAVITYCONCAVITY_THRESHOLD=((2*Math.PI)/360)*concavityConcavityAlignmentThreshold;
 			CONCAVITY_DEPTH_THRESHOLD=concavityDepthThreshold;
@@ -161,12 +169,12 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
 
-		GenericDialog gd = new GenericDialog("Choose Background");
-		gd.addMessage("What ist your Background Color?");
+		GenericDialog gd = new GenericDialog("Set Parameters");
 		String[] checkboxValues =
 		{ "black", "white" };
-		gd.addRadioButtonGroup("BackgroundColor", checkboxValues, 2, 1, "white");
-		
+		gd.addRadioButtonGroup("Choose your Backgroundcolor", checkboxValues, 2, 1, "white");
+		gd.addCheckbox("Show convexhull", true);
+		gd.addCheckbox("Show concavitydepth", true);
 		gd.addNumericField("Concavity Depth Threshold", 3, 0);
 		gd.addSlider("Saliency Threshold", 0, 1, 0.12);
 		gd.addSlider("Concavity-concavity alignment threshold in degrees", 0, 180, 105);

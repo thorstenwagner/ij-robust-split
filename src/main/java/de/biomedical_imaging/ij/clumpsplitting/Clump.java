@@ -61,6 +61,10 @@ public class Clump
 	{
 		this.boundary = boundary;
 		this.convexHull = this.computeConvexHull();
+		if(Clump_Splitting.SHOWCONVEXHULL)
+		{
+		this.drawConvexHull(ip);
+		}
 		this.concavityRegionList = this.computeConcavityRegions(ip);
 		this.computeSplitLines(ip);
 
@@ -76,6 +80,7 @@ public class Clump
 	{
 		PolygonRoi pr = new PolygonRoi(boundary, Roi.POLYGON);
 		Polygon convexHull = pr.getConvexHull();
+		
 		return convexHull;
 	}
 
@@ -96,6 +101,11 @@ public class Clump
 		{
 			// marks the concavityPoint on the boundary
 			cr.markMax(ip);
+			//cr.markMidPointOfConvexHull(ip);
+			if(Clump_Splitting.SHOWCONCAVITYDEPTH)
+			{
+			cr.markConcavityDepth(ip);
+			}
 
 		}
 		return concavityRegionList;
@@ -147,7 +157,7 @@ public class Clump
 	{
 		PolygonRoi polygonRoi = new PolygonRoi(convexHull, Roi.POLYGON);
 
-		ip.setColor(Color.CYAN);
+		ip.setColor(Color.magenta);
 		ip.draw(polygonRoi);
 	}
 
