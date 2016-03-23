@@ -1,6 +1,42 @@
+/*
+The MIT License (MIT)
+Copyright (c) 2016 Louise Bloch (louise.bloch001@stud.fh-dortmund.de), Thorsten Wagner (wagner@b
+iomedical-imaging.de)
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy
+of this software and associated documentation files (the "Software"),
+to deal
+in the Software without restriction, including without limitation the
+rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE
+SOFTWARE.
+*/
+
+
 package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.AWTEvent;
+import java.awt.Panel;
 import java.awt.Polygon;
 import java.util.ArrayList;
 
@@ -97,8 +133,11 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	{
 
 		
+
+		
 		ArrayList<Clump> clumpList = new ArrayList<Clump>();
-		ManyBlobs blobList = new ManyBlobs(imp);
+		
+		ManyBlobs blobList = new ManyBlobs(new ImagePlus("", ip));
 		// if the background is white backgroundColor must be 1
 		blobList.setBackground(backgroundColor);
 		// Clumps of the Image will be detected
@@ -112,7 +151,6 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			clump = new Clump(p, ip);
 			clumpList.add(clump);
 		}
-		
 	}
 
 	@Override
@@ -141,11 +179,13 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 						backgroundColor = 1;
 					}
 				}
+			
 			SHOWCONCAVITYDEPTH=showConcavityDepth;
 			SHOWCONVEXHULL=showConvexHull;
 			SALIENCY_THRESHOLD=saliencyThreshold;
 			CONCAVITYCONCAVITY_THRESHOLD=((2*Math.PI)/360)*concavityConcavityAlignmentThreshold;
 			CONCAVITY_DEPTH_THRESHOLD=concavityDepthThreshold;
+			//IJ.log(concavityDepthThreshold+"");
 			CONCAVITYLINE_THRESHOLD=((2*Math.PI)/360)*concavityLineAlignmentThreshold;
 			//IJ.log("concavitylinethreshold1="+concavityLineAlignmentThreshold);
 			
@@ -170,11 +210,19 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	{
 
 		GenericDialog gd = new GenericDialog("Set Parameters");
-		String[] checkboxValues =
+		String[] radioboxValues =
 		{ "black", "white" };
-		gd.addRadioButtonGroup("Choose your Backgroundcolor", checkboxValues, 2, 1, "white");
-		gd.addCheckbox("Show convexhull", true);
-		gd.addCheckbox("Show concavitydepth", true);
+		gd.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
+		//String[] checkboxes= new String[2];
+		//checkboxes[0]="Show Convexhull";
+		//checkboxes[1]="Show Concavitydepth";
+		//boolean[] checkboxValues=new boolean[2];
+		//checkboxValues[0]=false;
+		//checkboxValues[1]=false;
+		
+	//	gd.addCheckboxGroup(1, 2,checkboxes, checkboxValues);
+		gd.addCheckbox("Show convexhull",false);
+		gd.addCheckbox("Show concavitydepth", false);
 		gd.addNumericField("Concavity Depth Threshold", 3, 0);
 		gd.addSlider("Saliency Threshold", 0, 1, 0.12);
 		gd.addSlider("Concavity-concavity alignment threshold in degrees", 0, 180, 105);
@@ -209,3 +257,5 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	}
 
 }
+
+
