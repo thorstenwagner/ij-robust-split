@@ -216,17 +216,35 @@ public class ConcavityRegionAdministration
 	 */
 	private double[] getMaxDist(ArrayList<Double> distList)
 	{
-		int indexMax = 0;
+		//int indexMax = 0;
 		double max = 0;
 		int index = 0;
+		ArrayList<Integer> moreThanOneMax= new ArrayList<Integer>();
 		for (double d : distList)
 		{
-			if (d > max)
+			if(d>=max)
 			{
-				max = d;
-				indexMax = index;
+				if (d > max)
+				{
+					moreThanOneMax.clear();
+					moreThanOneMax.add(index);
+					max = d;
+					//indexMax = index;
+				}
+				else{
+					if(d==max)
+					{
+						moreThanOneMax.add(index);
+						max=d;
+					}
+				}
 			}
 			index++;
+		}
+		int indexMax=0;
+		if(moreThanOneMax.size()>0)
+		{
+			indexMax=moreThanOneMax.get((moreThanOneMax.size()/2));
 		}
 		double[] tmp =
 		{ max, indexMax };
