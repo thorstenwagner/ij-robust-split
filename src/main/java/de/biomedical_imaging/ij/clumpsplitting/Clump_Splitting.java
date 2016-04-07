@@ -35,9 +35,7 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.AWTEvent;
-import java.awt.Panel;
-import java.awt.Polygon;
+import java.awt.AWTEvent;import java.awt.Polygon;
 import java.util.ArrayList;
 
 import ij.IJ;
@@ -102,11 +100,22 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 */
 	public static double CONCAVITYRATIO_THRESHOLD = 6;
 	
-	public static boolean SHOWCONCAVITYDEPTH=true;
-	public static boolean SHOWCONVEXHULL=true;
-	
+	/**
+	 * if show ConcavityDepth is true the ConcavityDepth is drawn into the picture
+	 */
+	public static boolean SHOWCONCAVITYDEPTH=false;
 
-	int backgroundColor = 1;
+	/**
+	 * if show ConcavityDepth is true the ConvexHull is drawn into the picture
+	 */
+	public static boolean SHOWCONVEXHULL=false;
+
+	/**
+	 * if show ConcavityDepth is true the ConcavityPixels and the Pixel at the end of each SplitLine are drawn into the picture
+	 */
+	public static boolean SHOWPIXELS=false;
+
+	public static int BACKGROUNDCOLOR = 1;
 	int arbitraryNumber;
 	ImagePlus imp;
 
@@ -139,7 +148,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		
 		ManyBlobs blobList = new ManyBlobs(new ImagePlus("", ip));
 		// if the background is white backgroundColor must be 1
-		blobList.setBackground(backgroundColor);
+		blobList.setBackground(BACKGROUNDCOLOR);
 		// Clumps of the Image will be detected
 		blobList.findConnectedComponents();
 		Clump clump = null;
@@ -155,51 +164,70 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 	@Override
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e)
-	{
-
+	{	
+		gd.setEnabled(true);
 		String selection=gd.getNextRadioButton();
 		boolean showConvexHull=gd.getNextBoolean();
 		boolean showConcavityDepth=gd.getNextBoolean();
-		double concavityDepthThreshold=gd.getNextNumber();
-		double saliencyThreshold=gd.getNextNumber();
-		double concavityConcavityAlignmentThreshold=gd.getNextNumber();
-		double concavityLineAlignmentThreshold=gd.getNextNumber();
-		double concavityAngleThreshold=gd.getNextNumber();
-		double concavityRatioThreshold=gd.getNextNumber();
-	
-		if(gd.getErrorMessage()==null)
-		{
+		boolean showPixels=gd.getNextBoolean();
+		Double concavityDepthThreshold=gd.getNextNumber();
+		Double saliencyThreshold=gd.getNextNumber();
+		Double concavityConcavityAlignmentThreshold=gd.getNextNumber();
+		Double concavityLineAlignmentThreshold=gd.getNextNumber();
+		Double concavityAngleThreshold=gd.getNextNumber();
+		Double concavityRatioThreshold=gd.getNextNumber();
+		if(gd.invalidNumber()){
+			return false;
+		}else{
+		
 			if (selection.equals("black"))
 			{
-				backgroundColor = 0;
+				BACKGROUNDCOLOR = 0;
 			} else
 				{
 					if (selection.equals("white"))
 					{
-						backgroundColor = 1;
+						BACKGROUNDCOLOR = 1;
 					}
 				}
 			
 			SHOWCONCAVITYDEPTH=showConcavityDepth;
 			SHOWCONVEXHULL=showConvexHull;
-			SALIENCY_THRESHOLD=saliencyThreshold;
-			CONCAVITYCONCAVITY_THRESHOLD=((2*Math.PI)/360)*concavityConcavityAlignmentThreshold;
-			CONCAVITY_DEPTH_THRESHOLD=concavityDepthThreshold;
+			SHOWPIXELS=showPixels;
+			if(!saliencyThreshold.isNaN())
+			{
+				SALIENCY_THRESHOLD=saliencyThreshold;
+			//	IJ.log(saliencyThreshold+"");
+			}
+			if(!concavityConcavityAlignmentThreshold.isNaN())
+			{
+				CONCAVITYCONCAVITY_THRESHOLD=((2*Math.PI)/360)*concavityConcavityAlignmentThreshold;
+			}
+			if(!concavityDepthThreshold.isNaN())
+			{
+				CONCAVITY_DEPTH_THRESHOLD=concavityDepthThreshold;
+			}
 			//IJ.log(concavityDepthThreshold+"");
-			CONCAVITYLINE_THRESHOLD=((2*Math.PI)/360)*concavityLineAlignmentThreshold;
+			if(!concavityLineAlignmentThreshold.isNaN())
+			{
+				CONCAVITYLINE_THRESHOLD=((2*Math.PI)/360)*concavityLineAlignmentThreshold;
+			}
 			//IJ.log("concavitylinethreshold1="+concavityLineAlignmentThreshold);
 			
 			//IJ.log("concavitylinethreshold2="+CONCAVITYLINE_THRESHOLD);
-			CONCAVITYANGLE_THRESHOLD=((2*Math.PI)/360)*concavityAngleThreshold;
+			if(!concavityAngleThreshold.isNaN())
+			{
+				CONCAVITYANGLE_THRESHOLD=((2*Math.PI)/360)*concavityAngleThreshold;
+			}
 			//IJ.log("concavitylinethreshold1="+concavityAngleThreshold);
 			
 			//IJ.log("concavityanglethreshold2="+CONCAVITYLINE_THRESHOLD);
-			
-			CONCAVITYRATIO_THRESHOLD=concavityRatioThreshold;
+			if(!concavityRatioThreshold.isNaN())
+			{
+				CONCAVITYRATIO_THRESHOLD=concavityRatioThreshold;
+			}
 			return true;
 		}
-
-		return false;
 	}
 
 	/**
@@ -221,14 +249,15 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		//checkboxValues[1]=false;
 		
 	//	gd.addCheckboxGroup(1, 2,checkboxes, checkboxValues);
-		gd.addCheckbox("Show convexhull",false);
-		gd.addCheckbox("Show concavitydepth", false);
-		gd.addNumericField("Concavity Depth Threshold", 3, 0);
-		gd.addSlider("Saliency Threshold", 0, 1, 0.12);
-		gd.addSlider("Concavity-concavity alignment threshold in degrees", 0, 180, 105);
-		gd.addNumericField("Concavity-Line alignment threshold in degrees", 70, 1);
-		gd.addNumericField("Concavity-angle threshold in degrees", 90, 1);
-		gd.addNumericField("Concavity Ratio Threshold", 6, 1);
+		gd.addCheckbox("Show Convex Hull",false);
+		gd.addCheckbox("Show Concavity-Depth", false);
+		gd.addCheckbox("Show Concavity Pixel and Split Points", false);
+		gd.addNumericField("Concavity-Depth threshold", 3, 0);
+		gd.addSlider("Saliency threshold", 0, 1, 0.12);
+		gd.addSlider("Concavity-Concavity-Alignment threshold in Degrees", 0, 180, 105);
+		gd.addSlider("Concavity-Line-Alignment threshold in Degrees",0,180,70);
+		gd.addSlider("Concavity-Angle threshold in Degrees",0,180, 90);
+		gd.addNumericField("Concavity-Ratio threshold", 6, 1);
 		gd.addPreviewCheckbox(pfr);
 		gd.addDialogListener(this);
 		gd.showDialog();
@@ -236,12 +265,12 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		{
 		gd.previewRunning(true);
 		
-		}
+		}*/
 		if (gd.wasCanceled())
 		{
 			return DONE;
 		}
-		
+		/*
 		if (gd.wasOKed())
 		{
 		}

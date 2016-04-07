@@ -136,7 +136,10 @@ public class Clump
 		for (ConcavityRegion cr : concavityRegionList)
 		{
 			// marks the concavityPoint on the boundary
+			if(Clump_Splitting.SHOWPIXELS)
+			{
 			cr.markMax(ip);
+			}
 			//cr.markMidPointOfConvexHull(ip);
 			if(Clump_Splitting.SHOWCONCAVITYDEPTH)
 			{
@@ -193,7 +196,9 @@ public class Clump
 	{
 		PolygonRoi polygonRoi = new PolygonRoi(convexHull, Roi.POLYGON);
 
-		ip.setColor(Color.magenta);
+		
+		ip.setColor(Color.gray);
+		
 		ip.draw(polygonRoi);
 	}
 

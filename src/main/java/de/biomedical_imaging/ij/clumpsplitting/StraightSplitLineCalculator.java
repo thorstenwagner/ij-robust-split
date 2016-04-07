@@ -43,7 +43,6 @@ import javax.vecmath.Vector2d;
 
 
 
-
 /**
  * calculates Straight SplitLines
  * 

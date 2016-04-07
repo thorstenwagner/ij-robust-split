@@ -197,7 +197,7 @@ public class ConcavityRegionAdministration
 		Double dist;
 		for (Point2D point : boundaryPointList)
 		{
-			dist = line.ptSegDistSq(point);
+			dist = Math.sqrt(line.ptSegDistSq(point));
 			// dist=Math.abs(line.ptLineDist(point));
 			doubleList.add(dist);
 		}

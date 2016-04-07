@@ -35,6 +35,7 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting;
 
+import java.awt.Color;
 import java.awt.geom.Point2D;
 
 
@@ -103,12 +104,30 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint implements Straight
 	 */
 	public void drawLine(ImageProcessor ip)
 	{
+		ip.setLineWidth(3);
+		if(Clump_Splitting.BACKGROUNDCOLOR==0)
+		{
+		ip.setColor(Color.black);
+		}
+		else{
+			ip.setColor(Color.white);
+		}
 		ip.drawLine((int) cI.getMaxDistCoord().getX(), (int) cI.getMaxDistCoord().getY(), (int) point.getX(),
 				(int) point.getY());
+		if(Clump_Splitting.SHOWPIXELS)
+		{
+			ip.setColor(Color.gray);
 		ip.setLineWidth(10);
 		ip.drawDot((int) point.getX(), (int) point.getY());
 		ip.setLineWidth(1);
-		
+		if(Clump_Splitting.BACKGROUNDCOLOR==0)
+		{
+		ip.setColor(Color.black);
+		}
+		else{
+			ip.setColor(Color.white);
+		}
+		}
 		
 	}
 }

@@ -36,9 +36,9 @@ SOFTWARE.
 package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.Color;
-
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+
 import ij.process.ImageProcessor;
 
 /**
@@ -102,11 +102,19 @@ public class ConcavityRegion
 	 */
 	public void markMax(ImageProcessor ip)
 	{
+		
 		Point2D p = boundaryPointList.get(indexMax);
-		ip.setColor(Color.BLUE);
+		ip.setColor(Color.gray);
 		ip.setLineWidth(10);
 		ip.drawDot((int) p.getX(), (int) p.getY());
 		ip.setLineWidth(1);
+		if(Clump_Splitting.BACKGROUNDCOLOR==0)
+		{
+		ip.setColor(Color.black);
+		}
+		else{
+			ip.setColor(Color.white);
+		}
 	}
 	
 
@@ -118,9 +126,17 @@ public class ConcavityRegion
 	 */
 	public void markMidPointOfConvexHull(ImageProcessor ip)
 	{
+		ip.setColor(Color.gray);
 		ip.setLineWidth(10);
 		ip.drawDot((int) this.getMidPointOfConvexHull().getX(), (int) this.getMidPointOfConvexHull().getY());
 		ip.setLineWidth(1);
+		if(Clump_Splitting.BACKGROUNDCOLOR==0)
+		{
+		ip.setColor(Color.black);
+		}
+		else{
+			ip.setColor(Color.white);
+		}
 	}
 	/**
 	 * marks the Distance between the MidPointOfConvexHull and the maxDistCoord
@@ -129,8 +145,51 @@ public class ConcavityRegion
 	 */
 	public void markConcavityDepth(ImageProcessor ip)
 	{
+		double x1=this.getStartX();
+		double x2=this.getEndX();
+		double y1=this.getStartY();
+		double y2=this.getEndY();
+		double yEnd;
+		double xEnd;
+		if(x2-x1!=0)
+		{
+		double m= ((y2-y1)/(x2-x1));
+		
+		
+		double m2=(-1/m);
+		
+		
+		double b=(-m2)*(int)this.getMaxDistCoord().getX()+(int)this.getMaxDistCoord().getY();
+		
+		if((this.getMaxDistCoord().getY()-this.getMidPointOfConvexHull().getY())>0)
+		{
+		xEnd=Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1))+this.getMaxDistCoord().getX();
+		}
+		else{
+		xEnd=this.getMaxDistCoord().getX()-Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
+			
+		}
+		yEnd=m2*xEnd+b;
+		}
+		else{
+			yEnd=this.getMaxDistCoord().getY()+this.getMaxDist();
+			xEnd=this.getMaxDistCoord().getX();
+		}
+		
+		ip.setColor(Color.gray);
 		ip.setLineWidth(1);
-		ip.drawLine((int)this.getMidPointOfConvexHull().getX(),(int)this.getMidPointOfConvexHull().getY() , (int)this.getMaxDistCoord().getX(), (int) this.getMaxDistCoord().getY());
+		ip.drawLine((int)this.getMaxDistCoord().getX(), (int)this.getMaxDistCoord().getY() ,(int)xEnd,(int)yEnd);
+	//	ip.drawLine((int)this.getMidPointOfConvexHull().getX(),(int)this.getMidPointOfConvexHull().getY() , (int)this.getMaxDistCoord().getX(), (int) this.getMaxDistCoord().getY());
+		//IJ.log(this.getMaxDist()+"");
+	//	ip.drawLine((int)this.getStartX(),(int)this.getStartY() , (int)this.getStartX()+(int)this.getMaxDist(), (int)this.getStartY());
+		
+		if(Clump_Splitting.BACKGROUNDCOLOR==0)
+		{
+		ip.setColor(Color.black);
+		}
+		else{
+			ip.setColor(Color.white);
+		}
 	}
 	/**
 	 * produces a ConcavityRegion
