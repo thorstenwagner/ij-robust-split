@@ -155,25 +155,67 @@ public class ConcavityRegion
 		{
 		double m= ((y2-y1)/(x2-x1));
 		
+		if(m!=0)
+		{
 		
 		double m2=(-1/m);
 		
 		
 		double b=(-m2)*(int)this.getMaxDistCoord().getX()+(int)this.getMaxDistCoord().getY();
-		
-		if((this.getMaxDistCoord().getY()-this.getMidPointOfConvexHull().getY())>0)
+		//
+		if(m>=0)
 		{
-		xEnd=Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1))+this.getMaxDistCoord().getX();
+		if((this.getMaxDistCoord().getY()-this.getMidPointOfConvexHull().getY())>=0)
+		{
+		
+		xEnd=this.getMaxDistCoord().getX()+Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
 		}
 		else{
+			
 		xEnd=this.getMaxDistCoord().getX()-Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
 			
+		}
+		}
+		else{
+			if((this.getMaxDistCoord().getY()-this.getMidPointOfConvexHull().getY())>=0)
+			{
+				
+			xEnd=this.getMaxDistCoord().getX()-Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
+			}
+			else{
+				
+			xEnd=this.getMaxDistCoord().getX()+Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
+				
+			}
 		}
 		yEnd=m2*xEnd+b;
 		}
 		else{
+			if((this.getMaxDistCoord().getX()-this.getMidPointOfConvexHull().getX())>=0)
+			{
 			yEnd=this.getMaxDistCoord().getY()+this.getMaxDist();
 			xEnd=this.getMaxDistCoord().getX();
+			}
+			else{
+				yEnd=this.getMaxDistCoord().getY()-this.getMaxDist();
+				xEnd=this.getMaxDistCoord().getX();
+				
+			}
+		
+		}
+		
+		}
+		else{
+			if((this.getMaxDistCoord().getY()-this.getMidPointOfConvexHull().getY())>=0)
+			{
+			xEnd=this.getMaxDistCoord().getX()-this.getMaxDist();
+			yEnd=this.getMaxDistCoord().getY();
+			}
+			else{
+				xEnd=this.getMaxDistCoord().getX()+this.getMaxDist();
+				yEnd=this.getMaxDistCoord().getY();
+				
+			}
 		}
 		
 		ip.setColor(Color.gray);

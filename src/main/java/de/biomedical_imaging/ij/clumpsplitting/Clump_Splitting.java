@@ -37,7 +37,6 @@ package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.AWTEvent;import java.awt.Polygon;
 import java.util.ArrayList;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.blob.Blob;
