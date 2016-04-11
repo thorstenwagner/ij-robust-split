@@ -39,6 +39,7 @@ import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashSet;
 import javax.vecmath.Vector2d;
 
 
@@ -360,24 +361,35 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		Point2D concavityPoint = cI.getMaxDistCoord();
 		Line2D.Double line = new Line2D.Double(midPoint, concavityPoint);
 		Polygon p = c.getBoundary();
-		double minDist = line.ptLineDist(p.xpoints[0], p.ypoints[0]);
-		int indexMinDist = 0;
-		double dist = 0;
-		for (int i = 0; i < p.npoints; i++)
+		HashSet<Point2D.Double> test=new HashSet<Point2D.Double>();
+		for(int i=0;i<p.npoints;i++)
 		{
-			Point2D.Double point = new Point2D.Double(p.xpoints[i], p.ypoints[i]);
+			test.add(new Point2D.Double(p.xpoints[i], p.ypoints[i]));
+		}
+		test.removeAll(cI.getBoundaryPointList());
+		
+		double minDist = line.ptLineDist(p.xpoints[0], p.ypoints[0]);
+	//	int indexMinDist = 0;
+		double dist = 0;
+		java.util.Iterator<Point2D.Double> it=test.iterator();
+		Point2D.Double minDistPoint=null;
+		while (it.hasNext())
+		{
+			Point2D.Double point=it.next();
 			if (point.getX() != concavityPoint.getX() && point.getY() != concavityPoint.getY())
 			{
 				dist = line.ptLineDist(point);
 				if (dist < minDist)
 				{
+					
 					minDist = dist;
-					indexMinDist = i;
+					minDistPoint=point;
+				//	indexMinDist = i;
 				}
 			}
 		}
 		StraightSplitLineBetweenConcavityRegionAndPoint s = new StraightSplitLineBetweenConcavityRegionAndPoint(cI,
-				concavityAngle, concavityRatio, new Point2D.Double(p.xpoints[indexMinDist], p.ypoints[indexMinDist]));
+				concavityAngle, concavityRatio, minDistPoint);
 		return s;
 	}
 }

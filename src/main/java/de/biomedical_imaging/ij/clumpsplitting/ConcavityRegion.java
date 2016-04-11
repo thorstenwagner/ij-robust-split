@@ -51,9 +51,9 @@ public class ConcavityRegion
 {
 
 	/**
-	 * startX is the x-Coordinate of the StartingPoint of the ConcavityRegion
-	 * the StartingPoint is detected by a point of the ConvexHull
+	 * 
 	 */
+
 	private int startX;
 	/**
 	 * startY is the y-Coordinate of the StartingPoint of the ConcavityRegion
@@ -193,11 +193,11 @@ public class ConcavityRegion
 		else{
 			if((this.getMaxDistCoord().getX()-this.getMidPointOfConvexHull().getX())>=0)
 			{
-			yEnd=this.getMaxDistCoord().getY()+this.getMaxDist();
+			yEnd=this.getMaxDistCoord().getY()-this.getMaxDist();
 			xEnd=this.getMaxDistCoord().getX();
 			}
 			else{
-				yEnd=this.getMaxDistCoord().getY()-this.getMaxDist();
+				yEnd=this.getMaxDistCoord().getY()+this.getMaxDist();
 				xEnd=this.getMaxDistCoord().getX();
 				
 			}
@@ -263,6 +263,7 @@ public class ConcavityRegion
 		this.startY = startY;
 		this.endX = endX;
 		this.endY = endY;
+		
 		this.boundaryPointList = boundaryPointList;
 		this.distList = distList;
 		this.max = max;
@@ -299,6 +300,10 @@ public class ConcavityRegion
 	public Point2D getMaxDistCoord()
 	{
 		return boundaryPointList.get(indexMax);
+	}
+	public ArrayList<Point2D> getBoundaryPointList()
+	{
+		return boundaryPointList;
 	}
 
 	/**

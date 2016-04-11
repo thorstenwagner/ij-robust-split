@@ -182,6 +182,7 @@ public class Clump
 	 */
 	private void drawSplitLine(ImageProcessor ip, AbstractSplitLine asl)
 	{
+		
 		asl.drawLine(ip);
 	}
 
@@ -198,7 +199,7 @@ public class Clump
 
 		
 		ip.setColor(Color.gray);
-		
+		ip.setLineWidth(1);
 		ip.draw(polygonRoi);
 	}
 

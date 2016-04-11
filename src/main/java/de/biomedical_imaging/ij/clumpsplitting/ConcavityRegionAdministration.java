@@ -100,6 +100,7 @@ public class ConcavityRegionAdministration
 			double[] maxData = getMaxDist(doubleList);
 			if (maxData[0] > Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
 			{
+				
 				ConcavityRegion concavityRegion = new ConcavityRegion(startX, startY, endX, endY, pointList, doubleList,
 						maxData[0], (int) maxData[1]);
 				concavityRegionList.add(concavityRegion);
