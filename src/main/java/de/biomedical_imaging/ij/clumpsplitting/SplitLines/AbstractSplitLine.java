@@ -33,17 +33,10 @@ IN THE
 SOFTWARE.
 */
 
-package de.biomedical_imaging.ij.clumpsplitting;
+package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
-/**
- * a StraightSplitLine is defined by an start and an endPoint which are
- * connected with a straight line
- * 
- * @author Louise
- *
- */
+import ij.process.ImageProcessor;
 
-public interface StraightSplitLine extends AbstractSplitLine
-{
-
+public interface AbstractSplitLine {
+	public void drawLine(ImageProcessor ip);
 }

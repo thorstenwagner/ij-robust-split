@@ -1,5 +1,4 @@
 /*
-The MIT License (MIT)
 
 Copyright (c) 2016 Louise Bloch (louise.bloch001@stud.fh-dortmund.de), Thorsten Wagner (wagner@b
 iomedical-imaging.de)
@@ -35,10 +34,14 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting;
 
+
+import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+
+import ij.gui.Line;
 
 /**
  * administrates the concavityRegions
@@ -48,18 +51,9 @@ import java.util.ArrayList;
  */
 public class ConcavityRegionAdministration
 {
-	/**
-	 * represents the bounds of the affiliated Clump
-	 */
-	private Polygon boundaryArc;
-	/**
-	 * represents the convexHull of the affiliated Clump
-	 */
-	private Polygon convexHull;
+	private Clump clump;
+	public static ArrayList<Point2D> allConcavityRegionPoints=new ArrayList<Point2D>();
 
-	
-
-	
 
 	/**
 	 * 
@@ -68,10 +62,10 @@ public class ConcavityRegionAdministration
 	 * @param convexHull
 	 *            convexHull of the affiliated Clump
 	 */
-	public ConcavityRegionAdministration(Polygon boundaryArc, Polygon convexHull)
+	public ConcavityRegionAdministration(Clump clump)
 	{
-		this.boundaryArc = boundaryArc;
-		this.convexHull = convexHull;
+		this.clump=clump;
+		
 	}
 
 	/**
@@ -88,14 +82,20 @@ public class ConcavityRegionAdministration
 		int startY;
 		int endX;
 		int endY;
-		for (int i = 1; i < convexHull.npoints; i++)
+		if(clump.getConvexHull()!=null)
 		{
-			startX = convexHull.xpoints[i - 1];
-			startY = convexHull.ypoints[i - 1];
-			endX = convexHull.xpoints[i];
-			endY = convexHull.ypoints[i];
+		for (int i = 1; i < clump.getConvexHull().npoints; i++)
+		{
+			startX = clump.getConvexHull().xpoints[i - 1];
+			startY =clump.getConvexHull().ypoints[i - 1];
+			endX = clump.getConvexHull().xpoints[i];
+			endY = clump.getConvexHull().ypoints[i];
 
+			
 			ArrayList<Point2D> pointList = getAllEmbeddedPointsFromBoundaryArc(startX, startY, endX, endY);
+			this.allConcavityRegionPoints.addAll(pointList);
+			//if(pointList.size()>3)
+			//{
 			ArrayList<Double> doubleList = computeDistance(pointList, startX, startY, endX, endY);
 			double[] maxData = getMaxDist(doubleList);
 			if (maxData[0] > Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
@@ -106,7 +106,106 @@ public class ConcavityRegionAdministration
 				concavityRegionList.add(concavityRegion);
 			}
 
+		//}
 		}
+		//IJ.log("Anzahl ohne innere"+ concavityRegionList.size());
+		}
+		for(InnerContour inner:clump.getInnerContours())
+		{
+			//IJ.log("innere Kontur");
+			Polygon innerConvexHull=inner.getConvexHull();
+			//PolygonRoi roi=new PolygonRoi(innerConvexHull,Roi.POLYGON);
+			//Clump.o.add(roi);
+			//Polygon innerContour=inner.getContour();
+			int innerStartX;
+			int innerStartY;
+			int innerEndX;
+			int innerEndY;
+			if(innerConvexHull!=null)
+			{
+				ArrayList<ConcavityRegion> tempInner=new ArrayList<ConcavityRegion>();
+			//	IJ.log("convexHullPoints"+innerConvexHull.npoints);
+			for (int i = 1; i < innerConvexHull.npoints; i++)
+			{
+							
+				innerStartX = innerConvexHull.xpoints[i - 1];
+				innerStartY =innerConvexHull.ypoints[i - 1];
+				innerEndX = innerConvexHull.xpoints[i];
+				innerEndY = innerConvexHull.ypoints[i];
+
+				//IJ.log(innerStartX+ " "+innerStartY+ " "+innerEndX+ " "+innerEndY+ " ");
+				ArrayList<Point2D> pointList = getAllEmbeddedPointsFromInnerContour(innerStartX, innerStartY, innerEndX, innerEndY,inner);
+			//	IJ.log(innerStartX+ " "+innerStartY+ " "+innerEndX+ " "+innerEndY+ " "+pointList.size());
+				
+				if(pointList.size()>3)
+				{
+				ArrayList<Double> doubleList = computeDistance(pointList, innerStartX, innerStartY, innerEndX, innerEndY);
+				double[] maxData = getMaxDist(doubleList);
+				System.out.println("Threshold:"+Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD);
+				if (maxData[0] > Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
+				{
+					
+				//	IJ.log("test");
+					ConcavityRegion concavityRegion = new ConcavityRegion(innerStartX, innerStartY, innerEndX, innerEndY, pointList, doubleList,
+							maxData[0], (int) maxData[1]);
+					
+				//	Line polygonRoi = new Line(innerStartX, innerStartY,innerEndX, innerEndY);
+				//	polygonRoi.setStrokeColor(Color.magenta);
+					
+				//	Clump.p.add(polygonRoi);
+				//	polygonRoi = new Line(concavityRegion.getMaxDistCoord().getX(), concavityRegion.getMaxDistCoord().getY(),concavityRegion.getMaxDistCoord().getX(), concavityRegion.getMaxDistCoord().getY());
+				//	polygonRoi.setStrokeColor(Color.pink);
+				//	polygonRoi.setLineWidth(10);
+				//	Clump.q.add(polygonRoi);
+					
+					tempInner.add(concavityRegion);
+					
+				//	concavityRegionList.add(concavityRegion);
+				}
+				}
+				//IJ.log("Anzahl der inneren Konkavitätsregionen"+tempInner.size()+"");
+			}
+				for(int j=0;j<tempInner.size();j++)
+				{
+					ConcavityRegion teil1;
+					ConcavityRegion teil2;
+					
+					if(j>0)
+					{
+					teil1=tempInner.get(j);
+					teil2=tempInner.get(j-1);
+					}
+					else{
+						teil1=tempInner.get(j);
+						teil2=tempInner.get(tempInner.size()-1);
+					}
+					Point2D endPoint=teil1.getMaxDistCoord();
+					Point2D startPoint=teil2.getMaxDistCoord();
+					Line polygonRoi = new Line(startPoint.getX(), startPoint.getY(),endPoint.getX(), endPoint.getY());
+					polygonRoi.setStrokeColor(Color.green);
+					
+					ArrayList<Point2D> embeddedPoints=this.getAllEmbeddedPointsFromInnerContour((int)startPoint.getX(),(int)startPoint.getY(),(int)endPoint.getX(),(int)endPoint.getY(), inner);
+					if(embeddedPoints.size()>3)
+					{
+					ArrayList<Double> doubleListInner = computeDistance(embeddedPoints, (int)startPoint.getX(), (int)startPoint.getY(), (int)endPoint.getX(), (int)endPoint.getY());
+					double[] maxDataInner = getMaxDist(doubleListInner);
+					if (maxDataInner[0] > Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
+					{
+						
+						ConcavityRegion crReal=new ConcavityRegion((int)startPoint.getX(),(int)startPoint.getY(),(int)endPoint.getX(),(int)endPoint.getY(),embeddedPoints,doubleListInner,maxDataInner[0],(int)maxDataInner[1]);
+								//	tempInner.add(crReal);
+					//	IJ.log("innen");
+						concavityRegionList.add(crReal);
+					}
+					}
+				
+				}
+				
+			}
+			}
+		
+	//	IJ.log("Anzahl der Konkavitätsregionen"+ concavityRegionList.size());
+		
 		return concavityRegionList;
 	}
 
@@ -129,28 +228,28 @@ public class ConcavityRegionAdministration
 	 */
 	private ArrayList<Point2D> getAllEmbeddedPointsFromBoundaryArc(int startX, int startY, int endX, int endY)
 	{
-		int i = boundaryArc.npoints - 1;
+		int i = clump.getBoundary().npoints - 1;
 		boolean ended = false;
 		boolean started = false;
 		ArrayList<Point2D> pointList = new ArrayList<Point2D>();
 		while (i >= 0 && !ended)
 		{
-			if (boundaryArc.xpoints[i] == startX && boundaryArc.ypoints[i] == startY && !started)
+			if (clump.getBoundary().xpoints[i] == startX && clump.getBoundary().ypoints[i] == startY && !started)
 			{
-				pointList.add(new Point2D.Double(boundaryArc.xpoints[i], boundaryArc.ypoints[i]));
+				pointList.add(new Point2D.Double(clump.getBoundary().xpoints[i], clump.getBoundary().ypoints[i]));
 				started = true;
 			} else
 			{
 
-				if (started && (boundaryArc.xpoints[i] != endX || boundaryArc.ypoints[i] != endY) && !ended)
+				if (started && (clump.getBoundary().xpoints[i] != endX || clump.getBoundary().ypoints[i] != endY) && !ended)
 				{
-					pointList.add(new Point2D.Double(boundaryArc.xpoints[i], boundaryArc.ypoints[i]));
+					pointList.add(new Point2D.Double(clump.getBoundary().xpoints[i], clump.getBoundary().ypoints[i]));
 
 				} else
 				{
-					if (started && boundaryArc.xpoints[i] == endX && boundaryArc.ypoints[i] == endY)
+					if (started && clump.getBoundary().xpoints[i] == endX && clump.getBoundary().ypoints[i] == endY)
 					{
-						pointList.add(new Point2D.Double(boundaryArc.xpoints[i], boundaryArc.ypoints[i]));
+						pointList.add(new Point2D.Double(clump.getBoundary().xpoints[i], clump.getBoundary().ypoints[i]));
 						ended = true;
 					}
 
@@ -162,16 +261,42 @@ public class ConcavityRegionAdministration
 
 	}
 
-	public void setConvexHull(Polygon convexHull)
+	private ArrayList<Point2D> getAllEmbeddedPointsFromInnerContour(int startX, int startY, int endX, int endY,InnerContour innerContour)
 	{
-		this.convexHull = convexHull;
+		int i = 0;
+		boolean ended = false;
+		boolean started = false;
+		ArrayList<Point2D> pointList = new ArrayList<Point2D>();
+		while (i < innerContour.getContour().npoints - 1 && !ended)
+		{
+			if (innerContour.getContour().xpoints[i] == startX && innerContour.getContour().ypoints[i] == startY && !started)
+			{
+				pointList.add(new Point2D.Double(innerContour.getContour().xpoints[i], innerContour.getContour().ypoints[i]));
+				started = true;
+			} else
+			{
+
+				if (started && (innerContour.getContour().xpoints[i] != endX || innerContour.getContour().ypoints[i] != endY) && !ended)
+				{
+					pointList.add(new Point2D.Double(innerContour.getContour().xpoints[i], innerContour.getContour().ypoints[i]));
+
+				} else
+				{
+					if (started && innerContour.getContour().xpoints[i] == endX && innerContour.getContour().ypoints[i] == endY)
+					{
+						pointList.add(new Point2D.Double(innerContour.getContour().xpoints[i], innerContour.getContour().ypoints[i]));
+						ended = true;
+					}
+
+				}
+			}
+			i++;
+		}
+		return pointList;
+
 	}
 
-	public void setBoundaryArc(Polygon boundaryArc)
-	{
-		this.boundaryArc = boundaryArc;
-	}
-
+	
 	/**
 	 * computes the concavityDepth of all points on the boundaryList
 	 * 
@@ -204,6 +329,8 @@ public class ConcavityRegionAdministration
 		}
 		return doubleList;
 	}
+
+	
 
 	/**
 	 * filters the List for the largest Value

@@ -33,13 +33,24 @@ IN THE
 SOFTWARE.
 */
 
-package de.biomedical_imaging.ij.clumpsplitting;
+package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
-import java.util.ArrayList;
+import java.awt.geom.Point2D;
 
-public interface AbstractSplitLineCalculator
+import ij.process.ImageProcessor;
+
+/**
+ * a StraightSplitLine is defined by an start and an endPoint which are
+ * connected with a straight line
+ * 
+ * @author Louise
+ *
+ */
+
+public abstract class StraightSplitLine implements AbstractSplitLine
 {
-	public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
-			Clump c);
-
+	public abstract void drawLine(ImageProcessor ip);
+	public abstract Point2D getStartPoint();
+	public abstract Point2D getEndPoint();
+	
 }

@@ -33,12 +33,15 @@ IN THE
 SOFTWARE.
 */
 
-package de.biomedical_imaging.ij.clumpsplitting;
+package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
-
+import de.biomedical_imaging.ij.clumpsplitting.Clump;
+import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
+import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
+import ij.gui.Line;
 import ij.process.ImageProcessor;
 
 /**
@@ -49,7 +52,7 @@ import ij.process.ImageProcessor;
  * @author Louise
  *
  */
-public class StraightSplitLineBetweenConcavityRegionAndPoint implements StraightSplitLine
+public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSplitLine
 {
 
 	/**
@@ -97,13 +100,48 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint implements Straight
 		this.point = point;
 	}
 
-	
-	/**
+/*	public boolean contains(Point2D p)
+	{
+		Line2D.Double linie=new Line2D.Double((int) cI.getMaxDistCoord().getX(), (int) cI.getMaxDistCoord().getY(), (int) point.getX(),
+				(int) point.getY());
+		if(linie.contains(p))
+		{
+			return true;
+		}
+		else{
+			return false;
+		}
+	}*/
+	public double getConcavityAngle()
+	{
+		return concavityAngle;
+	}
+	public double getConcavityRatio()
+	{
+		return concavityRatio;
+	}
+	public Point2D getEndPoint()
+	{
+		return point;
+	}
+	public Point2D getStartPoint()
+	{
+		return cI.getMaxDistCoord();
+	}
+	public ConcavityRegion getCI()
+	{
+		return cI;
+	}
+		/**
 	 * draws the Splitline
 	 * @param ip ImageProcessor to draw the SplitLine
 	 */
 	public void drawLine(ImageProcessor ip)
 	{
+		//System.out.println("ConcAndPoint Error");
+		if(cI!=null){
+			if(point!=null)
+			{
 		ip.setLineWidth(3);
 		if(Clump_Splitting.BACKGROUNDCOLOR==0)
 		{
@@ -116,9 +154,20 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint implements Straight
 				(int) point.getY());
 		if(Clump_Splitting.SHOWPIXELS)
 		{
-			ip.setColor(Color.gray);
-		ip.setLineWidth(10);
-		ip.drawDot((int) point.getX(), (int) point.getY());
+		//	ip.setColor(Color.gray);
+		//ip.setLineWidth(10);
+		
+		
+		Line polygonRoi = new Line(point.getX(), point.getY(),point.getX(), point.getY());
+
+
+	      polygonRoi.setStrokeWidth(10);
+	      polygonRoi.setStrokeColor(Color.red);
+		     
+	    // Roi.setColor(Color.red);
+	      
+	      Clump.overlaySplitPoints.add(polygonRoi);
+		/*ip.drawDot((int) point.getX(), (int) point.getY());
 		ip.setLineWidth(1);
 		if(Clump_Splitting.BACKGROUNDCOLOR==0)
 		{
@@ -126,8 +175,20 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint implements Straight
 		}
 		else{
 			ip.setColor(Color.white);
+		}*/
 		}
+		else{
+			Clump.overlaySplitPoints.clear();
 		}
 		
 	}
-}
+	}
+	}
+
+	@Override
+	public String toString(){
+		return "X: " + point.getX() + " Y: " + point.getY() +" MaxX: " + cI.getMaxDistCoord().getX() +" MaxY: " + cI.getMaxDistCoord().getY();
+		
+	}
+	
+	}

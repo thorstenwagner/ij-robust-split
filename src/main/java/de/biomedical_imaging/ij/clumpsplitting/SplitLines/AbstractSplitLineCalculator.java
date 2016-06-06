@@ -33,10 +33,17 @@ IN THE
 SOFTWARE.
 */
 
-package de.biomedical_imaging.ij.clumpsplitting;
+package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
+import java.util.ArrayList;
+
+import de.biomedical_imaging.ij.clumpsplitting.Clump;
+import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
 import ij.process.ImageProcessor;
 
-public interface AbstractSplitLine {
-	public void drawLine(ImageProcessor ip);
+public interface AbstractSplitLineCalculator
+{
+	public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
+			Clump c,ImageProcessor ip);
+
 }

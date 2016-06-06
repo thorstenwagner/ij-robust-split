@@ -38,9 +38,10 @@ package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.Color;
 import java.awt.Polygon;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-
+import de.biomedical_imaging.ij.clumpsplitting.SplitLines.*;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
@@ -60,7 +61,13 @@ public class Clump
 	 * if a ConcavityRegion is useful is the CONCAVITY_DEPTH_THRESHOLD from
 	 * class ConcavityRegionAdministration
 	 */
-	private ArrayList<ConcavityRegion> concavityRegionList;
+	public static int done=0;
+	public static ArrayList<Roi> overlayConvexHull=new ArrayList<Roi>();
+	public static ArrayList<Roi> overlaySplitPoints=new ArrayList<Roi>();
+	public static ArrayList<Roi> overlayConcavityDepth=new ArrayList<Roi>();
+	public static ArrayList<Roi> overlayAngleCtrl=new ArrayList<Roi>();
+	private ArrayList<InnerContour> innerList=new ArrayList<InnerContour>();
+	private ArrayList<ConcavityRegion> concavityRegionList=new ArrayList<ConcavityRegion>();
 	/**
 	 * the boundary describes the outer border of the Clump
 	 */
@@ -75,6 +82,7 @@ public class Clump
 	 * distance between convexHull and boundary, this one is used for the
 	 * detection of a Splitline between a concavityRegion and a boundarypoint
 	 */
+	public static int STOP=0;
 	private int indexOfMaxConcavityRegion;
 	/**
 	 * the variable secondMaxConcavityDepth represents the distance of the
@@ -93,17 +101,47 @@ public class Clump
 	 *            ImageProcessor to visualize the detected Points and lines of
 	 *            the Image
 	 */
-	public Clump(Polygon boundary, ImageProcessor ip)
+	public Clump(Polygon boundary,ArrayList<Polygon> innerContours, ImageProcessor ip)
 	{
 		this.boundary = boundary;
-		this.convexHull = this.computeConvexHull();
-		if(Clump_Splitting.SHOWCONVEXHULL)
+		this.convexHull = this.computeConvexHull(boundary);
+		if(convexHull!=null)
+		{
+		for(Polygon innerContour: innerContours)
+		{
+			Polygon innerConvexHull=this.computeConvexHull(innerContour);
+			InnerContour inner=new InnerContour(innerContour, innerConvexHull);
+			innerList.add(inner);
+		}
+		 
+		
+		if(Clump_Splitting.SHOWCONVEXHULL&&Clump.done<Clump_Splitting.count)
 		{
 		this.drawConvexHull(ip);
+		//this.done=true;
+		Clump.done++;
 		}
-		this.concavityRegionList = this.computeConcavityRegions(ip);
-		this.computeSplitLines(ip);
-
+		else{
+			if(!Clump_Splitting.SHOWCONVEXHULL)
+			{
+			//	IJ.log("Fehler");
+				Clump.done=0;
+				Clump.overlayConvexHull.clear();
+			}
+		}
+		}
+	//	IJ.log("Anzahl der Inneren Konturen"+innerList.size()+"");
+	    
+		this.concavityRegionList.clear();
+		this.concavityRegionList = this.computeConcavityRegions();
+		for(ConcavityRegion cr:concavityRegionList)
+		{
+			cr.drawInformation();
+		}
+	//	IJ.log(concavityRegionList.size()+"");
+		
+	/*ArrayList<AbstractSplitLine> possibleSplitLines=*/this.computeSplitLines(ip);
+//		this.selectBestSplitLine(possibleSplitLines);
 	}
 
 	/**
@@ -112,14 +150,18 @@ public class Clump
 	 * @return the convexhull
 	 */
 
-	private Polygon computeConvexHull()
+	private Polygon computeConvexHull(Polygon contour)
 	{
-		PolygonRoi pr = new PolygonRoi(boundary, Roi.POLYGON);
+		PolygonRoi pr = new PolygonRoi(contour, Roi.POLYGON);
 		Polygon convexHull = pr.getConvexHull();
 		
 		return convexHull;
 	}
 
+	/*private Polygon computeConvexBubble(Polygon innerContour)
+	{
+		
+	}*/
 	/**
 	 * computes the areas with high concavity
 	 * 
@@ -128,29 +170,39 @@ public class Clump
 	 * 
 	 * @return returns the valid concavityRegions detected in the Clump
 	 */
-	private ArrayList<ConcavityRegion> computeConcavityRegions(ImageProcessor ip)
+	private ArrayList<ConcavityRegion> computeConcavityRegions()
 	{
-		ConcavityRegionAdministration cra = new ConcavityRegionAdministration(boundary, this.convexHull);
+		ConcavityRegionAdministration cra = new ConcavityRegionAdministration(this);
 		ArrayList<ConcavityRegion> concavityRegionList = cra.computeConcavityRegions();
 
+	
 		for (ConcavityRegion cr : concavityRegionList)
 		{
+			
 			// marks the concavityPoint on the boundary
 			if(Clump_Splitting.SHOWPIXELS)
 			{
-			cr.markMax(ip);
+			cr.markMax();
 			}
-			//cr.markMidPointOfConvexHull(ip);
+			else{
+				Clump.overlaySplitPoints.clear();
+			}
+			cr.markMidPointOfConvexHull();
 			if(Clump_Splitting.SHOWCONCAVITYDEPTH)
 			{
-			cr.markConcavityDepth(ip);
+			cr.markConcavityDepth();
+			}
+			else{
+				
+					//Clump.done=0;
+					Clump.overlayConcavityDepth.clear();
+				
 			}
 
 		}
 		return concavityRegionList;
 
 	}
-
 	/**
 	 * computes the SplitLines of the Clump
 	 * 
@@ -158,18 +210,55 @@ public class Clump
 	 *            ImageProcessor to draw the detectedSplitLine
 	 */
 
-	private void computeSplitLines(ImageProcessor ip)
+	private ArrayList<AbstractSplitLine> computeSplitLines(ImageProcessor ip)
 	{
 		this.computeFirstAndSecondLargestConcavityDepth();
-
+		ArrayList<AbstractSplitLine> possibleSplitLines=null;
+		if(Clump_Splitting.SPLITLINETYPE==0||Clump_Splitting.SPLITLINETYPE==3)
+		{
 		AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
-		ArrayList<AbstractSplitLine> possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this);
+		possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this,ip);
+		}
+		else{
+			if(Clump_Splitting.SPLITLINETYPE==1)
+			{
+				AbstractSplitLineCalculator mmislc = new MaximumIntensitySplitLineCalculator();
+				possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, this,ip);
+				
+			}
+			else{
+				if(Clump_Splitting.SPLITLINETYPE==2)
+				{
+					AbstractSplitLineCalculator mmislc = new MinimumIntensitySplitLineCalculator();
+					possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, this,ip);
+					
+				}
+			}
+		}
+	//	System.out.println(possibleSplitLines.get(0));
+	//	IJ.log(possibleSplitLines.size()+"Anzahl trennungslinien");
+	//	IJ.log(possibleSplitLines.get(0)+"Erste Stelle");
+	//	System.out.println("PossibleSplitLineSize: " + possibleSplitLines.size());
+		if(possibleSplitLines.size()==0)
+		{
+			Clump.STOP++;
+		}
+		else{
+			if(possibleSplitLines.get(0)==null)
+			{
+
+				Clump.STOP++;
+			}
+		}
 		for (AbstractSplitLine asl : possibleSplitLines)
 		{
-
+			if(asl!=null)
+			{
 			this.drawSplitLine(ip, asl);
+			}
 		}
 
+		return possibleSplitLines;
 	}
 
 	/**
@@ -197,10 +286,24 @@ public class Clump
 	{
 		PolygonRoi polygonRoi = new PolygonRoi(convexHull, Roi.POLYGON);
 
-		
-		ip.setColor(Color.gray);
-		ip.setLineWidth(1);
-		ip.draw(polygonRoi);
+
+	      polygonRoi.setStrokeWidth(1);;
+	   //  Roi.setColor(Color.cyan);
+	      polygonRoi.setStrokeColor(Color.cyan);
+	      overlayConvexHull.add(polygonRoi);
+	      
+	//	o.setStrokeColor(Color.red);
+	//	o.addElement(polygonRoi);
+		//ip.setOverlay(o);
+		//ip.drawOverlay(o);
+	//	ImageProcessor imapr=Clump_Splitting.imp.getProcessor();
+	//	imapr.setOverlay(o);
+	//	imapr.drawOverlay(o);
+	//	Clump_Splitting.imp.setOverlay(o);
+	//	o.
+		//ip.setColor(Color.gray);
+		//ip.setLineWidth(1);
+		//ip.draw(polygonRoi);
 	}
 
 	/**
@@ -262,8 +365,16 @@ public class Clump
 		return secondMaxConcavityDepth;
 	}
 
+	public Polygon getConvexHull()
+	{
+		return convexHull;
+	}
 	public Polygon getBoundary()
 	{
 		return boundary;
+	}
+	public ArrayList<InnerContour> getInnerContours()
+	{
+		return innerList;
 	}
 }

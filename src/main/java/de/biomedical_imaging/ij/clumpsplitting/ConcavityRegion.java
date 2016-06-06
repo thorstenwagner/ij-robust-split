@@ -39,15 +39,17 @@ import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-import ij.process.ImageProcessor;
+import javax.vecmath.Vector2d;
 
+import ij.gui.Line;
+import ij.gui.TextRoi;
 /**
  * a ConcavityRegion is a Region of a Clump with high concavity.
  * 
  * @author Louise
  *
  */
-public class ConcavityRegion
+public class ConcavityRegion implements Comparable<ConcavityRegion>
 {
 
 	/**
@@ -90,31 +92,44 @@ public class ConcavityRegion
 	private Point2D midPointOfConvexHull;
 	/**
 	 * boundaryPointList is a List with all Points based on the grid, which is
-	 * on the boundary
+	 * on the boundary of the Concavity Region
 	 */
 	private ArrayList<Point2D> boundaryPointList;
 
-	/**
+		/**
 	 * marks the Pixel with the largest concavityDepth of the boundary
 	 * 
 	 * @param ip
 	 *            ImageProcessor to mark the Pixel
 	 */
-	public void markMax(ImageProcessor ip)
+	public void markMax()
 	{
-		
 		Point2D p = boundaryPointList.get(indexMax);
-		ip.setColor(Color.gray);
-		ip.setLineWidth(10);
-		ip.drawDot((int) p.getX(), (int) p.getY());
-		ip.setLineWidth(1);
-		if(Clump_Splitting.BACKGROUNDCOLOR==0)
-		{
-		ip.setColor(Color.black);
-		}
-		else{
-			ip.setColor(Color.white);
-		}
+		
+		/*float[] i=new float[1];
+		float[] j=new float[1];
+		i[0]=(int)p.getX();
+		j[0]=(int)p.getY();*/
+		Line polygonRoi = new Line(p.getX(), p.getY(),p.getX(), p.getY());
+
+
+	      polygonRoi.setStrokeWidth(10);;
+	      polygonRoi.setStrokeColor(Color.red);
+		     
+	    // Roi.setColor(Color.red);
+	      
+	      Clump.overlaySplitPoints.add(polygonRoi);
+		//ip.setColor(Color.gray);
+		//ip.setLineWidth(10);
+		//ip.drawDot((int) p.getX(), (int) p.getY());
+		//ip.setLineWidth(1);
+		//if(Clump_Splitting.BACKGROUNDCOLOR==0)
+		//{
+		//ip.setColor(Color.black);
+		//}
+		//else{
+		//	ip.setColor(Color.white);
+		//}
 	}
 	
 
@@ -124,26 +139,58 @@ public class ConcavityRegion
 	 * @param ip
 	 *            ImageProcessor to mark the Pixel
 	 */
-	public void markMidPointOfConvexHull(ImageProcessor ip)
+	public void markMidPointOfConvexHull()
 	{
-		ip.setColor(Color.gray);
-		ip.setLineWidth(10);
-		ip.drawDot((int) this.getMidPointOfConvexHull().getX(), (int) this.getMidPointOfConvexHull().getY());
-		ip.setLineWidth(1);
-		if(Clump_Splitting.BACKGROUNDCOLOR==0)
+	//	ip.setColor(Color.gray);
+		Line polygonRoi = new Line((int) this.getMidPointOfConvexHull().getX(), (int) this.getMidPointOfConvexHull().getY(),(int) this.getMidPointOfConvexHull().getX(), (int) this.getMidPointOfConvexHull().getY());
+
+
+	      polygonRoi.setStrokeWidth(4);
+	      polygonRoi.setStrokeColor(Color.green);
+		     
+	      
+	      Clump.overlayConvexHull.add(polygonRoi);
+		
+	}
+	public double getOrientation()
+	{
+		Point2D midPointI = this.getMidPointOfConvexHull();
+		Point2D maxPointI = this.getMaxDistCoord();
+		double xPointDistOne = maxPointI.getX() - midPointI.getX();
+		double yPointDistOne = maxPointI.getY() - midPointI.getY();
+		
+		Vector2d vi = new Vector2d(xPointDistOne, yPointDistOne);
+		Vector2d vj= new Vector2d(midPointI.getX()+10,midPointI.getY());
+		vi.normalize();
+		vj.normalize();
+		double angle = Math.PI - Math.acos(vi.dot(vj));
+
+		if(yPointDistOne>=0)
 		{
-		ip.setColor(Color.black);
+			if(0<angle&&angle<=((Math.PI)/2))
+			{
+				angle=angle+1.5*Math.PI;
+			}
+			else{
+				angle=angle+((Math.PI)/2);
+			}
+		}
+		else{	if(0<angle&&angle<=((Math.PI)/2))
+		{
+			angle=angle+((Math.PI)/2);
 		}
 		else{
-			ip.setColor(Color.white);
+			angle=angle-((Math.PI)/2);
 		}
+		}
+	return angle;
 	}
 	/**
 	 * marks the Distance between the MidPointOfConvexHull and the maxDistCoord
 	 * @param ip
 	 * 				ImageProcessor to mark the Line
 	 */
-	public void markConcavityDepth(ImageProcessor ip)
+	public void markConcavityDepth()
 	{
 		double x1=this.getStartX();
 		double x2=this.getEndX();
@@ -158,40 +205,40 @@ public class ConcavityRegion
 		if(m!=0)
 		{
 		
-		double m2=(-1/m);
+			double m2=(-1/m);
 		
 		
-		double b=(-m2)*(int)this.getMaxDistCoord().getX()+(int)this.getMaxDistCoord().getY();
+			double b=(-m2)*(int)this.getMaxDistCoord().getX()+(int)this.getMaxDistCoord().getY();
 		//
-		if(m>=0)
-		{
-		if((this.getMaxDistCoord().getY()-this.getMidPointOfConvexHull().getY())>=0)
-		{
+			if(m>=0)
+			{
+				if((this.getMaxDistCoord().getY()-this.getMidPointOfConvexHull().getY())>=0)
+				{
 		
-		xEnd=this.getMaxDistCoord().getX()+Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
-		}
-		else{
+					xEnd=this.getMaxDistCoord().getX()+Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
+				}
+				else{
 			
-		xEnd=this.getMaxDistCoord().getX()-Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
+					xEnd=this.getMaxDistCoord().getX()-Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
 			
-		}
+				}
+			}
+			else{
+				if((this.getMaxDistCoord().getY()-this.getMidPointOfConvexHull().getY())>=0)
+				{
+				
+					xEnd=this.getMaxDistCoord().getX()-Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
+				}
+				else{
+				
+					xEnd=this.getMaxDistCoord().getX()+Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
+				
+				}
+			}
+			yEnd=m2*xEnd+b;
 		}
 		else{
 			if((this.getMaxDistCoord().getY()-this.getMidPointOfConvexHull().getY())>=0)
-			{
-				
-			xEnd=this.getMaxDistCoord().getX()-Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
-			}
-			else{
-				
-			xEnd=this.getMaxDistCoord().getX()+Math.sqrt(((this.getMaxDist())*this.getMaxDist())/(m2*m2+1));
-				
-			}
-		}
-		yEnd=m2*xEnd+b;
-		}
-		else{
-			if((this.getMaxDistCoord().getX()-this.getMidPointOfConvexHull().getX())>=0)
 			{
 			yEnd=this.getMaxDistCoord().getY()-this.getMaxDist();
 			xEnd=this.getMaxDistCoord().getX();
@@ -218,20 +265,26 @@ public class ConcavityRegion
 			}
 		}
 		
-		ip.setColor(Color.gray);
-		ip.setLineWidth(1);
-		ip.drawLine((int)this.getMaxDistCoord().getX(), (int)this.getMaxDistCoord().getY() ,(int)xEnd,(int)yEnd);
+		Line polygonRoi = new Line((int)this.getMaxDistCoord().getX(), (int)this.getMaxDistCoord().getY() ,(int)xEnd,(int)yEnd);
+
+
+	      polygonRoi.setStrokeWidth(1);
+	      polygonRoi.setStrokeColor(Color.green);
+		     
+	      
+	      Clump.overlayConcavityDepth.add(polygonRoi);
+	//	ip.drawLine((int)this.getMaxDistCoord().getX(), (int)this.getMaxDistCoord().getY() ,(int)xEnd,(int)yEnd);
 	//	ip.drawLine((int)this.getMidPointOfConvexHull().getX(),(int)this.getMidPointOfConvexHull().getY() , (int)this.getMaxDistCoord().getX(), (int) this.getMaxDistCoord().getY());
 		//IJ.log(this.getMaxDist()+"");
 	//	ip.drawLine((int)this.getStartX(),(int)this.getStartY() , (int)this.getStartX()+(int)this.getMaxDist(), (int)this.getStartY());
 		
-		if(Clump_Splitting.BACKGROUNDCOLOR==0)
+		/*if(Clump_Splitting.BACKGROUNDCOLOR==0)
 		{
 		ip.setColor(Color.black);
 		}
 		else{
 			ip.setColor(Color.white);
-		}
+		}*/
 	}
 	/**
 	 * produces a ConcavityRegion
@@ -306,6 +359,77 @@ public class ConcavityRegion
 		return boundaryPointList;
 	}
 
+	public void drawInformation()
+	{
+		/*int hoehe=(int)cI.getMaxDist();
+		int x=(int) (cI.getMaxDistCoord().getX())-hoehe;
+
+		int y=(int) (cI.getMaxDistCoord().getY())-hoehe;
+		int width=2*hoehe;
+		int height=2*hoehe;
+		
+		int gegenkatheteStart=Math.abs((int)cI.getEndY()-(int)cI.getMaxDistCoord().getY());
+		int ankatheteStart=Math.abs((int)cI.getEndX()-(int)cI.getMaxDistCoord().getX());
+		double angleStart=Math.atan(gegenkatheteStart/ankatheteStart);
+		angleStart=(360/(2*Math.PI))*angleStart;
+		int gegenkatheteEnd=Math.abs((int)cI.getStartY()-(int)cI.getMaxDistCoord().getY());
+		int ankatheteEnd=Math.abs((int)cI.getStartX()-(int)cI.getMaxDistCoord().getX());
+		double angleEnd=Math.atan(gegenkatheteEnd/ankatheteEnd);
+		angleEnd=(360/(2*Math.PI))*angleEnd;
+		System.out.println(angleStart+ " "+ angleEnd);
+		Shape angle= new Arc2D.Double(x,y,width,height,angleEnd,angleStart, Arc2D.PIE);
+		Roi region= new ShapeRoi(angle);
+		region.setStrokeWidth(1);
+		region.setStrokeColor(Color.orange);*/
+
+		
+
+		
+		double cangle= (360/(2*Math.PI))*this.getOrientation();
+		
+		cangle=Math.round(cangle*100);
+		cangle=cangle/100;
+		double concavityDepth= Math.round(this.getMaxDist()*100);
+		concavityDepth=concavityDepth/100;
+		Point2D.Double a = new Point2D.Double(this.getStartX(), this.getStartY());
+		Point2D.Double b = new Point2D.Double(this.getEndX(), this.getEndY());
+		Point2D c = this.getMaxDistCoord();
+
+		double clength = Math
+				.sqrt((b.getX() - a.getX()) * (b.getX() - a.getX()) + (b.getY() - a.getY()) * (b.getY() - a.getY()));
+		double alength = Math
+				.sqrt((b.getX() - c.getX()) * (b.getX() - c.getX()) + (b.getY() - c.getY()) * (b.getY() - c.getY()));
+		double blength = Math
+				.sqrt((c.getX() - a.getX()) * (c.getX() - a.getX()) + (c.getY() - a.getY()) * (c.getY() - a.getY()));
+
+		double gamma = Math
+				.acos(((clength * clength) - (alength * alength) - (blength * blength)) / (-2 * Math.abs(alength) * Math.abs(blength)));
+		gamma=(360/(2*Math.PI))*gamma;
+		gamma=Math.round(gamma*100);
+		gamma=gamma/100;
+		TextRoi.setFont("Arial", 10, 1);
+		TextRoi text= new TextRoi(this.getMaxDistCoord().getX(),this.getMaxDistCoord().getY(),"Ausrichtung: "+cangle+"\nKonkavitätstiefe: "+ concavityDepth+"\nKonkavitätswinkel: "+gamma);
+		text.setStrokeColor(Color.orange);
+		//Clump.overlayAngleCtrl.add(region);
+		Clump.overlayAngleCtrl.add(text);
+		
+		//Clump.overlaySplitLines.clear();
+	/*	Line polygonRoi = new Line((int) this.getCI().getMaxDistCoord().getX(), (int) this.getCI().getMaxDistCoord().getY(), (int) this.getPoint().getX(),
+				(int) this.getPoint().getY());
+		polygonRoi.setStrokeWidth(5);
+	    polygonRoi.setStrokeColor(Color.BLUE);
+		
+	    // Roi.setColor(Color.red);
+	    Clump.overlaySplitLines.add(polygonRoi);
+
+		
+        
+        double cAngle= ((360)/(2*Math.PI))*sl.getConcavityAngle();
+		String st= "ConcavityAngle: "+Math.round(cAngle) +"\n"+" Concavity-Ratio: "+ Math.round(sl.getConcavityRatio());
+		
+		return st;*/
+	}
+
 	/**
 	 * computes the point of the ConvexHull, which is in middle of the convexHull
 	 * @return Point in the middle of the ConvexHull
@@ -328,6 +452,24 @@ public class ConcavityRegion
 	public double getMaxDist()
 	{
 		return max;
+	}
+
+	@Override
+	public int compareTo(ConcavityRegion o)
+	{
+		if(this.getMaxDist()<o.getMaxDist())
+		{
+			return -1;
+		}
+		else{
+			if(this.getMaxDist()>o.getMaxDist())
+			{
+				return 1;
+			}
+			else{
+				return 0;
+			}
+		}
 	}
 
 }
