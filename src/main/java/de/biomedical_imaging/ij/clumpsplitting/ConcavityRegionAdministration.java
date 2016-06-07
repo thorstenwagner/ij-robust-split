@@ -104,6 +104,7 @@ public class ConcavityRegionAdministration
 				ConcavityRegion concavityRegion = new ConcavityRegion(startX, startY, endX, endY, pointList, doubleList,
 						maxData[0], (int) maxData[1]);
 				concavityRegionList.add(concavityRegion);
+				System.out.println("außen "+concavityRegion);
 			}
 
 		//}
@@ -148,6 +149,8 @@ public class ConcavityRegionAdministration
 				//	IJ.log("test");
 					ConcavityRegion concavityRegion = new ConcavityRegion(innerStartX, innerStartY, innerEndX, innerEndY, pointList, doubleList,
 							maxData[0], (int) maxData[1]);
+
+					System.out.println("innenTemp "+concavityRegion);
 					
 				//	Line polygonRoi = new Line(innerStartX, innerStartY,innerEndX, innerEndY);
 				//	polygonRoi.setStrokeColor(Color.magenta);
@@ -196,6 +199,8 @@ public class ConcavityRegionAdministration
 								//	tempInner.add(crReal);
 					//	IJ.log("innen");
 						concavityRegionList.add(crReal);
+
+						System.out.println("innen"+crReal);
 					}
 					}
 				

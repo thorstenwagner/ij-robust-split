@@ -275,6 +275,14 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		}
 		else
 		{
+			if(Clump_Splitting.SPLITLINETYPE==1)
+			{
+				if(bestSplitLine!=null)
+				{
+				AbstractSplitLineCalculator mmislc = new MaximumIntensitySplitLineCalculator(bestSplitLine.getStartPoint(),bestSplitLine.getEndPoint());
+				possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, c,ip);
+				}
+			}else{
 			if(Clump_Splitting.SPLITLINETYPE==3)
 			{
 				System.out.println(bestSplitLine);
@@ -284,7 +292,18 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				possibleSplitLines=gdslc.calculatePossibleSplitLines(concavityRegionList, c, ip);
 				}
 				}
-		}
+			else{
+				if(Clump_Splitting.SPLITLINETYPE==2)
+				{
+					if(bestSplitLine!=null)
+					{
+					AbstractSplitLineCalculator mmislc = new MinimumIntensitySplitLineCalculator(bestSplitLine.getStartPoint(),bestSplitLine.getEndPoint());
+					possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, c,ip);
+					}
+				
+				}
+			}
+		}}
 		return possibleSplitLines;
 	}
 	private StraightSplitLine calculatePossibleStraightSplitLines(ArrayList<ConcavityRegion> concavityRegionList,

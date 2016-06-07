@@ -214,27 +214,14 @@ public class Clump
 	{
 		this.computeFirstAndSecondLargestConcavityDepth();
 		ArrayList<AbstractSplitLine> possibleSplitLines=null;
-		if(Clump_Splitting.SPLITLINETYPE==0||Clump_Splitting.SPLITLINETYPE==3)
-		{
 		AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
 		possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this,ip);
-		}
-		else{
-			if(Clump_Splitting.SPLITLINETYPE==1)
-			{
-				AbstractSplitLineCalculator mmislc = new MaximumIntensitySplitLineCalculator();
-				possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, this,ip);
+		
 				
-			}
-			else{
-				if(Clump_Splitting.SPLITLINETYPE==2)
-				{
-					AbstractSplitLineCalculator mmislc = new MinimumIntensitySplitLineCalculator();
-					possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, this,ip);
-					
-				}
-			}
-		}
+		
+				
+			
+		
 	//	System.out.println(possibleSplitLines.get(0));
 	//	IJ.log(possibleSplitLines.size()+"Anzahl trennungslinien");
 	//	IJ.log(possibleSplitLines.get(0)+"Erste Stelle");

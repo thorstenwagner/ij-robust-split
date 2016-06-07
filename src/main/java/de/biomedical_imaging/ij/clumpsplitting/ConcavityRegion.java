@@ -156,16 +156,16 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	{
 		Point2D midPointI = this.getMidPointOfConvexHull();
 		Point2D maxPointI = this.getMaxDistCoord();
-		double xPointDistOne = maxPointI.getX() - midPointI.getX();
-		double yPointDistOne = maxPointI.getY() - midPointI.getY();
+		double xPointDistOne = midPointI.getX() - maxPointI.getX();
+		double yPointDistOne = midPointI.getY() - maxPointI.getY();
 		
 		Vector2d vi = new Vector2d(xPointDistOne, yPointDistOne);
-		Vector2d vj= new Vector2d(midPointI.getX()+10,midPointI.getY());
+		Vector2d vj= new Vector2d(10,0);
 		vi.normalize();
 		vj.normalize();
 		double angle = Math.PI - Math.acos(vi.dot(vj));
 
-		if(yPointDistOne>=0)
+		if(yPointDistOne<=0)
 		{
 			if(0<angle&&angle<=((Math.PI)/2))
 			{
@@ -175,14 +175,14 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 				angle=angle+((Math.PI)/2);
 			}
 		}
-		else{	if(0<angle&&angle<=((Math.PI)/2))
+	/*	else{	if(0<angle&&angle<=((Math.PI)/2))
 		{
 			angle=angle+((Math.PI)/2);
 		}
 		else{
 			angle=angle-((Math.PI)/2);
 		}
-		}
+		}*/
 	return angle;
 	}
 	/**
@@ -472,4 +472,10 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		}
 	}
 
+	@Override
+	public String toString()
+	{
+		String st= "StartX:"+this.startX+" StartY:"+this.startY+ " EndX:"+ this.endX+ " EndY:" + this.endY+ " Max:"+this.max;
+		return st;
+	}
 }

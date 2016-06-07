@@ -3,149 +3,296 @@ package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
-
 import de.biomedical_imaging.ij.clumpsplitting.Clump;
-import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
-import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegionAdministration;
-import ij.process.AutoThresholder;
 import ij.process.ImageProcessor;
-import ij.process.AutoThresholder.Method;
 
 public class MaximumIntensitySplitLineCalculator implements AbstractSplitLineCalculator
 {
 
-	static final int[][] NULLTONINETY={{1,1,1},{0,0,1},{0,0,0}};
-	static final int[][] NINETYTOHUNDREDEIGHTY={{1,1,0},{1,0,0},{1,0,0}};
-	static final int[][] HUNDREDEIGHTYTOTWOHUNDREDSEVENTY={{0,0,0},{1,0,0},{1,1,1}};
-	static final int[][] TWOHUNDREDSEVENTTOTHREEHUNDREDSIXTY={{0,0,1},{0,0,1},{0,1,1}};
+	private Point2D startPoint;
+	private Point2D endPoint;
+
 	
-	
+	public MaximumIntensitySplitLineCalculator(Point2D startPoint, Point2D endPoint)
+	{
+		this.startPoint=startPoint;
+		this.endPoint=endPoint;
+	}
 	@Override
 	public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
 			Clump c, ImageProcessor ip)
 	{
-		ArrayList<AbstractSplitLine> splitLines=new ArrayList<AbstractSplitLine>();
-		Collections.sort(concavityRegionList);
 		
-			ArrayList<Point2D> points=new ArrayList<Point2D>();
-			if(concavityRegionList.size()>0)
-			{
-			ConcavityRegion cr=concavityRegionList.get(concavityRegionList.size()-1);
-			Point2D aktuellerPunkt= cr.getMaxDistCoord();
-			System.out.println("Startpunkt: "+aktuellerPunkt.getX()+" "+aktuellerPunkt.getY()+" "+ ip.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY()));
-			points.add(aktuellerPunkt);
-			double orientation=cr.getOrientation();
-			int[][] filter;
-			System.out.println(orientation);
-			if(orientation>0&&orientation<=(Math.PI/2))
-			{
-				filter=MaximumIntensitySplitLineCalculator.NULLTONINETY;
-				System.out.println("0-90");
-			}
-			else{
-				if(orientation>(Math.PI/2)&&orientation<=(Math.PI))
-				{
-					filter=MaximumIntensitySplitLineCalculator.NINETYTOHUNDREDEIGHTY;
-					System.out.println("90-180");
-					
-				}
-				else{
-					if(orientation>(Math.PI)&&orientation<=(Math.PI)*(3/2))
-					{
-					filter=MaximumIntensitySplitLineCalculator.HUNDREDEIGHTYTOTWOHUNDREDSEVENTY;
-					System.out.println("180-270");
-					
-					}
-					else{
-						filter=MaximumIntensitySplitLineCalculator.TWOHUNDREDSEVENTTOTHREEHUNDREDSIXTY;
-						System.out.println("270-360");
-						
-					}
-				}
-			}
-	/*		ip.blurGaussian(2.0);
-			ip.autoThreshold();
-			ip.erode();
-			
-			ip.dilate();*/	
-			ImageProcessor binary= ip.duplicate();
-			AutoThresholder at= new AutoThresholder();
-			int[] histogram = binary.getHistogram();
-			int threshold=at.getThreshold(Method.RenyiEntropy, histogram);
-			
-			binary.blurGaussian(1.0);
-			binary.threshold(threshold);
-			binary.autoThreshold();
-			if(Clump_Splitting.BACKGROUNDCOLOR==1)
-			{
-			binary.erode();
-			
-			binary.dilate();
-			} else{
-				binary.invert();
-				binary.erode();
-				
-				binary.dilate();
-				binary.invert();
-				
-			}
+		ArrayList<AbstractSplitLine> splitLineList=new ArrayList<AbstractSplitLine>();
+/*		if(startPoint.equals(endPoint))
+		{
+			return splitLineList;
+		}*/
+	int minX;
+	int maxX;
+	if(startPoint.getX()<endPoint.getX())
+	{
+		//TODO Konstante
+		minX=(int)startPoint.getX();
+		maxX=(int)endPoint.getX();
 		
-			
-//			System.out.println(binary.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY())+ " "+Clump_Splitting.BACKGROUNDCOLOR);
-			int value;
-			if(Clump_Splitting.BACKGROUNDCOLOR==1)
+	}
+	else{
+		minX=(int)endPoint.getX();
+		maxX=(int)startPoint.getX();
+		
+	}
+	int minY;
+	int maxY;
+	if(startPoint.getY()<endPoint.getY())
+	{
+		//TODO Konstante
+		minY=(int)startPoint.getY();
+		maxY=(int)endPoint.getY();
+		
+	}
+	else{
+		minY=(int)endPoint.getY();
+		maxY=(int)startPoint.getY();
+		
+	}
+	//double[][] partialDerivative=new double[maxX-minX+2][maxY-minY+2];
+	
+	//horizontale Ableitung
+	/*for(int i=minX+1;i<maxX;i++)
+	{
+		for(int j=minY+1;j<maxY;j++)
+		{
+			double wert=0;
+			for(int m=-1;m<=1;m++)
 			{
-				value=255;
-			}
-			else{
-				value =0;
-			}
-			boolean equals=(binary.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY())==value);
-		//	System.out.println(equals);
-			while(!equals&&aktuellerPunkt.getX()>0&&aktuellerPunkt.getY()>0&&aktuellerPunkt.getX()<ip.getWidth()&aktuellerPunkt.getY()<ip.getHeight())
-			{
-				int max=-10;
-				Point2D temp=null;
-				for(int m=-1;m<=1;m++)
+				for(int n=-1;n<=1;n++)
 				{
-					for(int n=-1;n<=1;n++)
+					wert=wert+prewittHor[m+1][n+1]*ip.getPixel(i+m, j+n);
+				}
+			}
+			wert=Math.abs(wert);
+			partialDerivative[i-minX][j-minY]=wert;
+		}
+		
+	}
+	for(int i=minX+1;i<maxX-1;i++)
+	{
+		for(int j=minY+1;j<maxY-1;j++)
+		{
+			double wert=0;
+			for(int m=-1;m<=1;m++)
+			{
+				for(int n=-1;n<=1;n++)
+				{
+					wert=wert+prewittVer[m+1][n+1]*ip.getPixel(i+m, j+n);
+				}
+			}
+			wert=Math.abs(wert);
+			partialDerivative[i-minX][j-minY]=partialDerivative[i-minX][j-minY]+wert;
+		}
+	}
+	*/
+	double[][] werte=new double[maxX-minX+2][maxY-minY+2];
+	for(int i=0;i<maxX-minX;i++)
+	{
+		
+		for(int j=0;j<maxY-minY;j++)
+		{
+			werte[i][j]=-(ip.getPixel(i+minX, j+minY))+256;
+		}
+	}
+	/*double maxi=256;
+	for(int i=0;i<partialDerivative.length;i++)
+	{
+		
+		for(int j=0;j<partialDerivative[i].length;j++)
+		{
+			partialDerivative[i][j]=partialDerivative[i][j]+maxi;
+		}
+	}
+	*/
+	Point2D aktuellerPunkt= startPoint;
+	
+/*
+	ArrayList<Point2D> besuchteNichtAbgearbeitetePunkte= new ArrayList<Point2D>();
+	boolean[][] besucht=new boolean[partialDerivative.length][partialDerivative[0].length];
+	double [][] distance=new double[partialDerivative.length][partialDerivative[0].length];
+
+	Point2D[][] vorgaenger=new Point2D[partialDerivative.length][partialDerivative[0].length];
+	
+	while(!besucht[(int)endPoint.getX()-minX][(int)endPoint.getY()-minY])
+	{
+		besucht[(int)aktuellerPunkt.getX()-minX][(int)aktuellerPunkt.getY()-minY]=true;
+		distance[(int)aktuellerPunkt.getX()-minX][(int)aktuellerPunkt.getY()-minY]=0;
+		besuchteNichtAbgearbeitetePunkte.add(aktuellerPunkt);
+		*/
+		//Hier vor muss noch das berechnen des Pfades
+		
+		ArrayList<AccessiblePoint> unusedPoints = new ArrayList<AccessiblePoint>();
+		ArrayList<AccessiblePoint> usedPoints= new ArrayList<AccessiblePoint>();
+		AccessiblePoint first= new AccessiblePoint(aktuellerPunkt,0,null);
+		usedPoints.add(first);
+		
+		//While
+		while(!(aktuellerPunkt.getX()==endPoint.getX()&&aktuellerPunkt.getY()==endPoint.getY()))
+		{
+		for(int i=-1;i<=1;i++)
+		{
+			for(int j=-1;j<=1;j++)
+			{
+				if(aktuellerPunkt.getX()+i>=minX&&aktuellerPunkt.getX()+i<=maxX)
+				{
+				
+					if(aktuellerPunkt.getY()+j>=minY&&aktuellerPunkt.getY()+j<=maxY)
 					{
-						if(filter[m+1][n+1]==1)
+					
+						boolean besucht=false;
+						boolean ready=false;
+						for(AccessiblePoint ap:unusedPoints)
 						{
-				//			System.out.println("max"+max+"Pixelwert: "+ ip.getPixel((int)aktuellerPunkt.getX()+m, (int)aktuellerPunkt.getY()+n));
-							if(ip.getPixel((int)aktuellerPunkt.getX()+m, (int)aktuellerPunkt.getY()+n)>max)
+							if(ap.getPoint().getX()==aktuellerPunkt.getX()+i&&ap.getPoint().getY()==aktuellerPunkt.getY()+j)
 							{
-								max= ip.getPixel((int)aktuellerPunkt.getX()+m, (int)aktuellerPunkt.getY()+n);
-								temp=new Point2D.Double(aktuellerPunkt.getX()+m, aktuellerPunkt.getY()+n);
+								besucht=true;
+								if(ap.getWeight()>(werte[(int)aktuellerPunkt.getX()+i-minX][(int)aktuellerPunkt.getY()+j-minY]+first.getWeight()))
+								{
+									ap.setWeight((werte[(int)aktuellerPunkt.getX()+i-minX][(int)aktuellerPunkt.getY()+j-minY]+first.getWeight()));
+								}
+							}
+						}
+						for(AccessiblePoint ap:usedPoints)
+						{
+							if(ap.getPoint().getX()==aktuellerPunkt.getX()+i&&ap.getPoint().getY()==aktuellerPunkt.getY()+j)
+							{
+								ready=true;
+							}
+						}
+						
+						if(besucht==false&&ready==false)
+						{
+							Point2D temp= new Point2D.Double(aktuellerPunkt.getX()+i,aktuellerPunkt.getY()+j);
+							AccessiblePoint ap=new AccessiblePoint(temp,(werte[(int)aktuellerPunkt.getX()+i-minX][(int)aktuellerPunkt.getY()+j-minY]+first.getWeight()),first);
+							unusedPoints.add(ap);
+						}
+					}
+				}
+			}
+		}
+		Collections.sort(unusedPoints);
+		if(unusedPoints.size()!=0)
+		{
+			aktuellerPunkt=unusedPoints.get(0).getPoint();
+			first=unusedPoints.get(0);
+			usedPoints.add(unusedPoints.get(0));
+			unusedPoints.remove(0);
+		}
+	}
+		ArrayList<Point2D> pointList = new ArrayList<Point2D>(); 
+		while(first.getPrevious()!=null)
+		{
+			pointList.add(first.getPoint());
+			first=first.getPrevious();
+		}
+			System.out.println(pointList.size());
+	/*	if(pointList.size()<=0)
+		{
+			Clump.STOP++;
+		}*/
+		//	for(Point2D punkt:besuchteNichtAbgearbeitetePunkte)	
+	/*	{
+			for(int i=-1;i<=1;i++)
+			{
+				for(int j=-1;j<=1;j++)
+				{
+					if(aktuellerPunkt.getX()+i>minX&&aktuellerPunkt.getX()+i<maxX)
+					{
+					
+						if(aktuellerPunkt.getY()+j>minY&&aktuellerPunkt.getY()+j<maxY)
+						{
+							if(!besucht[(int) (aktuellerPunkt.getX()+i-minX)][(int) (aktuellerPunkt.getY()+j-minY)])
+							{
+								if(partialDerivative[(int) (aktuellerPunkt.getX()+i-minX)][(int) (aktuellerPunkt.getY()+j-minY)]<min)
+								{
+									min=partialDerivative[(int) (aktuellerPunkt.getX()+i-minX)][(int) (aktuellerPunkt.getY()+j-minY)];
+									vorgaenger[(int) (aktuellerPunkt.getX()+i-minX)][(int) (aktuellerPunkt.getY()+j-minY)]=aktuellerPunkt;
+								}
 							}
 						}
 					}
 				}
-				//ip.autoThreshold();
-		/*		if(t<100)
-				{
-				System.out.println(temp.getX()+" "+ temp.getY()+" "+ip.getPixel((int)temp.getX(), (int)temp.getY())+ " "+ binary.getPixel((int)temp.getX(), (int)temp.getY()));
-				t++;
-				}*/
-				points.add(temp);
-				aktuellerPunkt=temp;
-		//		System.out.println(aktuellerPunkt.getX()+ " "+ aktuellerPunkt.getY());
-				equals=(binary.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY())==value);
 			}
-			}
-			if(points.size()>3)
-			{
-				if(points.get(points.size()-1).getX()==0||points.get(points.size()-1).getY()==0||points.get(points.size()-1).getX()>=ip.getWidth()||points.get(points.size()-1).getY()>=ip.getHeight()||ConcavityRegionAdministration.allConcavityRegionPoints.contains(points.get(points.size()-1)))
-				{
-					MaximumMinimumIntensitySplitLine mmis=new MaximumMinimumIntensitySplitLine(points);
-					System.out.println(mmis.getStartPoint().getX()+" "+ mmis.getStartPoint().getY()+" "+mmis.getEndPoint().getX()+" "+ mmis.getEndPoint().getY());
-			
-					splitLines.add(mmis);
-				}
-			}
-		return splitLines;
 		}
+	}
+	/////////////////////////////////////////////////////
+	System.out.println(partialDerivative.length);
+
+	System.out.println(partialDerivative[0].length);
+	ArrayList<Point2D> cutPoints=new ArrayList<Point2D>();
+		Point2D aktuellerPunkt= startPoint;
+		//for(int test=0;test<100;test++)
+	
+	while(!aktuellerPunkt.equals(endPoint))
+		{
+//		System.out.println((int)aktuellerPunkt.getX()+" "+minX + " "+ (int)aktuellerPunkt.getY()+" "+minY);
+			double max=0;
+			Point2D maxPoint=null;
+			double distXV=0;
+			double distYV=0;
+			double distV=0;
+			for(int i=-1;i<=1;i++)
+			{
+				for(int j=-1;j<=1;j++)
+				{
+					if(i!=0||j!=0)
+					{
+						if((int)aktuellerPunkt.getX()-minX+i+1>0&&(int)aktuellerPunkt.getX()-minX+i+1<partialDerivative.length)
+						{
+
+							if(aktuellerPunkt.getY()-minY+j+1>0&&aktuellerPunkt.getY()-minY+j+1<partialDerivative[0].length)
+							{
+									
+					if(partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)aktuellerPunkt.getY()-minY+j+1]>max||maxPoint==null)
+					{
+						max=partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)aktuellerPunkt.getY()-minY+j+1];
+						maxPoint= new Point2D.Double(aktuellerPunkt.getX()+i,aktuellerPunkt.getY()+j);
+						distXV=Math.abs(aktuellerPunkt.getX()+i-endPoint.getX());
+						distYV=Math.abs(aktuellerPunkt.getY()+j-endPoint.getY());
+						
+						distV=Math.sqrt(distXV*distXV+distYV*distYV);
+					}else
+					{
+						if(partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)aktuellerPunkt.getY()-minY+j+1]==max)
+						{
+							double distX=Math.abs(aktuellerPunkt.getX()+i-endPoint.getX());
+							double distY=Math.abs(aktuellerPunkt.getY()+j-endPoint.getY());
+							
+							double dist=Math.sqrt(distX*distX+distY*distY);
+							if(dist<distV)
+							{
+								maxPoint= new Point2D.Double(aktuellerPunkt.getX()+i,aktuellerPunkt.getY()+j);
+								
+							}
+						}
+					}
+						}
+					}
+					}
+					}
+			}
+			partialDerivative[(int)aktuellerPunkt.getX()-minX+1][(int)aktuellerPunkt.getY()-minY+1]=0;
+		//	System.out.println("Maximaler Punkt: " +maxPoint.getX()+ " y: " + maxPoint.getY()+ " Grenzen: "+ minX+ " " + maxX+ " "+ minY+ " "+ maxY );
+					cutPoints.add(aktuellerPunkt);
+					aktuellerPunkt=maxPoint;
+				
+			
+		
+		
+	}*/
+		MaximumMinimumIntensitySplitLine gdsl=new MaximumMinimumIntensitySplitLine(pointList);
+		splitLineList.add(gdsl);
+		return splitLineList;
+	}
 	
 
 }
