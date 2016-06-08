@@ -38,7 +38,6 @@ package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.Color;
 import java.awt.Polygon;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import de.biomedical_imaging.ij.clumpsplitting.SplitLines.*;
@@ -214,9 +213,27 @@ public class Clump
 	{
 		this.computeFirstAndSecondLargestConcavityDepth();
 		ArrayList<AbstractSplitLine> possibleSplitLines=null;
-		AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
-		possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this,ip);
-		
+		if(Clump_Splitting.SPLITLINETYPE==0||Clump_Splitting.SPLITLINETYPE==1||Clump_Splitting.SPLITLINETYPE==2||Clump_Splitting.SPLITLINETYPE==3)
+		{
+			AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
+			possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this,ip);
+		}
+		else{
+			if(Clump_Splitting.SPLITLINETYPE==4)
+			{
+				AbstractSplitLineCalculator mislcf = new MaximumIntensitySplitLineCalculatorFarhan();
+				possibleSplitLines=mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip);
+				
+			}
+			else{
+				if(Clump_Splitting.SPLITLINETYPE==5)
+				{
+					AbstractSplitLineCalculator mislcf = new MinimumIntensitySplitLineCalculatorFarhan();
+					possibleSplitLines=mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip);
+				
+				}
+			}
+		}
 				
 		
 				

@@ -93,7 +93,7 @@ public class ConcavityRegionAdministration
 
 			
 			ArrayList<Point2D> pointList = getAllEmbeddedPointsFromBoundaryArc(startX, startY, endX, endY);
-			this.allConcavityRegionPoints.addAll(pointList);
+			ConcavityRegionAdministration.allConcavityRegionPoints.addAll(pointList);
 			//if(pointList.size()>3)
 			//{
 			ArrayList<Double> doubleList = computeDistance(pointList, startX, startY, endX, endY);

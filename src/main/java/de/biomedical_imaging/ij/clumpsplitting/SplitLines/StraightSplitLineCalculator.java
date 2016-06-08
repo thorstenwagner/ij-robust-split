@@ -38,8 +38,6 @@ package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;

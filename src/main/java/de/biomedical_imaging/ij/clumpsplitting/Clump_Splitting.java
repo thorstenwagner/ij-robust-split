@@ -35,14 +35,11 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.AWTEvent;import java.awt.Polygon;
-import java.io.BufferedWriter;
+import java.awt.AWTEvent;import java.awt.Polygon;import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -285,14 +282,15 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		Double concavityRatioThreshold=0.0;
 		Double c1=0.0;
 		Double c2=0.0;
-		 saliencyThreshold=gd.getNextNumber();
+		if(Clump_Splitting.SPLITLINETYPE==0||Clump_Splitting.SPLITLINETYPE==1||Clump_Splitting.SPLITLINETYPE==2||Clump_Splitting.SPLITLINETYPE==3)
+		 {saliencyThreshold=gd.getNextNumber();
 		 concavityConcavityAlignmentThreshold=gd.getNextNumber();
 		 concavityLineAlignmentThreshold=gd.getNextNumber();
 		 concavityAngleThreshold=gd.getNextNumber();
 		 concavityRatioThreshold=gd.getNextNumber();
 		 c1=gd.getNextNumber();
 		 c2=gd.getNextNumber();
-		//}
+		}
 		if(gd.invalidNumber()){
 			return false;
 		}else{
@@ -385,7 +383,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	{
 		GenericDialog gd= new NonBlockingGenericDialog("Choose your Split-Line-Type");
 		
-		String[] items={"Straight Split-Line","Maximum-Intensity-Split-Line","Minimum-Intensity-Split-Line", "Geodesic-Distance-Split-Line"};
+		String[] items={"Straight Split-Line","Maximum-Intensity-Split-Line","Minimum-Intensity-Split-Line", "Geodesic-Distance-Split-Line","Maximum-Intensity-Split-Line Farhan","Minimum-Intensity-Split-Line Farhan"};
 		gd.addChoice("Split-Line-Type:", items, "Straight Split-Line");
 		gd.showDialog();
 		
@@ -433,9 +431,31 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		if (gd.wasOKed())
 		{
 			String splitLineType=gd.getNextChoice();
-			if(splitLineType.equals("Straight Split-Line"))
+			if(splitLineType.equals("Straight Split-Line")||splitLineType.equals("Maximum-Intensity-Split-Line")||splitLineType.equals("Minimum-Intensity-Split-Line")||splitLineType.equals("Geodesic-Distance-Split-Line"))
 			{
+				if(splitLineType.equals("Straight Split-Line"))
+				{
 				Clump_Splitting.SPLITLINETYPE=0;
+				}
+				else{
+					if(splitLineType.equals("Maximum-Intensity-Split-Line"))
+					{
+					Clump_Splitting.SPLITLINETYPE=1;
+					}
+					else{
+						if(splitLineType.equals("Minimum-Intensity-Split-Line"))
+						{
+						Clump_Splitting.SPLITLINETYPE=2;
+						}
+						else{
+							if(splitLineType.equals("Straight Split-Line"))
+							{
+							Clump_Splitting.SPLITLINETYPE=3;
+							}
+							
+						}
+					}
+				}
 				GenericDialog dialog1= new NonBlockingGenericDialog("Choose Parameters for Straight-Split-Line");
 				
 				String[] radioboxValues =
@@ -477,56 +497,18 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 					}
 			}
 			else{
-					
-				if(splitLineType.equals("Maximum-Intensity-Split-Line"))
-				{
-					Clump_Splitting.SPLITLINETYPE=1;
-					
-					GenericDialog dialog1= new NonBlockingGenericDialog("Choose Parameters for Straight-Split-Line");
-					
-					String[] radioboxValues =
-						{ "black", "white" };
-						dialog1.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
-						//String[] checkboxes= new String[2];
-						//checkboxes[0]="Show Convexhull";
-						//checkboxes[1]="Show Concavitydepth";
-						//boolean[] checkboxValues=new boolean[2];
-						//checkboxValues[0]=false;
-						//checkboxValues[1]=false;
-						
-					//	gd.addCheckboxGroup(1, 2,checkboxes, checkboxValues);
-					//	String[] items={"Straight Split-Line","Maximum-Intensity-Split-Line","Minimum-Intensity-Split-Line", "Geodesic-Distance-Split-Line"};
-					//	dialog1.addChoice("Split-Line-Type:", items, "Straight Split-Line");
-						dialog1.addCheckbox("Show Convex Hull",false);
-						dialog1.addCheckbox("Show Concavity-Depth", false);
-						dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
-						dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
-						dialog1.addSlider("Saliency threshold", 0, 1, 0.12);
-						dialog1.addSlider("Concavity-Concavity-Alignment threshold in Degrees", 0, 180, 105);
-						dialog1.addSlider("Concavity-Line-Alignment threshold in Degrees",0,180,70);
-						dialog1.addSlider("Concavity-Angle threshold in Degrees",0,180, 90);
-						dialog1.addNumericField("Concavity-Ratio threshold", 6, 1);
-						dialog1.addNumericField("C1", 1.73, 3);
-						dialog1.addNumericField("C2",-4.72,3);
-						
-						dialog1.addPreviewCheckbox(pfr);
-						dialog1.addDialogListener(this);
-						dialog1.showDialog();
-						dialog1.setFocusable(true);
-						WindowManager.getCurrentImage().getWindow().getCanvas().setFocusable(true);
-				      
-						gd.setVisible(false);
-						gd.dispose();
-						if (dialog1.wasCanceled())
-						{
-							return DONE;
-						}
-					
-				}
-				else{
-					if(splitLineType.equals("Minimum-Intensity-Split-Line"))
+					if(splitLineType.equals("Maximum-Intensity-Split-Line Farhan")||splitLineType.equals("Minimum-Intensity-Split-Line Farhan"))
 					{
-						Clump_Splitting.SPLITLINETYPE=2;
+						if(splitLineType.equals("Maximum-Intensity-Split-Line Farhan"))
+						{
+							Clump_Splitting.SPLITLINETYPE=4;
+						}
+						else{ 
+							if(splitLineType.equals("Minimum-Intensity-Split-Line Farhan"))
+							{
+								Clump_Splitting.SPLITLINETYPE=5;
+							}
+						}
 						GenericDialog dialog1= new NonBlockingGenericDialog("Choose Parameters for Straight-Split-Line");
 						
 						String[] radioboxValues =
@@ -546,14 +528,14 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 							dialog1.addCheckbox("Show Concavity-Depth", false);
 							dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
 							dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
-							dialog1.addSlider("Saliency threshold", 0, 1, 0.12);
+						/*	dialog1.addSlider("Saliency threshold", 0, 1, 0.12);
 							dialog1.addSlider("Concavity-Concavity-Alignment threshold in Degrees", 0, 180, 105);
 							dialog1.addSlider("Concavity-Line-Alignment threshold in Degrees",0,180,70);
 							dialog1.addSlider("Concavity-Angle threshold in Degrees",0,180, 90);
 							dialog1.addNumericField("Concavity-Ratio threshold", 6, 1);
 							dialog1.addNumericField("C1", 1.73, 3);
 							dialog1.addNumericField("C2",-4.72,3);
-							
+							*/
 							dialog1.addPreviewCheckbox(pfr);
 							dialog1.addDialogListener(this);
 							dialog1.showDialog();
@@ -566,56 +548,10 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 							{
 								return DONE;
 							}
-						
-					}
-					else{
-						if(splitLineType.equals("Geodesic-Distance-Split-Line"))
-						{
-							Clump_Splitting.SPLITLINETYPE=3;
-							GenericDialog dialog1= new NonBlockingGenericDialog("Choose Parameters for Straight-Split-Line");
-							
-							String[] radioboxValues =
-								{ "black", "white" };
-								dialog1.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
-								//String[] checkboxes= new String[2];
-								//checkboxes[0]="Show Convexhull";
-								//checkboxes[1]="Show Concavitydepth";
-								//boolean[] checkboxValues=new boolean[2];
-								//checkboxValues[0]=false;
-								//checkboxValues[1]=false;
-								
-							//	gd.addCheckboxGroup(1, 2,checkboxes, checkboxValues);
-							//	String[] items={"Straight Split-Line","Maximum-Intensity-Split-Line","Minimum-Intensity-Split-Line", "Geodesic-Distance-Split-Line"};
-							//	dialog1.addChoice("Split-Line-Type:", items, "Straight Split-Line");
-								dialog1.addCheckbox("Show Convex Hull",false);
-								dialog1.addCheckbox("Show Concavity-Depth", false);
-								dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
-								dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
-								dialog1.addSlider("Saliency threshold", 0, 1, 0.12);
-								dialog1.addSlider("Concavity-Concavity-Alignment threshold in Degrees", 0, 180, 105);
-								dialog1.addSlider("Concavity-Line-Alignment threshold in Degrees",0,180,70);
-								dialog1.addSlider("Concavity-Angle threshold in Degrees",0,180, 90);
-								dialog1.addNumericField("Concavity-Ratio threshold", 6, 1);
-								dialog1.addNumericField("C1", 1.73, 3);
-								dialog1.addNumericField("C2",-4.72,3);
-								
-								dialog1.addPreviewCheckbox(pfr);
-								dialog1.addDialogListener(this);
-								dialog1.showDialog();
-								dialog1.setFocusable(true);
-								WindowManager.getCurrentImage().getWindow().getCanvas().setFocusable(true);
-						      
-								gd.setVisible(false);
-								gd.dispose();
-								if (dialog1.wasCanceled())
-								{
-									return DONE;
-								}
-								
-						}
 					}
 				}
-			}
+				
+			
 		}
 
 		return IJ.setupDialog(imp, DOES_8G);
