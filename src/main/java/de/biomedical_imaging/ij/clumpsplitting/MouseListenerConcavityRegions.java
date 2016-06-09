@@ -8,6 +8,7 @@ import java.awt.event.MouseListener;
 import ij.ImagePlus;
 import ij.WindowManager;
 
+
 public class MouseListenerConcavityRegions implements MouseListener
 {
 
@@ -15,6 +16,16 @@ public class MouseListenerConcavityRegions implements MouseListener
 	public MouseListenerConcavityRegions( ConcavityRegion cr)
 	{
 		this.cr=cr;
+	}
+	public double getZoomFactor()
+	{
+		ImagePlus imageplus=WindowManager.getCurrentImage();
+		
+		Rectangle r=imageplus.getCanvas().getSrcRect();
+		Rectangle s=imageplus.getCanvas().getBounds();
+		double xZoom=r.getWidth();
+		double zoomfactor=xZoom/s.getWidth();
+		return zoomfactor;
 	}
 	@Override
 	public void mouseClicked(MouseEvent e)
@@ -26,9 +37,9 @@ public class MouseListenerConcavityRegions implements MouseListener
 		double maxY=boundingBox.getMaxY();
 	
 			//System.out.println(e.getX()*+ " "+ e.getY()*3);
-		if((e.getX()*Clump_Splitting.zoomfactor>minX)&&(e.getX()*Clump_Splitting.zoomfactor<maxX))
+		if((e.getX()*this.getZoomFactor()>minX)&&(e.getX()*this.getZoomFactor()<maxX))
 		{
-			if((e.getY()*Clump_Splitting.zoomfactor>minY)&&(e.getY()*Clump_Splitting.zoomfactor<maxY))
+			if((e.getY()*this.getZoomFactor()>minY)&&(e.getY()*this.getZoomFactor()<maxY))
 			{
 				Clump_Splitting.window.setText(cr.getInformation());
 				Clump_Splitting.window.setBackground(Color.lightGray);

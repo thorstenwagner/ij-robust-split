@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import javax.vecmath.Vector2d;
 
 import ij.gui.Line;
-import ij.gui.TextRoi;
 /**
  * a ConcavityRegion is a Region of a Clump with high concavity.
  * 
@@ -361,76 +360,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		return boundaryPointList;
 	}
 
-	public void drawInformation()
-	{
-		/*int hoehe=(int)cI.getMaxDist();
-		int x=(int) (cI.getMaxDistCoord().getX())-hoehe;
-
-		int y=(int) (cI.getMaxDistCoord().getY())-hoehe;
-		int width=2*hoehe;
-		int height=2*hoehe;
-		
-		int gegenkatheteStart=Math.abs((int)cI.getEndY()-(int)cI.getMaxDistCoord().getY());
-		int ankatheteStart=Math.abs((int)cI.getEndX()-(int)cI.getMaxDistCoord().getX());
-		double angleStart=Math.atan(gegenkatheteStart/ankatheteStart);
-		angleStart=(360/(2*Math.PI))*angleStart;
-		int gegenkatheteEnd=Math.abs((int)cI.getStartY()-(int)cI.getMaxDistCoord().getY());
-		int ankatheteEnd=Math.abs((int)cI.getStartX()-(int)cI.getMaxDistCoord().getX());
-		double angleEnd=Math.atan(gegenkatheteEnd/ankatheteEnd);
-		angleEnd=(360/(2*Math.PI))*angleEnd;
-		System.out.println(angleStart+ " "+ angleEnd);
-		Shape angle= new Arc2D.Double(x,y,width,height,angleEnd,angleStart, Arc2D.PIE);
-		Roi region= new ShapeRoi(angle);
-		region.setStrokeWidth(1);
-		region.setStrokeColor(Color.orange);*/
-
-		
-
-		
-		double cangle= (360/(2*Math.PI))*this.getOrientation();
-		
-		cangle=Math.round(cangle*100);
-		cangle=cangle/100;
-		double concavityDepth= Math.round(this.getMaxDist()*100);
-		concavityDepth=concavityDepth/100;
-		Point2D.Double a = new Point2D.Double(this.getStartX(), this.getStartY());
-		Point2D.Double b = new Point2D.Double(this.getEndX(), this.getEndY());
-		Point2D c = this.getMaxDistCoord();
-
-		double clength = Math
-				.sqrt((b.getX() - a.getX()) * (b.getX() - a.getX()) + (b.getY() - a.getY()) * (b.getY() - a.getY()));
-		double alength = Math
-				.sqrt((b.getX() - c.getX()) * (b.getX() - c.getX()) + (b.getY() - c.getY()) * (b.getY() - c.getY()));
-		double blength = Math
-				.sqrt((c.getX() - a.getX()) * (c.getX() - a.getX()) + (c.getY() - a.getY()) * (c.getY() - a.getY()));
-
-		double gamma = Math
-				.acos(((clength * clength) - (alength * alength) - (blength * blength)) / (-2 * Math.abs(alength) * Math.abs(blength)));
-		gamma=(360/(2*Math.PI))*gamma;
-		gamma=Math.round(gamma*100);
-		gamma=gamma/100;
-		TextRoi.setFont("Arial", 10, 1);
-		TextRoi text= new TextRoi(this.getMaxDistCoord().getX(),this.getMaxDistCoord().getY(),"Ausrichtung: "+cangle+"\nKonkavitätstiefe: "+ concavityDepth+"\nKonkavitätswinkel: "+gamma);
-		text.setStrokeColor(Color.orange);
-		//Clump.overlayAngleCtrl.add(region);
-		Clump.overlayAngleCtrl.add(text);
-		
-		//Clump.overlaySplitLines.clear();
-	/*	Line polygonRoi = new Line((int) this.getCI().getMaxDistCoord().getX(), (int) this.getCI().getMaxDistCoord().getY(), (int) this.getPoint().getX(),
-				(int) this.getPoint().getY());
-		polygonRoi.setStrokeWidth(5);
-	    polygonRoi.setStrokeColor(Color.BLUE);
-		
-	    // Roi.setColor(Color.red);
-	    Clump.overlaySplitLines.add(polygonRoi);
-
-		
-        
-        double cAngle= ((360)/(2*Math.PI))*sl.getConcavityAngle();
-		String st= "ConcavityAngle: "+Math.round(cAngle) +"\n"+" Concavity-Ratio: "+ Math.round(sl.getConcavityRatio());
-		
-		return st;*/
-	}
+	
 	public String getInformation()
 	{
 

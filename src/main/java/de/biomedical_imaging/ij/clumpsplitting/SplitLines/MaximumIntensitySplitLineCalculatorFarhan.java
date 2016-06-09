@@ -33,34 +33,34 @@ public class MaximumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 			{
 			ConcavityRegion cr=concavityRegionList.get(concavityRegionList.size()-1);
 			Point2D aktuellerPunkt= cr.getMaxDistCoord();
-			System.out.println("Startpunkt: "+aktuellerPunkt.getX()+" "+aktuellerPunkt.getY()+" "+ ip.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY()));
+		//	System.out.println("Startpunkt: "+aktuellerPunkt.getX()+" "+aktuellerPunkt.getY()+" "+ ip.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY()));
 			points.add(aktuellerPunkt);
 			double orientation=cr.getOrientation();
 			int[][] filter;
-			System.out.println(orientation);
+		//	System.out.println(orientation);
 			if(orientation>0&&orientation<=(Math.PI/2))
 			{
 				filter=MaximumIntensitySplitLineCalculatorFarhan.NULLTONINETY;
-				System.out.println("0-90");
+			//	System.out.println("0-90");
 			}
 			else{
 				if(orientation>(Math.PI/2)&&orientation<=(Math.PI))
 				{
 					filter=MaximumIntensitySplitLineCalculatorFarhan
 							.NINETYTOHUNDREDEIGHTY;
-					System.out.println("90-180");
+			//		System.out.println("90-180");
 					
 				}
 				else{
 					if(orientation>(Math.PI)&&orientation<=((Math.PI)*1.5))
 					{
 					filter=MaximumIntensitySplitLineCalculatorFarhan.HUNDREDEIGHTYTOTWOHUNDREDSEVENTY;
-					System.out.println("180-270");
+				//	System.out.println("180-270");
 					
 					}
 					else{
 						filter=MaximumIntensitySplitLineCalculatorFarhan.TWOHUNDREDSEVENTTOTHREEHUNDREDSIXTY;
-						System.out.println("270-360");
+					//	System.out.println("270-360");
 						
 					}
 				}
@@ -117,7 +117,7 @@ public class MaximumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 				//			System.out.println("max"+max+"Pixelwert: "+ ip.getPixel((int)aktuellerPunkt.getX()+m, (int)aktuellerPunkt.getY()+n));
 							if((orientation>0&&orientation<=(Math.PI/2)&&m==-1 &&n==1)||(orientation>(Math.PI/2)&&orientation<=(Math.PI)&&m==-1 &&n==-1)||(orientation>(Math.PI)&&orientation<=((Math.PI)*1.5)&&m==1 &&n==-1)||(orientation>((Math.PI)*1.5)&&orientation<=((Math.PI)*2)&&m==1 &&n==1))
 							{
-								System.out.println(ip.getPixel((int)aktuellerPunkt.getX()+m, (int)aktuellerPunkt.getY()+n));
+						//		System.out.println(ip.getPixel((int)aktuellerPunkt.getX()+m, (int)aktuellerPunkt.getY()+n));
 								if(ip.getPixel((int)aktuellerPunkt.getX()+n, (int)aktuellerPunkt.getY()+m)>=max)
 								{
 								max= ip.getPixel((int)aktuellerPunkt.getX()+n, (int)aktuellerPunkt.getY()+m);
@@ -151,7 +151,7 @@ public class MaximumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 				if(points.get(points.size()-1).getX()==0||points.get(points.size()-1).getY()==0||points.get(points.size()-1).getX()>=ip.getWidth()||points.get(points.size()-1).getY()>=ip.getHeight()||ConcavityRegionAdministration.allConcavityRegionPoints.contains(points.get(points.size()-1)))
 				{
 					MaximumMinimumIntensitySplitLine mmis=new MaximumMinimumIntensitySplitLine(points);
-					System.out.println(mmis.getStartPoint().getX()+" "+ mmis.getStartPoint().getY()+" "+mmis.getEndPoint().getX()+" "+ mmis.getEndPoint().getY());
+				//	System.out.println(mmis.getStartPoint().getX()+" "+ mmis.getStartPoint().getY()+" "+mmis.getEndPoint().getX()+" "+ mmis.getEndPoint().getY());
 			
 					splitLines.add(mmis);
 				}

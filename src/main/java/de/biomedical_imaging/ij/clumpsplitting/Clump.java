@@ -69,7 +69,6 @@ public class Clump
 	public static ArrayList<Roi> overlayConvexHull=new ArrayList<Roi>();
 	public static ArrayList<Roi> overlaySplitPoints=new ArrayList<Roi>();
 	public static ArrayList<Roi> overlayConcavityDepth=new ArrayList<Roi>();
-	public static ArrayList<Roi> overlayAngleCtrl=new ArrayList<Roi>();
 	private ArrayList<InnerContour> innerList=new ArrayList<InnerContour>();
 	private ArrayList<ConcavityRegion> concavityRegionList=new ArrayList<ConcavityRegion>();
 	/**

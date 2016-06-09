@@ -214,7 +214,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				}
 */
 
-    
+   /* 
 	private String drawInformationAboutSplitLineTwoConcavityRegions(StraightSplitLineBetweenTwoConcavityRegions sl)
 	{
 		/*int hoehe=(int)cI.getMaxDist();
@@ -258,8 +258,8 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		
 		String st= "Saliency: "+Math.round(sl.getSaliency()) +"\n"+" Concavity-Concavity-Alignment: "+ Math.round(ccAlignment)+"\n"+" Concavity-Line-Alignment: "+ Math.round(clAlignment);
 		return null;*/
-		return "";
-		}
+	/*	return "";
+		}*/
 
 		public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
 			Clump c, ImageProcessor ip)
@@ -283,7 +283,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 			}else{
 			if(Clump_Splitting.SPLITLINETYPE==3)
 			{
-				System.out.println(bestSplitLine);
+			//	System.out.println(bestSplitLine);
 				if(bestSplitLine!=null)
 				{
 				GeodesicDistanceSplitLineCalculator gdslc= new GeodesicDistanceSplitLineCalculator(bestSplitLine.getStartPoint(),bestSplitLine.getEndPoint());
@@ -393,7 +393,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 					String str= cOne.getMaxDistCoord().getX()+", "+ cOne.getMaxDistCoord().getY()+", "+cTwo.getMaxDistCoord().getX()+", "+cTwo.getMaxDistCoord().getY()+", "+maxDistSum+ ", "+ distance;
 					try
 					{
-						System.out.println(str);
+				//		System.out.println(str);
 						Clump_Splitting.bw.write("\n");
 						Clump_Splitting.bw.write(str);
 					} catch (IOException e)

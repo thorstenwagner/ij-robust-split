@@ -194,7 +194,7 @@ public class MaximumIntensitySplitLineCalculator implements AbstractSplitLineCal
 			pointList.add(first.getPoint());
 			first=first.getPrevious();
 		}
-			System.out.println(pointList.size());
+		//	System.out.println(pointList.size());
 	/*	if(pointList.size()<=0)
 		{
 			Clump.STOP++;
