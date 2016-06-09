@@ -35,11 +35,19 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.AWTEvent;import java.awt.Polygon;import java.io.BufferedWriter;
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.swing.JTextArea;
+import javax.swing.JWindow;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -65,7 +73,11 @@ import ij.process.ImageProcessor;
 
 public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 {
-//	public static boolean ISPREVIEWCHECKED=false;
+public static JWindow pane=new JWindow();
+	
+	public static JTextArea window= new JTextArea("haaaaaloo");
+public static double zoomfactor=0;
+		public static boolean ISPREVIEWCHECKED=false;
 	private static boolean done;
 	public static FileWriter fw=null;
 	public static BufferedWriter bw;
@@ -262,6 +274,21 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
+	for(int n=0;n<Clump.allRegions.size();n++)
+	{
+		ConcavityRegion cr= Clump.allRegions.get(n);
+	
+		ImagePlus imageplus=WindowManager.getCurrentImage();
+		
+		Rectangle r=imageplus.getCanvas().getSrcRect();
+		Rectangle s=imageplus.getCanvas().getBounds();
+		double xZoom=r.getWidth();
+		zoomfactor=xZoom/s.getWidth();
+		System.out.println("XLänge"+xZoom+" 2 " +s.getWidth());
+		imp.getCanvas().addMouseListener(new MouseListenerConcavityRegions(cr));
+		cr.drawInformation();
+	}
+
 	}
 
 	@Override

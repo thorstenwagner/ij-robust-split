@@ -36,6 +36,8 @@ SOFTWARE.
 package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.Color;
+import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
@@ -429,6 +431,35 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		
 		return st;*/
 	}
+	public String getInformation()
+	{
+
+		double cangle= (360/(2*Math.PI))*this.getOrientation();
+		
+		cangle=Math.round(cangle*100);
+		cangle=cangle/100;
+		double concavityDepth= Math.round(this.getMaxDist()*100);
+		concavityDepth=concavityDepth/100;
+		Point2D.Double a = new Point2D.Double(this.getStartX(), this.getStartY());
+		Point2D.Double b = new Point2D.Double(this.getEndX(), this.getEndY());
+		Point2D c = this.getMaxDistCoord();
+
+		double clength = Math
+				.sqrt((b.getX() - a.getX()) * (b.getX() - a.getX()) + (b.getY() - a.getY()) * (b.getY() - a.getY()));
+		double alength = Math
+				.sqrt((b.getX() - c.getX()) * (b.getX() - c.getX()) + (b.getY() - c.getY()) * (b.getY() - c.getY()));
+		double blength = Math
+				.sqrt((c.getX() - a.getX()) * (c.getX() - a.getX()) + (c.getY() - a.getY()) * (c.getY() - a.getY()));
+
+		double gamma = Math
+				.acos(((clength * clength) - (alength * alength) - (blength * blength)) / (-2 * Math.abs(alength) * Math.abs(blength)));
+		gamma=(360/(2*Math.PI))*gamma;
+		gamma=Math.round(gamma*100);
+		gamma=gamma/100;
+		String text= "Ausrichtung: "+cangle+"\nKonkavitätstiefe: "+ concavityDepth+"\nKonkavitätswinkel: "+gamma;
+		return text;
+		
+	}
 
 	/**
 	 * computes the point of the ConvexHull, which is in middle of the convexHull
@@ -471,11 +502,44 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 			}
 		}
 	}
-
+	public Rectangle getRectangle()
+	{
+		Polygon p= new Polygon();
+		for(Point2D point: boundaryPointList)
+		{
+			p.addPoint((int)point.getX(), (int)point.getY());
+		}
+		return p.getBounds();
+	}
+	@Override
+	public boolean equals(Object o)
+	{
+		if(o.getClass().equals(this.getClass()))
+		{
+			ConcavityRegion other=(ConcavityRegion)(o);
+			if(other.getEndX()==this.getEndX()&&other.getEndY()==this.getEndY()&&other.getStartX()==this.getStartX()&&other.getStartY()==this.getStartY())
+			{
+				return true;
+			}
+			else
+			{
+				if(other.getEndX()==this.getStartX()&&other.getEndY()==this.getStartY()&&other.getStartX()==this.getEndX()&&other.getStartY()==this.getEndY())
+				{
+					return true;
+				}
+				else{
+					return false;
+				}
+			}
+		}
+		else{
+			return false;
+		}
+	}
 	@Override
 	public String toString()
 	{
-		String st= "StartX:"+this.startX+" StartY:"+this.startY+ " EndX:"+ this.endX+ " EndY:" + this.endY+ " Max:"+this.max;
+		String st= "StartX:"+this.startX+" StartY:"+this.startY+ " EndX:"+ this.endX+ " EndY:" + this.endY+ " Max:"+this.max +" MaxCoord: "+ this.getMaxDistCoord().getX()+" "+this.getMaxDistCoord().getY() ;
 		return st;
 	}
 }

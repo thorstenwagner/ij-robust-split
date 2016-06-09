@@ -40,7 +40,9 @@ import java.awt.Color;
 import java.awt.Polygon;
 import java.util.ArrayList;
 
+
 import de.biomedical_imaging.ij.clumpsplitting.SplitLines.*;
+
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
@@ -55,6 +57,9 @@ import ij.process.ImageProcessor;
  */
 public class Clump
 {
+	public static ArrayList<ConcavityRegion> allRegions= new ArrayList<ConcavityRegion>();
+	
+	
 	/**
 	 * the concavityRegionList includes all useful concavityRegion the criteria,
 	 * if a ConcavityRegion is useful is the CONCAVITY_DEPTH_THRESHOLD from
@@ -135,9 +140,13 @@ public class Clump
 		this.concavityRegionList = this.computeConcavityRegions();
 		for(ConcavityRegion cr:concavityRegionList)
 		{
-			cr.drawInformation();
+			if(!Clump.allRegions.contains(cr))
+			{
+			Clump.allRegions.add(cr);
+			}
+			
 		}
-	//	IJ.log(concavityRegionList.size()+"");
+		//	IJ.log(concavityRegionList.size()+"");
 		
 	/*ArrayList<AbstractSplitLine> possibleSplitLines=*/this.computeSplitLines(ip);
 //		this.selectBestSplitLine(possibleSplitLines);
