@@ -17,15 +17,27 @@ public class MouseListenerConcavityRegions implements MouseListener
 	{
 		this.cr=cr;
 	}
-	public double getZoomFactor()
+	public int getImageCoordinateY(int n)
 	{
 		ImagePlus imageplus=WindowManager.getCurrentImage();
-		
-		Rectangle r=imageplus.getCanvas().getSrcRect();
+		return imageplus.getCanvas().offScreenY(n);
+	/*	Rectangle r=imageplus.getCanvas().getSrcRect();
 		Rectangle s=imageplus.getCanvas().getBounds();
+		System.out.println(s.getX()+ " "+ s.getY());
 		double xZoom=r.getWidth();
 		double zoomfactor=xZoom/s.getWidth();
-		return zoomfactor;
+		return zoomfactor;*/
+	}
+	public int getImageCoordinateX(int n)
+	{
+		ImagePlus imageplus=WindowManager.getCurrentImage();
+		return imageplus.getCanvas().offScreenX(n);
+	/*	Rectangle r=imageplus.getCanvas().getSrcRect();
+		Rectangle s=imageplus.getCanvas().getBounds();
+		System.out.println(s.getX()+ " "+ s.getY());
+		double xZoom=r.getWidth();
+		double zoomfactor=xZoom/s.getWidth();
+		return zoomfactor;*/
 	}
 	@Override
 	public void mouseClicked(MouseEvent e)
@@ -37,9 +49,9 @@ public class MouseListenerConcavityRegions implements MouseListener
 		double maxY=boundingBox.getMaxY();
 	
 			//System.out.println(e.getX()*+ " "+ e.getY()*3);
-		if((e.getX()*this.getZoomFactor()>minX)&&(e.getX()*this.getZoomFactor()<maxX))
+		if((this.getImageCoordinateX(e.getX())>minX)&&(this.getImageCoordinateX(e.getX())<maxX))
 		{
-			if((e.getY()*this.getZoomFactor()>minY)&&(e.getY()*this.getZoomFactor()<maxY))
+			if((this.getImageCoordinateY(e.getY())>minY)&&(this.getImageCoordinateY(e.getY())<maxY))
 			{
 				Clump_Splitting.window.setText(cr.getInformation());
 				Clump_Splitting.window.setBackground(Color.lightGray);
