@@ -168,6 +168,9 @@ public static JWindow pane=new JWindow();
 	public void run(ImageProcessor ip)
 	{
 
+		Clump.overlayConcavityDepth.clear();
+		Clump.overlayConvexHull.clear();
+		Clump.overlaySplitPoints.clear();
 		try
 		{
 			fw= new FileWriter("test/test.txt");

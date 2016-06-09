@@ -42,6 +42,8 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import ij.gui.Line;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
 
 /**
  * administrates the concavityRegions
@@ -184,9 +186,9 @@ public class ConcavityRegionAdministration
 					}
 					Point2D endPoint=teil1.getMaxDistCoord();
 					Point2D startPoint=teil2.getMaxDistCoord();
-					Line polygonRoi = new Line(startPoint.getX(), startPoint.getY(),endPoint.getX(), endPoint.getY());
+				/*	Line polygonRoi = new Line(startPoint.getX(), startPoint.getY(),endPoint.getX(), endPoint.getY());
 					polygonRoi.setStrokeColor(Color.green);
-					
+				*/	
 					ArrayList<Point2D> embeddedPoints=this.getAllEmbeddedPointsFromInnerContour((int)startPoint.getX(),(int)startPoint.getY(),(int)endPoint.getX(),(int)endPoint.getY(), inner);
 					if(embeddedPoints.size()>3)
 					{
@@ -200,6 +202,17 @@ public class ConcavityRegionAdministration
 					//	IJ.log("innen");
 						concavityRegionList.add(crReal);
 
+						if(Clump_Splitting.SHOWCONVEXHULL)
+						{
+							Line linie = new Line(crReal.getStartX(),crReal.getStartY(),crReal.getEndX(),crReal.getEndY());
+
+
+							
+						      linie.setStrokeWidth(1);;
+						   //  Roi.setColor(Color.cyan);
+						      linie.setStrokeColor(Color.cyan);
+						      Clump.overlayConvexHull.add(linie);
+						}
 					//	System.out.println("innen"+crReal);
 					}
 					}

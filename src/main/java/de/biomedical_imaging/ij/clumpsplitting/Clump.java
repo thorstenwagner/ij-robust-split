@@ -128,6 +128,7 @@ public class Clump
 			if(!Clump_Splitting.SHOWCONVEXHULL)
 			{
 			//	IJ.log("Fehler");
+				
 				Clump.done=0;
 				Clump.overlayConvexHull.clear();
 			}
@@ -299,6 +300,7 @@ public class Clump
 		PolygonRoi polygonRoi = new PolygonRoi(convexHull, Roi.POLYGON);
 
 
+		
 	      polygonRoi.setStrokeWidth(1);;
 	   //  Roi.setColor(Color.cyan);
 	      polygonRoi.setStrokeColor(Color.cyan);
