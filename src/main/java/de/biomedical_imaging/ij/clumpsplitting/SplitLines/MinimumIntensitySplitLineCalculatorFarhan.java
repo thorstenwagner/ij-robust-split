@@ -75,10 +75,10 @@ public class MinimumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 			int[] histogram = binary.getHistogram();
 			int threshold=at.getThreshold(Method.RenyiEntropy, histogram);
 			
-			binary.blurGaussian(1.0);
+			binary.blurGaussian(2.0);
 			binary.threshold(threshold);
 		//	binary.autoThreshold();
-			if(Clump_Splitting.BACKGROUNDCOLOR==1)
+			/*if(Clump_Splitting.BACKGROUNDCOLOR==1)
 			{
 			binary.erode();
 			
@@ -92,7 +92,7 @@ public class MinimumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 				
 			}
 		
-			
+			*/
 //			System.out.println(binary.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY())+ " "+Clump_Splitting.BACKGROUNDCOLOR);
 			int value;
 			if(Clump_Splitting.BACKGROUNDCOLOR==1)

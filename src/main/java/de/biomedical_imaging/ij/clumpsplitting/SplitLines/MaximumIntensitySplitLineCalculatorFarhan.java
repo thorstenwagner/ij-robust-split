@@ -75,10 +75,10 @@ public class MaximumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 			int[] histogram = binary.getHistogram();
 			int threshold=at.getThreshold(Method.Default, histogram);
 			
-			binary.blurGaussian(1.0);
+			binary.blurGaussian(3.0);
 			binary.threshold(threshold);
 		//	binary.autoThreshold();
-			if(Clump_Splitting.BACKGROUNDCOLOR==1)
+			/*if(Clump_Splitting.BACKGROUNDCOLOR==1)
 			{
 			binary.erode();
 			
@@ -90,7 +90,7 @@ public class MaximumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 				binary.dilate();
 				binary.invert();
 				
-			}
+			}*/
 		
 			
 //			System.out.println(binary.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY())+ " "+Clump_Splitting.BACKGROUNDCOLOR);

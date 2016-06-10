@@ -266,14 +266,14 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 			}
 		}
 		
-		Line polygonRoi = new Line((int)this.getMaxDistCoord().getX(), (int)this.getMaxDistCoord().getY() ,(int)xEnd,(int)yEnd);
+	/*	Line polygonRoi = new Line((int)this.getMaxDistCoord().getX(), (int)this.getMaxDistCoord().getY() ,(int)xEnd,(int)yEnd);
 
 
 	      polygonRoi.setStrokeWidth(1);
 	      polygonRoi.setStrokeColor(Color.green);
 		     
 	      
-	      Clump.overlayConcavityDepth.add(polygonRoi);
+	      Clump.overlayConcavityDepth.add(polygonRoi);*/
 	//	ip.drawLine((int)this.getMaxDistCoord().getX(), (int)this.getMaxDistCoord().getY() ,(int)xEnd,(int)yEnd);
 	//	ip.drawLine((int)this.getMidPointOfConvexHull().getX(),(int)this.getMidPointOfConvexHull().getY() , (int)this.getMaxDistCoord().getX(), (int) this.getMaxDistCoord().getY());
 		//IJ.log(this.getMaxDist()+"");

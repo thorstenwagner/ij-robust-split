@@ -42,8 +42,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import ij.gui.Line;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 
 /**
  * administrates the concavityRegions

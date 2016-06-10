@@ -51,7 +51,7 @@ import ij.process.ImageProcessor;
  * @author Louise
  *
  */
-public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLine
+public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLine implements Comparable<StraightSplitLineBetweenTwoConcavityRegions>
 {
 	/**
 	 * first concavityRegion at its concavityPoint would start the
@@ -194,6 +194,24 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 		public ConcavityRegion getCJ()
 		{
 			return cJ;
+		}
+
+		@Override
+		public int compareTo(StraightSplitLineBetweenTwoConcavityRegions o)
+		{
+			if(this.getChi()<o.getChi())
+			{
+				return -1;
+			}
+			else{
+				if(this.getChi()>o.getChi())
+				{
+					return 1;
+				}
+				else{
+					return 0;
+				}
+			}
 		}
 		
 }

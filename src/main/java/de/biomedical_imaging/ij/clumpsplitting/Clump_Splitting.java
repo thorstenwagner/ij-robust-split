@@ -37,7 +37,6 @@ package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.AWTEvent;
 import java.awt.Polygon;
-import java.awt.Rectangle;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -129,7 +128,7 @@ public static JWindow pane=new JWindow();
 	/**
 	 * if show ConcavityDepth is true the ConcavityDepth is drawn into the picture
 	 */
-	public static boolean SHOWCONCAVITYDEPTH=false;
+//	public static boolean SHOWCONCAVITYDEPTH=false;
 
 	/**
 	 * if show ConcavityDepth is true the ConvexHull is drawn into the picture
@@ -168,7 +167,7 @@ public static JWindow pane=new JWindow();
 	public void run(ImageProcessor ip)
 	{
 
-		Clump.overlayConcavityDepth.clear();
+	//	Clump.overlayConcavityDepth.clear();
 		Clump.overlayConvexHull.clear();
 		Clump.overlaySplitPoints.clear();
 		try
@@ -196,10 +195,10 @@ public static JWindow pane=new JWindow();
 		int[] histogram = imageProcessorBinary.getHistogram();
 		int threshold=at.getThreshold(Method.Default, histogram);
 		
-		imageProcessorBinary.blurGaussian(1.0);
+		imageProcessorBinary.blurGaussian(2.0);
 		imageProcessorBinary.threshold(threshold);
 	//	imageProcessorBinary.autoThreshold();
-		if(Clump_Splitting.BACKGROUNDCOLOR==1)
+	/*if(Clump_Splitting.BACKGROUNDCOLOR==1)
 		{
 		imageProcessorBinary.erode();
 		
@@ -211,7 +210,7 @@ public static JWindow pane=new JWindow();
 			imageProcessorBinary.dilate();
 			imageProcessorBinary.invert();
 			
-		}
+		}*/
 		ManyBlobs blobList = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 		blobList.setBackground(BACKGROUNDCOLOR);
 		
@@ -256,10 +255,10 @@ public static JWindow pane=new JWindow();
 	{
 		o.addElement(overlay);
 	}
-	for(Roi overlay:Clump.overlayConcavityDepth)
+	/*for(Roi overlay:Clump.overlayConcavityDepth)
 	{
 		o.addElement(overlay);
-	}
+	}*/
 	
 	imp.setOverlay(o);
 	try
@@ -289,7 +288,7 @@ public static JWindow pane=new JWindow();
 		String selection=gd.getNextRadioButton();
 		//String splitLineType=gd.getNextChoice();
 		boolean showConvexHull=gd.getNextBoolean();
-		boolean showConcavityDepth=gd.getNextBoolean();
+		//boolean showConcavityDepth=gd.getNextBoolean();
 		boolean showPixels=gd.getNextBoolean();
 		Double concavityDepthThreshold=gd.getNextNumber();
 		Double saliencyThreshold=0.0;
@@ -344,7 +343,7 @@ public static JWindow pane=new JWindow();
 					}
 				}
 			}*/
-			SHOWCONCAVITYDEPTH=showConcavityDepth;
+	//		SHOWCONCAVITYDEPTH=showConcavityDepth;
 			SHOWCONVEXHULL=showConvexHull;
 			SHOWPIXELS=showPixels;
 			if(!saliencyThreshold.isNaN())
@@ -473,7 +472,7 @@ public static JWindow pane=new JWindow();
 						}
 					}
 				}
-				GenericDialog dialog1= new NonBlockingGenericDialog("Choose Parameters for Straight-Split-Line");
+				GenericDialog dialog1= new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");
 				
 				String[] radioboxValues =
 					{ "black", "white" };
@@ -489,7 +488,7 @@ public static JWindow pane=new JWindow();
 				//	String[] items={"Straight Split-Line","Maximum-Intensity-Split-Line","Minimum-Intensity-Split-Line", "Geodesic-Distance-Split-Line"};
 				//	dialog1.addChoice("Split-Line-Type:", items, "Straight Split-Line");
 					dialog1.addCheckbox("Show Convex Hull",false);
-					dialog1.addCheckbox("Show Concavity-Depth", false);
+			//		dialog1.addCheckbox("Show Concavity-Depth", false);
 					dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
 					dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
 					dialog1.addSlider("Saliency threshold", 0, 1, 0.12);
@@ -526,7 +525,7 @@ public static JWindow pane=new JWindow();
 								Clump_Splitting.SPLITLINETYPE=5;
 							}
 						}
-						GenericDialog dialog1= new NonBlockingGenericDialog("Choose Parameters for Straight-Split-Line");
+						GenericDialog dialog1= new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");
 						
 						String[] radioboxValues =
 							{ "black", "white" };
@@ -542,7 +541,7 @@ public static JWindow pane=new JWindow();
 						//	String[] items={"Straight Split-Line","Maximum-Intensity-Split-Line","Minimum-Intensity-Split-Line", "Geodesic-Distance-Split-Line"};
 						//	dialog1.addChoice("Split-Line-Type:", items, "Straight Split-Line");
 							dialog1.addCheckbox("Show Convex Hull",false);
-							dialog1.addCheckbox("Show Concavity-Depth", false);
+				//			dialog1.addCheckbox("Show Concavity-Depth", false);
 							dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
 							dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
 						/*	dialog1.addSlider("Saliency threshold", 0, 1, 0.12);

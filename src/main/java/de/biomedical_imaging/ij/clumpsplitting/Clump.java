@@ -68,7 +68,7 @@ public class Clump
 	public static int done=0;
 	public static ArrayList<Roi> overlayConvexHull=new ArrayList<Roi>();
 	public static ArrayList<Roi> overlaySplitPoints=new ArrayList<Roi>();
-	public static ArrayList<Roi> overlayConcavityDepth=new ArrayList<Roi>();
+	//public static ArrayList<Roi> overlayConcavityDepth=new ArrayList<Roi>();
 	private ArrayList<InnerContour> innerList=new ArrayList<InnerContour>();
 	private ArrayList<ConcavityRegion> concavityRegionList=new ArrayList<ConcavityRegion>();
 	/**
@@ -196,16 +196,16 @@ public class Clump
 				Clump.overlaySplitPoints.clear();
 			}
 			cr.markMidPointOfConvexHull();
-			if(Clump_Splitting.SHOWCONCAVITYDEPTH)
+			/*if(Clump_Splitting.SHOWCONCAVITYDEPTH)
 			{
 			cr.markConcavityDepth();
-			}
-			else{
+			}*/
+			/*else{
 				
 					//Clump.done=0;
-					Clump.overlayConcavityDepth.clear();
+					//Clump.overlayConcavityDepth.clear();
 				
-			}
+			}*/
 
 		}
 		return concavityRegionList;
