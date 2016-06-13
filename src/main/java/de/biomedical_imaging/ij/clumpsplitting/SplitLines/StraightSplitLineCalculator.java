@@ -38,12 +38,14 @@ package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 import java.awt.Polygon;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 
 import javax.vecmath.Vector2d;
+
+import org.apache.spark.mllib.linalg.DenseVector;
+import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.mllib.regression.LabeledPoint;
 
 import de.biomedical_imaging.ij.clumpsplitting.Clump;
 import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
@@ -392,16 +394,10 @@ private ArrayList<StraightSplitLine> computeStraigthSplitLineBetweenTwoConcavity
 
 			if (!cOne.equals(cTwo))
 			{
-				double maxDistSum=cOne.getMaxDist()+cTwo.getMaxDist();
-				maxDistSum=maxDistSum*1000;
-				maxDistSum=Math.round(maxDistSum);
-				maxDistSum=maxDistSum/1000;
-				double distance= cOne.getMaxDistCoord().distance(cTwo.getMaxDistCoord());
-				distance= distance*1000;
-				distance= Math.round(distance);
-				distance= distance/1000;
-				String str= cOne.getMaxDistCoord().getX()+", "+ cOne.getMaxDistCoord().getY()+", "+cTwo.getMaxDistCoord().getX()+", "+cTwo.getMaxDistCoord().getY()+", "+maxDistSum+ ", "+ distance;
-				try
+				
+				
+				//String str= cOne.getMaxDistCoord().getX()+", "+ cOne.getMaxDistCoord().getY()+", "+cTwo.getMaxDistCoord().getX()+", "+cTwo.getMaxDistCoord().getY()+", "+maxDistSum+ ", "+ distance;
+				/*try
 				{
 					System.out.println(str);
 					Clump_Splitting.bw.write("\n");
@@ -410,7 +406,7 @@ private ArrayList<StraightSplitLine> computeStraigthSplitLineBetweenTwoConcavity
 				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}*/
 				double chi=this.computeChi(cOne,cTwo);
 				if(chi>0.5)
 				{
@@ -424,14 +420,28 @@ private ArrayList<StraightSplitLine> computeStraigthSplitLineBetweenTwoConcavity
 						possibleSplitLines.clear();
 						StraightSplitLineBetweenTwoConcavityRegions splitLineAll = new StraightSplitLineBetweenTwoConcavityRegions(
 								cOne, cTwo, saliency, concavityConcavityAlignment, concavityLineAlignment,chi);
-						try
+						double[] values= new double[2];
+						double maxDistSum=cOne.getMaxDist()+cTwo.getMaxDist();
+						maxDistSum=maxDistSum*1000;
+						maxDistSum=Math.round(maxDistSum);
+						maxDistSum=maxDistSum/1000;
+						double distance= cOne.getMaxDistCoord().distance(cTwo.getMaxDistCoord());
+						distance= distance*1000;
+						distance= Math.round(distance);
+						distance= distance/1000;
+						values[0]=maxDistSum;
+						values[1]=distance;
+						Vector v= new DenseVector(values);
+						LabeledPoint lp= new LabeledPoint(1,v);
+						Clump_Splitting.listOfAllLabeledPoints.add(lp);
+					/*	try
 						{
 							Clump_Splitting.bw.write(", Trennungslinie");
 						} catch (IOException e)
 						{
 							// TODO Auto-generated catch block
 							e.printStackTrace();
-						}
+						} */
 						possibleSplitLines.add(splitLineAll);
 						return possibleSplitLines;
 					}
@@ -448,14 +458,29 @@ private ArrayList<StraightSplitLine> computeStraigthSplitLineBetweenTwoConcavity
 						
 						if (concavityLineAlignment < Clump_Splitting.CONCAVITYLINE_THRESHOLD)
 						{
-							try
+							double[] values= new double[2];
+							double maxDistSum=cOne.getMaxDist()+cTwo.getMaxDist();
+							maxDistSum=maxDistSum*1000;
+							maxDistSum=Math.round(maxDistSum);
+							maxDistSum=maxDistSum/1000;
+							double distance= cOne.getMaxDistCoord().distance(cTwo.getMaxDistCoord());
+							distance= distance*1000;
+							distance= Math.round(distance);
+							distance= distance/1000;
+							values[0]=maxDistSum;
+							values[1]=distance;
+							Vector v= new DenseVector(values);
+							LabeledPoint lp= new LabeledPoint(1,v);
+
+							Clump_Splitting.listOfAllLabeledPoints.add(lp);
+					/*		try
 							{
 								Clump_Splitting.bw.write(", Trennungslinie");
 							} catch (IOException e)
 							{
 								// TODO Auto-generated catch block
 								e.printStackTrace();
-							}
+							}*/
 							
 							StraightSplitLineBetweenTwoConcavityRegions splitLineAll = new StraightSplitLineBetweenTwoConcavityRegions(
 									cOne, cTwo, saliency, concavityConcavityAlignment, concavityLineAlignment,chi);
@@ -466,7 +491,24 @@ private ArrayList<StraightSplitLine> computeStraigthSplitLineBetweenTwoConcavity
 				}
 
 			}
+			else{
+				double[] values= new double[2];
+				double maxDistSum=cOne.getMaxDist()+cTwo.getMaxDist();
+				maxDistSum=maxDistSum*1000;
+				maxDistSum=Math.round(maxDistSum);
+				maxDistSum=maxDistSum/1000;
+				double distance= cOne.getMaxDistCoord().distance(cTwo.getMaxDistCoord());
+				distance= distance*1000;
+				distance= Math.round(distance);
+				distance= distance/1000;
+				values[0]=maxDistSum;
+				values[1]=distance;
+				Vector v= new DenseVector(values);
+				LabeledPoint lp= new LabeledPoint(0,v);
+
+				Clump_Splitting.listOfAllLabeledPoints.add(lp);
 				}
+			}
 		}
 	}
 	

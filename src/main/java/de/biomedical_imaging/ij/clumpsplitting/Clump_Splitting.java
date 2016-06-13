@@ -35,15 +35,17 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.AWTEvent;
-import java.awt.Polygon;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.awt.AWTEvent;import java.awt.Polygon;
 import java.util.ArrayList;
 
 import javax.swing.JTextArea;
 import javax.swing.JWindow;
+
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.mllib.regression.LabeledPoint;
+import org.apache.spark.mllib.util.MLUtils;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -70,13 +72,13 @@ import ij.process.ImageProcessor;
 public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 {
 public static JWindow pane=new JWindow();
-	
-	public static JTextArea window= new JTextArea("haaaaaloo");
+	public static ArrayList<LabeledPoint> listOfAllLabeledPoints= new ArrayList<LabeledPoint>();
+	public static JTextArea window= new JTextArea();
 		public static boolean ISPREVIEWCHECKED=false;
 	private static boolean done;
-	public static FileWriter fw=null;
+/*	public static FileWriter fw=null;
 	public static BufferedWriter bw;
-	
+*/	
 	public static int SPLITLINETYPE=0;
 	/**
 	 * the threshold defines if a ConcavityRegion is valid or not. If the
@@ -170,7 +172,10 @@ public static JWindow pane=new JWindow();
 	//	Clump.overlayConcavityDepth.clear();
 		Clump.overlayConvexHull.clear();
 		Clump.overlaySplitPoints.clear();
-		try
+		//SparkConf conf = new SparkConf().setAppName("SVM Classifier Example").setMaster("local");
+		//SparkContext sc = new SparkContext(conf);
+		
+	/*	try
 		{
 			fw= new FileWriter("test/test.txt");
 			bw= new BufferedWriter(fw);
@@ -178,8 +183,7 @@ public static JWindow pane=new JWindow();
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
+		}*/		
 		ArrayList<Clump> clumpList = new ArrayList<Clump>();
 		
 		ImagePlus imp = IJ.getImage(); 
@@ -246,6 +250,15 @@ public static JWindow pane=new JWindow();
 		IJ.log("Die Anzahl der gefundenen Klumpen beträgt: "+ clumpList.size());
 		//IJ.showStatus(s);
 	}
+	SparkConf conf = new SparkConf().setAppName("Test").setMaster("local");
+    JavaSparkContext sc = new JavaSparkContext(conf);
+
+ //   JavaRDD<String> accessLogs = sc.textFile("/test/test.txt");
+    JavaRDD<LabeledPoint> test= sc.parallelize(listOfAllLabeledPoints);
+
+  //  test.saveAsTextFile("test/testen.txt");
+	  MLUtils.saveAsLibSVMFile(test.rdd(), "test/testen.txt");
+	  sc.close();
 	Overlay o=new Overlay();
 	for(Roi overlay:Clump.overlayConvexHull)
 	{
@@ -261,14 +274,14 @@ public static JWindow pane=new JWindow();
 	}*/
 	
 	imp.setOverlay(o);
-	try
+	/*try
 	{
 		bw.close();
 	} catch (IOException e)
 	{
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-	}
+	}*/
 	for(int n=0;n<Clump.allRegions.size();n++)
 	{
 		ConcavityRegion cr= Clump.allRegions.get(n);

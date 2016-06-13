@@ -56,6 +56,11 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     			<artifactId>vecmath</artifactId>
     			<version>1.5.2</version>
 		</dependency>
+		<dependency>
+    <groupId>org.apache.spark</groupId>
+    <artifactId>spark-mllib_2.10</artifactId>
+    <version>1.3.0</version>
+</dependency>
  	</dependencies>
 	<developers>
 		<developer>
