@@ -36,6 +36,7 @@ SOFTWARE.
 package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.AWTEvent;import java.awt.Polygon;
+import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.JTextArea;
@@ -44,9 +45,12 @@ import javax.swing.JWindow;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.mllib.linalg.DenseVector;
+import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.util.MLUtils;
 
+import de.biomedical_imaging.ij.clumpsplitting.SplitLines.SplitLineAssignmentSVM;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -72,10 +76,11 @@ import ij.process.ImageProcessor;
 public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 {
 public static JWindow pane=new JWindow();
-	public static ArrayList<LabeledPoint> listOfAllLabeledPoints= new ArrayList<LabeledPoint>();
+public static ArrayList<SplitLineAssignmentSVM> list= new ArrayList<SplitLineAssignmentSVM>();
 	public static JTextArea window= new JTextArea();
-		public static boolean ISPREVIEWCHECKED=false;
+//		public static boolean ISPREVIEWCHECKED=false;
 	private static boolean done;
+	public static boolean WRITEDATAINFILE=false;
 /*	public static FileWriter fw=null;
 	public static BufferedWriter bw;
 */	
@@ -250,16 +255,7 @@ public static JWindow pane=new JWindow();
 		IJ.log("Die Anzahl der gefundenen Klumpen beträgt: "+ clumpList.size());
 		//IJ.showStatus(s);
 	}
-	SparkConf conf = new SparkConf().setAppName("Test").setMaster("local");
-    JavaSparkContext sc = new JavaSparkContext(conf);
-
- //   JavaRDD<String> accessLogs = sc.textFile("/test/test.txt");
-    JavaRDD<LabeledPoint> test= sc.parallelize(listOfAllLabeledPoints);
-
-  //  test.saveAsTextFile("test/testen.txt");
-	  MLUtils.saveAsLibSVMFile(test.rdd(), "test/testen.txt");
-	  sc.close();
-	Overlay o=new Overlay();
+		Overlay o=new Overlay();
 	for(Roi overlay:Clump.overlayConvexHull)
 	{
 		o.addElement(overlay);
@@ -303,6 +299,7 @@ public static JWindow pane=new JWindow();
 		boolean showConvexHull=gd.getNextBoolean();
 		//boolean showConcavityDepth=gd.getNextBoolean();
 		boolean showPixels=gd.getNextBoolean();
+		boolean writeDataInFile=false;
 		Double concavityDepthThreshold=gd.getNextNumber();
 		Double saliencyThreshold=0.0;
 		Double concavityConcavityAlignmentThreshold=0.0;
@@ -312,7 +309,9 @@ public static JWindow pane=new JWindow();
 		Double c1=0.0;
 		Double c2=0.0;
 		if(Clump_Splitting.SPLITLINETYPE==0||Clump_Splitting.SPLITLINETYPE==1||Clump_Splitting.SPLITLINETYPE==2||Clump_Splitting.SPLITLINETYPE==3)
-		 {saliencyThreshold=gd.getNextNumber();
+		 {
+			writeDataInFile=gd.getNextBoolean();
+			saliencyThreshold=gd.getNextNumber();
 		 concavityConcavityAlignmentThreshold=gd.getNextNumber();
 		 concavityLineAlignmentThreshold=gd.getNextNumber();
 		 concavityAngleThreshold=gd.getNextNumber();
@@ -358,6 +357,7 @@ public static JWindow pane=new JWindow();
 			}*/
 	//		SHOWCONCAVITYDEPTH=showConcavityDepth;
 			SHOWCONVEXHULL=showConvexHull;
+			Clump_Splitting.WRITEDATAINFILE=writeDataInFile;
 			SHOWPIXELS=showPixels;
 			if(!saliencyThreshold.isNaN())
 			{
@@ -503,6 +503,7 @@ public static JWindow pane=new JWindow();
 					dialog1.addCheckbox("Show Convex Hull",false);
 			//		dialog1.addCheckbox("Show Concavity-Depth", false);
 					dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
+					dialog1.addCheckbox("Write data in file to train SVM", false);
 					dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
 					dialog1.addSlider("Saliency threshold", 0, 1, 0.12);
 					dialog1.addSlider("Concavity-Concavity-Alignment threshold in Degrees", 0, 180, 105);
@@ -520,6 +521,55 @@ public static JWindow pane=new JWindow();
 			      
 					gd.setVisible(false);
 					gd.dispose();
+					if(dialog1.wasOKed())
+					{ 
+						System.out.println("OKKKKKKK");
+						if(Clump_Splitting.WRITEDATAINFILE)
+						{
+							System.out.println("IMIFFFFFF");
+						SparkConf conf = new SparkConf().setAppName("Test").setMaster("local");
+					    JavaSparkContext sc = new JavaSparkContext(conf);
+
+					 //   JavaRDD<String> accessLogs = sc.textFile("/test/test.txt");
+					    ArrayList<LabeledPoint> listOfAllLabeledPoints= new ArrayList<LabeledPoint>();
+					    for(SplitLineAssignmentSVM slaSVM:Clump_Splitting.list)
+					    {
+					    	double[] values= new double[2];
+							double maxDistSum=slaSVM.getSumConcavityDepth();
+							maxDistSum=maxDistSum*1000;
+							maxDistSum=Math.round(maxDistSum);
+							maxDistSum=maxDistSum/1000;
+							double distance= slaSVM.getDistance();
+							distance= distance*1000;
+							distance= Math.round(distance);
+							distance= distance/1000;
+							values[0]=maxDistSum;
+							values[1]=distance;
+							Vector v= new DenseVector(values);
+							LabeledPoint lp= new LabeledPoint(slaSVM.getClassificationValue(),v);
+							listOfAllLabeledPoints.add(lp);
+						
+					    }
+					    JavaRDD<LabeledPoint> test= sc.parallelize(listOfAllLabeledPoints);
+
+					  //  test.saveAsTextFile("test/testen.txt");
+					    String[] name=imp.getTitle().split("\\.");
+					    String filename="test/testen"+ name[0];
+					   /* File file = new File(filename);
+
+					    for(File f:file.listFiles())
+					    {
+					    	f.delete();
+					    }
+					    if(file.exists())
+					    {
+					    	file.delete();
+					    }*/
+					    
+						  MLUtils.saveAsLibSVMFile(test.rdd(), filename);
+						  sc.close();
+						}
+					}
 					if (dialog1.wasCanceled())
 					{
 						return DONE;

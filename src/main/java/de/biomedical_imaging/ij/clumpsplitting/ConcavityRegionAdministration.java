@@ -143,8 +143,8 @@ public class ConcavityRegionAdministration
 				ArrayList<Double> doubleList = computeDistance(pointList, innerStartX, innerStartY, innerEndX, innerEndY);
 				double[] maxData = getMaxDist(doubleList);
 			//	System.out.println("Threshold:"+Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD);
-				if (maxData[0] > Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
-				{
+				//if (maxData[0] > Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
+				//{
 					
 				//	IJ.log("test");
 					ConcavityRegion concavityRegion = new ConcavityRegion(innerStartX, innerStartY, innerEndX, innerEndY, pointList, doubleList,
@@ -164,7 +164,7 @@ public class ConcavityRegionAdministration
 					tempInner.add(concavityRegion);
 					
 				//	concavityRegionList.add(concavityRegion);
-				}
+				//}
 				}
 				//IJ.log("Anzahl der inneren Konkavitätsregionen"+tempInner.size()+"");
 			}
