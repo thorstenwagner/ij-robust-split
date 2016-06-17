@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import javax.vecmath.Vector2d;
 
 import ij.gui.Line;
+import ij.process.ImageProcessor;
 /**
  * a ConcavityRegion is a Region of a Clump with high concavity.
  * 
@@ -160,6 +161,13 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		double xPointDistOne = midPointI.getX() - maxPointI.getX();
 		double yPointDistOne = midPointI.getY() - maxPointI.getY();
 		
+		Line l= new Line(midPointI.getX(),midPointI.getY(),maxPointI.getX(),maxPointI.getY());
+		Line m= new Line(midPointI.getX(),midPointI.getY(),midPointI.getX()+50,midPointI.getY());
+		l.setStrokeColor(Color.red);
+		m.setStrokeColor(Color.red);
+		Clump.overlayForOrientation.add(l);
+		Clump.overlayForOrientation.add(m);
+		System.out.println("WICHTIG"+midPointI.getX()+ " "+midPointI.getY()+" "+maxPointI.getX()+ " "+maxPointI.getY());
 		Vector2d vi = new Vector2d(xPointDistOne, yPointDistOne);
 		Vector2d vj= new Vector2d(10,0);
 		vi.normalize();
@@ -170,20 +178,18 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		{
 			if(0<angle&&angle<=((Math.PI)/2))
 			{
-				angle=angle+1.5*Math.PI;
+				double dist=0.5*Math.PI-angle;
+				angle=dist+1.5*Math.PI;
+				
 			}
 			else{
-				angle=angle+((Math.PI)/2);
+				double dist=1.5*Math.PI-angle;
+				
+				angle=dist+0.5*Math.PI;
+				
 			}
 		}
-	/*	else{	if(0<angle&&angle<=((Math.PI)/2))
-		{
-			angle=angle+((Math.PI)/2);
-		}
-		else{
-			angle=angle-((Math.PI)/2);
-		}
-		}*/
+	
 	return angle;
 	}
 	/**

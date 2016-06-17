@@ -14,6 +14,10 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 public class SVMPanel extends JPanel
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private List<LabeledPoint> labeledPoints= new ArrayList<LabeledPoint>();
 	private Vector weight;
 	private double bias;
@@ -55,7 +59,7 @@ public class SVMPanel extends JPanel
 	    	  else{
 	    		  g.setColor(Color.blue);
 	    	  }
-	    	  g.drawRect((int)features[0]+20, this.getHeight()-(int)features[1]-20, 5,5);
+	    	  g.drawRect((int)features[1]+20-3, this.getHeight()-(int)features[0]-20-3, 6,6);
 	    	  
 	    	 
 	      }
@@ -69,8 +73,9 @@ public class SVMPanel extends JPanel
     	  double y2=-m*x2+b;
     	  
     	  System.out.println(x1+" "+ y1+ " "+ x2+ " "+ y2);*/
-    	  double y =((array[0]*this.getWidth())/array[1]);
+    	  double y =-(array[0]/array[1]);
     	  System.out.println(this.getWidth()+ " "+ y);
-    	  g.drawLine((int)20, this.getHeight()-20, this.getWidth()+20, this.getHeight()+(int)y-20);
+    	  double wert= y*this.getWidth();
+    	  g.drawLine((int)20, this.getHeight()-20, this.getWidth()+20,-this.getHeight()- (int) wert-20);
 	   }
 }

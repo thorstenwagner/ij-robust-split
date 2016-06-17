@@ -352,11 +352,12 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		
 			SplitLineAssignmentSVM slaSVMComparison= new SplitLineAssignmentSVM((int)sslbtcr.getCI().getMaxDistCoord().getX(),(int)sslbtcr.getCI().getMaxDistCoord().getY(),(int)sslbtcr.getCJ().getMaxDistCoord().getX(),(int)sslbtcr.getCJ().getMaxDistCoord().getY(),0,distance,maxDistSum);
 			
-			for(SplitLineAssignmentSVM slaSVM:Clump_Splitting.list)
+			for(SplitLineAssignmentSVM slaSVM:Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM)
 			{
 				if(slaSVM.equals(slaSVMComparison))
 				{
 					slaSVM.setClassificationValue(1);
+					
 				}
 			}
 			}
@@ -439,7 +440,10 @@ private ArrayList<StraightSplitLine> computeStraigthSplitLineBetweenTwoConcavity
 				maxDistSum=maxDistSum/1000;
 				
 				SplitLineAssignmentSVM splitLine= new SplitLineAssignmentSVM((int)cOne.getMaxDistCoord().getX(),(int)cOne.getMaxDistCoord().getY(),(int)cTwo.getMaxDistCoord().getX(),(int)cTwo.getMaxDistCoord().getY(),0,distance,maxDistSum);
-				Clump_Splitting.list.add(splitLine);
+				if(!Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.contains(splitLine))
+				{
+				Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.add(splitLine);
+				}
 				if(chi>0.5)
 				{
 					if(chi>0.8)

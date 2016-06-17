@@ -21,23 +21,11 @@ public class MouseListenerConcavityRegions implements MouseListener
 	{
 		ImagePlus imageplus=WindowManager.getCurrentImage();
 		return imageplus.getCanvas().offScreenY(n);
-	/*	Rectangle r=imageplus.getCanvas().getSrcRect();
-		Rectangle s=imageplus.getCanvas().getBounds();
-		System.out.println(s.getX()+ " "+ s.getY());
-		double xZoom=r.getWidth();
-		double zoomfactor=xZoom/s.getWidth();
-		return zoomfactor;*/
 	}
 	public int getImageCoordinateX(int n)
 	{
 		ImagePlus imageplus=WindowManager.getCurrentImage();
 		return imageplus.getCanvas().offScreenX(n);
-	/*	Rectangle r=imageplus.getCanvas().getSrcRect();
-		Rectangle s=imageplus.getCanvas().getBounds();
-		System.out.println(s.getX()+ " "+ s.getY());
-		double xZoom=r.getWidth();
-		double zoomfactor=xZoom/s.getWidth();
-		return zoomfactor;*/
 	}
 	@Override
 	public void mouseClicked(MouseEvent e)
@@ -48,19 +36,17 @@ public class MouseListenerConcavityRegions implements MouseListener
 		double maxX=boundingBox.getMaxX();
 		double maxY=boundingBox.getMaxY();
 	
-			//System.out.println(e.getX()*+ " "+ e.getY()*3);
 		if((this.getImageCoordinateX(e.getX())>minX)&&(this.getImageCoordinateX(e.getX())<maxX))
 		{
 			if((this.getImageCoordinateY(e.getY())>minY)&&(this.getImageCoordinateY(e.getY())<maxY))
 			{
-				Clump_Splitting.window.setText(cr.getInformation());
-				Clump_Splitting.window.setBackground(Color.lightGray);
-				Clump_Splitting.pane.add(Clump_Splitting.window);
-				Clump_Splitting.pane.setLocation(e.getXOnScreen(), e.getYOnScreen());
-		//		System.out.println("Ich tu was");
-				Clump_Splitting.pane.setBackground(Color.gray);
-				Clump_Splitting.pane.pack();
-				Clump_Splitting.pane.setVisible(true);
+				Clump_Splitting.textAreaForConcavityInformation.setText(cr.getInformation());
+				Clump_Splitting.textAreaForConcavityInformation.setBackground(Color.lightGray);
+				Clump_Splitting.windowPanelConcavityRegion.add(Clump_Splitting.textAreaForConcavityInformation);
+				Clump_Splitting.windowPanelConcavityRegion.setLocation(e.getXOnScreen(), e.getYOnScreen());
+				Clump_Splitting.windowPanelConcavityRegion.setBackground(Color.gray);
+				Clump_Splitting.windowPanelConcavityRegion.pack();
+				Clump_Splitting.windowPanelConcavityRegion.setVisible(true);
 			
 			}
 		}

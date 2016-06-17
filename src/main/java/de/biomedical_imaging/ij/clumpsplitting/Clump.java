@@ -39,10 +39,7 @@ package de.biomedical_imaging.ij.clumpsplitting;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.util.ArrayList;
-
-
 import de.biomedical_imaging.ij.clumpsplitting.SplitLines.*;
-
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
@@ -66,6 +63,7 @@ public class Clump
 	 * class ConcavityRegionAdministration
 	 */
 	public static int done=0;
+	public static ArrayList<Roi> overlayForOrientation=new ArrayList<Roi>();
 	public static ArrayList<Roi> overlayConvexHull=new ArrayList<Roi>();
 	public static ArrayList<Roi> overlaySplitPoints=new ArrayList<Roi>();
 	//public static ArrayList<Roi> overlayConcavityDepth=new ArrayList<Roi>();
