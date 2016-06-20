@@ -216,28 +216,31 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	public void run(ImageProcessor ip)
 	{
 
+		// overlays are cleared to show actual overlays
+		Clump.overlayForOrientation.clear();
 		Clump.overlayConvexHull.clear();
 		Clump.overlaySplitPoints.clear();
 		ArrayList<Clump> clumpList = new ArrayList<Clump>();
 
 		ImagePlus imp = IJ.getImage();
-		int i = 0;
+		// int i = 0;
+		/* TODO */
 		IJ.showProgress(0.0);
 		do
 		{
-			i++;
 
+			// generates a copy of the original image to binarize the image to
+			// find ConcavityRegions and SplitPoints
 			ImageProcessor imageProcessorBinary = ip.duplicate();
-			// Clump.o.clear();
 
 			AutoThresholder at = new AutoThresholder();
 			int[] histogram = imageProcessorBinary.getHistogram();
 			int threshold = at.getThreshold(Method.Default, histogram);
 
+			// pre-processing
 			imageProcessorBinary.blurGaussian(2.0);
 			imageProcessorBinary.threshold(threshold);
 			// preprocessing /*TODO*/
-			// imageProcessorBinary.autoThreshold();
 			/*
 			 * if(Clump_Splitting.BACKGROUNDCOLOR==1) {
 			 * imageProcessorBinary.erode();
@@ -249,24 +252,34 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			 * 
 			 * }
 			 */
+			// computes the blobs at the image
 			ManyBlobs blobList = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 			blobList.setBackground(BACKGROUNDCOLOR);
 
+			/*
+			 * Counter of ready Clumps has to be zero at the beginning of each
+			 * step, because all Clumps are detected at first. Counts the number
+			 * of Clumps for which no possible splitlines can be found
+			 */
 			Clump.STOP = 0;
+
 			clumpList.clear();
-			// if the background is white backgroundColor must be 1
-			// Clumps of the Image will be detected
+			/*
+			 * if the background is white backgroundColor must be 1 Clumps of
+			 * the Image will be detected
+			 */
 			blobList.findConnectedComponents();
+
 			Clump clump = null;
 			for (Blob b : blobList)
 			{
-				// right now only the outer contours are considered
+				// outerContour is detected
 				Polygon p = b.getOuterContour();
+				// innerContours of a Clump are detected
 				ArrayList<Polygon> q = b.getInnerContours();
 				clump = new Clump(p, q, ip);
 				clumpList.add(clump);
 			}
-			IJ.showProgress(i / 10);
 
 			if (!Clump_Splitting.done)
 			{
@@ -279,6 +292,9 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			 */
 		} while (clumpList.size() > Clump.STOP);
 
+		/*
+		 * writes data of each StraightSplitLine into a LibSVM file
+		 */
 		if (Clump_Splitting.WASOKED)
 		{
 			if (Clump_Splitting.WRITEDATAINFILE)
@@ -286,12 +302,19 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				this.writeDataInFile();
 			}
 		}
+		/*
+		 * If the condition is true all Clumps are split and the plugin is
+		 * completed
+		 */
 		if (Clump.STOP == clumpList.size())
 		{
 			IJ.log("Die Anzahl der gefundenen Klumpen beträgt: " + clumpList.size());
 		}
+		/*
+		 * manages the overlays
+		 */
 		Overlay o = new Overlay();
-		for(Roi overlay:Clump.overlayForOrientation)
+		for (Roi overlay : Clump.overlayForOrientation)
 		{
 			o.addElement(overlay);
 		}
@@ -303,10 +326,11 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		{
 			o.addElement(overlay);
 		}
-		
+
 		imp.setOverlay(o);
 		/*
-		 * adds MouseListener to each ConcavityRegion for the Bounding Box to show information about the ConcavityRegions
+		 * adds MouseListener to each ConcavityRegion for the Bounding Box to
+		 * show information about the ConcavityRegions
 		 */
 		for (int n = 0; n < Clump.allRegions.size(); n++)
 		{
@@ -317,6 +341,13 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 	}
 
+	/**
+	 * writes Data about all StraightSplitLines into a LibSVM file to save Data
+	 * and to analyse it with a SVM and optimize parameter for the cell type:
+	 * data which is saved is the distance between the ConcavityPixel of the
+	 * ConcavityRegion of the SplitLine and the sum of the ConcavityDeoth of all
+	 * ConcavityPixel
+	 */
 	private void writeDataInFile()
 	{
 
@@ -358,9 +389,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 		gd.setEnabled(true);
 		String selection = gd.getNextRadioButton();
-		// String splitLineType=gd.getNextChoice();
 		boolean showConvexHull = gd.getNextBoolean();
-		// boolean showConcavityDepth=gd.getNextBoolean();
 		boolean showPixels = gd.getNextBoolean();
 		boolean writeDataInFile = false;
 		Double concavityDepthThreshold = gd.getNextNumber();
@@ -399,24 +428,13 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 					BACKGROUNDCOLOR = 1;
 				}
 			}
-			/*
-			 * if(splitLineType.equals("Straight Split-Line")) {
-			 * Clump_Splitting.SPLITLINETYPE=0; } else{
-			 * if(splitLineType.equals("Maximum-Intensity-Split-Line")) {
-			 * Clump_Splitting.SPLITLINETYPE=1; } else{
-			 * if(splitLineType.equals("Minimum-Intensity-Split-Line")) {
-			 * Clump_Splitting.SPLITLINETYPE=2; } else{
-			 * if(splitLineType.equals("Geodesic-Distance-Split-Line")) {
-			 * Clump_Splitting.SPLITLINETYPE=3; } } } }
-			 */
-			// SHOWCONCAVITYDEPTH=showConcavityDepth;
+
 			SHOWCONVEXHULL = showConvexHull;
 			Clump_Splitting.WRITEDATAINFILE = writeDataInFile;
 			SHOWPIXELS = showPixels;
 			if (!saliencyThreshold.isNaN())
 			{
 				SALIENCY_THRESHOLD = saliencyThreshold;
-				// IJ.log(saliencyThreshold+"");
 			}
 			if (!concavityConcavityAlignmentThreshold.isNaN())
 			{
@@ -426,21 +444,14 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			{
 				CONCAVITY_DEPTH_THRESHOLD = concavityDepthThreshold;
 			}
-			// IJ.log(concavityDepthThreshold+"");
 			if (!concavityLineAlignmentThreshold.isNaN())
 			{
 				CONCAVITYLINE_THRESHOLD = ((2 * Math.PI) / 360) * concavityLineAlignmentThreshold;
 			}
-			// IJ.log("concavitylinethreshold1="+concavityLineAlignmentThreshold);
-
-			// IJ.log("concavitylinethreshold2="+CONCAVITYLINE_THRESHOLD);
 			if (!concavityAngleThreshold.isNaN())
 			{
 				CONCAVITYANGLE_THRESHOLD = ((2 * Math.PI) / 360) * concavityAngleThreshold;
 			}
-			// IJ.log("concavitylinethreshold1="+concavityAngleThreshold);
-
-			// IJ.log("concavityanglethreshold2="+CONCAVITYLINE_THRESHOLD);
 			if (!concavityRatioThreshold.isNaN())
 			{
 				CONCAVITYRATIO_THRESHOLD = concavityRatioThreshold;
@@ -473,38 +484,6 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		gd.addChoice("Split-Line-Type:", items, "Straight Split-Line");
 		gd.showDialog();
 
-		/*
-		 * GenericDialog gd = new NonBlockingGenericDialog("Set Parameters");
-		 * 
-		 * String[] radioboxValues = { "black", "white" };
-		 * gd.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues,
-		 * 1, 2, "white"); //String[] checkboxes= new String[2];
-		 * //checkboxes[0]="Show Convexhull"; //checkboxes[1]=
-		 * "Show Concavitydepth"; //boolean[] checkboxValues=new boolean[2];
-		 * //checkboxValues[0]=false; //checkboxValues[1]=false;
-		 * 
-		 * // gd.addCheckboxGroup(1, 2,checkboxes, checkboxValues); String[]
-		 * items={"Straight Split-Line"
-		 * ,"Maximum-Intensity-Split-Line","Minimum-Intensity-Split-Line",
-		 * "Geodesic-Distance-Split-Line"}; gd.addChoice("Split-Line-Type:",
-		 * items, "Straight Split-Line"); gd.addCheckbox("Show Convex Hull"
-		 * ,false); gd.addCheckbox("Show Concavity-Depth", false);
-		 * gd.addCheckbox("Show Concavity Pixel and Split Points", false);
-		 * gd.addNumericField("Concavity-Depth threshold", 3, 0); gd.addSlider(
-		 * "Saliency threshold", 0, 1, 0.12); gd.addSlider(
-		 * "Concavity-Concavity-Alignment threshold in Degrees", 0, 180, 105);
-		 * gd.addSlider("Concavity-Line-Alignment threshold in Degrees"
-		 * ,0,180,70); gd.addSlider("Concavity-Angle threshold in Degrees"
-		 * ,0,180, 90); gd.addNumericField("Concavity-Ratio threshold", 6, 1);
-		 * gd.addPreviewCheckbox(pfr); gd.addDialogListener(this);
-		 * gd.showDialog(); gd.setFocusable(true);
-		 * WindowManager.getCurrentImage().getWindow().getCanvas().setFocusable(
-		 * true);
-		 * 
-		 * /*if(gd.isPreviewActive()) { gd.previewRunning(true);
-		 * 
-		 * }
-		 */
 		if (gd.wasCanceled())
 		{
 			return DONE;
@@ -512,6 +491,9 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 		if (gd.wasOKed())
 		{
+			/*
+			 * different Menues to chose parameter for each SplitLineType
+			 */
 			String splitLineType = gd.getNextChoice();
 			if (splitLineType.equals("Straight Split-Line") || splitLineType.equals("Maximum-Intensity-Split-Line")
 					|| splitLineType.equals("Minimum-Intensity-Split-Line")
@@ -545,21 +527,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				String[] radioboxValues =
 				{ "black", "white" };
 				dialog1.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
-				// String[] checkboxes= new String[2];
-				// checkboxes[0]="Show Convexhull";
-				// checkboxes[1]="Show Concavitydepth";
-				// boolean[] checkboxValues=new boolean[2];
-				// checkboxValues[0]=false;
-				// checkboxValues[1]=false;
 
-				// gd.addCheckboxGroup(1, 2,checkboxes, checkboxValues);
-				// String[] items={"Straight
-				// Split-Line","Maximum-Intensity-Split-Line","Minimum-Intensity-Split-Line",
-				// "Geodesic-Distance-Split-Line"};
-				// dialog1.addChoice("Split-Line-Type:", items, "Straight
-				// Split-Line");
 				dialog1.addCheckbox("Show Convex Hull", false);
-				// dialog1.addCheckbox("Show Concavity-Depth", false);
 				dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
 				dialog1.addCheckbox("Write data in file to train SVM", false);
 				dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
@@ -582,7 +551,6 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				if (dialog1.wasOKed())
 				{
 					Clump_Splitting.WASOKED = true;
-					System.out.println("OKKKKKKK");
 				}
 				if (dialog1.wasCanceled())
 				{
@@ -608,35 +576,11 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 					String[] radioboxValues =
 					{ "black", "white" };
 					dialog1.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
-					// String[] checkboxes= new String[2];
-					// checkboxes[0]="Show Convexhull";
-					// checkboxes[1]="Show Concavitydepth";
-					// boolean[] checkboxValues=new boolean[2];
-					// checkboxValues[0]=false;
-					// checkboxValues[1]=false;
 
-					// gd.addCheckboxGroup(1, 2,checkboxes, checkboxValues);
-					// String[] items={"Straight
-					// Split-Line","Maximum-Intensity-Split-Line","Minimum-Intensity-Split-Line",
-					// "Geodesic-Distance-Split-Line"};
-					// dialog1.addChoice("Split-Line-Type:", items, "Straight
-					// Split-Line");
 					dialog1.addCheckbox("Show Convex Hull", false);
-					// dialog1.addCheckbox("Show Concavity-Depth", false);
 					dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
 					dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
-					/*
-					 * dialog1.addSlider("Saliency threshold", 0, 1, 0.12);
-					 * dialog1.addSlider(
-					 * "Concavity-Concavity-Alignment threshold in Degrees", 0,
-					 * 180, 105); dialog1.addSlider(
-					 * "Concavity-Line-Alignment threshold in Degrees"
-					 * ,0,180,70); dialog1.addSlider(
-					 * "Concavity-Angle threshold in Degrees",0,180, 90);
-					 * dialog1.addNumericField("Concavity-Ratio threshold", 6,
-					 * 1); dialog1.addNumericField("C1", 1.73, 3);
-					 * dialog1.addNumericField("C2",-4.72,3);
-					 */
+
 					dialog1.addPreviewCheckbox(pfr);
 					dialog1.addDialogListener(this);
 					dialog1.showDialog();

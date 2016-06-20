@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
-import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.regression.LabeledPoint;
 
 public class SVMPanel extends JPanel
@@ -19,9 +18,9 @@ public class SVMPanel extends JPanel
 	 */
 	private static final long serialVersionUID = 1L;
 	private List<LabeledPoint> labeledPoints= new ArrayList<LabeledPoint>();
-	private Vector weight;
+	private double[] weight;
 	private double bias;
-	public SVMPanel(List<LabeledPoint> list, Vector weight, double bias)
+	public SVMPanel(List<LabeledPoint> list, double[] weight, double bias)
 	{
 		  this.setBackground(Color.white);
 		  this.setPreferredSize(new Dimension(500,500));
@@ -59,12 +58,11 @@ public class SVMPanel extends JPanel
 	    	  else{
 	    		  g.setColor(Color.blue);
 	    	  }
-	    	  g.drawRect((int)features[1]+20-3, this.getHeight()-(int)features[0]-20-3, 6,6);
+	    	  g.drawRect((int)features[0]+20-3, this.getHeight()-(int)features[1]-20-3, 6,6);
 	    	  
 	    	 
 	      }
 	      g.setColor(Color.green);
-    	  double[] array = this.weight.toArray();
     	 /* double m= array[0]/array[1];
     	  double b=this.bias;
     	  double x1=0;
@@ -73,9 +71,9 @@ public class SVMPanel extends JPanel
     	  double y2=-m*x2+b;
     	  
     	  System.out.println(x1+" "+ y1+ " "+ x2+ " "+ y2);*/
-    	  double y =-(array[0]/array[1]);
+    	  double y =(weight[1]/weight[0]);
     	  System.out.println(this.getWidth()+ " "+ y);
     	  double wert= y*this.getWidth();
-    	  g.drawLine((int)20, this.getHeight()-20, this.getWidth()+20,-this.getHeight()- (int) wert-20);
+    	  g.drawLine((int)20, this.getHeight()-20-(int)bias, this.getWidth()+20,-this.getHeight()- (int) wert-20-(int)bias);
 	   }
 }
