@@ -34,20 +34,13 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.AWTEvent;
-import java.awt.Polygon;
+import java.awt.AWTEvent;import java.awt.Polygon;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JTextArea;
 import javax.swing.JWindow;
-
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.mllib.linalg.DenseVector;
-import org.apache.spark.mllib.linalg.Vector;
-import org.apache.spark.mllib.regression.LabeledPoint;
-import org.apache.spark.mllib.util.MLUtils;
 
 import de.biomedical_imaging.ij.clumpsplitting.SplitLines.SplitLineAssignmentSVM;
 import ij.IJ;
@@ -351,36 +344,56 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	private void writeDataInFile()
 	{
 
-		SparkConf conf = new SparkConf().setAppName("Test").setMaster("local");
-		JavaSparkContext sc = new JavaSparkContext(conf);
-
-		ArrayList<LabeledPoint> listOfAllLabeledPoints = new ArrayList<LabeledPoint>();
+		/*
+		 * SparkConf conf = new
+		 * SparkConf().setAppName("Test").setMaster("local"); JavaSparkContext
+		 * sc = new JavaSparkContext(conf);
+		 * 
+		 * ArrayList<LabeledPoint> listOfAllLabeledPoints = new
+		 * ArrayList<LabeledPoint>();
+		 */
+		
+		FileWriter writer = null;
+		try
+		{
+			writer = new FileWriter("yourfile.csv");
+		} catch (IOException e1)
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		for (SplitLineAssignmentSVM slaSVM : Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM)
 		{
-			double[] values = new double[2];
-			double maxDistSum = slaSVM.getSumConcavityDepth();
+			Double maxDistSum = slaSVM.getSumConcavityDepth();
 			maxDistSum = maxDistSum * 1000;
-			maxDistSum = Math.round(maxDistSum);
+			maxDistSum = (double) Math.round(maxDistSum);
 			maxDistSum = maxDistSum / 1000;
-			double distance = slaSVM.getDistance();
+			Double distance = slaSVM.getDistance();
 			distance = distance * 1000;
-			distance = Math.round(distance);
+			distance = (double) Math.round(distance);
 			distance = distance / 1000;
-			values[0] = maxDistSum;
-			values[1] = distance;
-			Vector v = new DenseVector(values);
-			LabeledPoint lp = new LabeledPoint(slaSVM.getClassificationValue(), v);
-			listOfAllLabeledPoints.add(lp);
-
+			// feed in your array (or convert your data to an array)
+			String[] entrie =
+			{  String.valueOf(slaSVM.getClassificationValue()),maxDistSum.toString(), distance.toString() };
+			try
+			{
+				writer.write(entrie[0]+","+entrie[1]+","+ entrie[2]+"\n");
+			} catch (IOException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		}
-		JavaRDD<LabeledPoint> test = sc.parallelize(listOfAllLabeledPoints);
-
-		String[] name = imp.getTitle().split("\\.");
-		String filename = "test/testen" + name[0];
-
-		MLUtils.saveAsLibSVMFile(test.rdd(), filename);
-		sc.close();
+		try
+		{
+			writer.close();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
