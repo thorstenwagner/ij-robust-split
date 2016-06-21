@@ -94,20 +94,24 @@ public class ConcavityRegionAdministration
 			
 			ArrayList<Point2D> pointList = getAllEmbeddedPointsFromBoundaryArc(startX, startY, endX, endY);
 			ConcavityRegionAdministration.allConcavityRegionPoints.addAll(pointList);
-			//if(pointList.size()>3)
-			//{
+			if(pointList.size()>3)
+			{
 			ArrayList<Double> doubleList = computeDistance(pointList, startX, startY, endX, endY);
 			double[] maxData = getMaxDist(doubleList);
 			if (maxData[0] > Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
 			{
-				
+				ArrayList<Integer> maxDataList=new ArrayList<Integer>();
+				for(int m=1;m<maxData.length;m++)
+				{
+					maxDataList.add((int)maxData[m]);
+				}
 				ConcavityRegion concavityRegion = new ConcavityRegion(startX, startY, endX, endY, pointList, doubleList,
-						maxData[0], (int) maxData[1]);
+						maxData[0], maxDataList);
 				concavityRegionList.add(concavityRegion);
 		//		System.out.println("außen "+concavityRegion);
 			}
 
-		//}
+		}
 		}
 		//IJ.log("Anzahl ohne innere"+ concavityRegionList.size());
 		}
@@ -147,8 +151,13 @@ public class ConcavityRegionAdministration
 				//{
 					
 				//	IJ.log("test");
+				ArrayList<Integer> maxDataList=new ArrayList<Integer>();
+				for(int m=1;m<maxData.length;m++)
+				{
+					maxDataList.add((int)maxData[m]);
+				}
 					ConcavityRegion concavityRegion = new ConcavityRegion(innerStartX, innerStartY, innerEndX, innerEndY, pointList, doubleList,
-							maxData[0], (int) maxData[1]);
+							maxData[0], maxDataList);
 
 				//	System.out.println("innenTemp "+concavityRegion);
 					
@@ -182,8 +191,11 @@ public class ConcavityRegionAdministration
 						teil1=tempInner.get(j);
 						teil2=tempInner.get(tempInner.size()-1);
 					}
-					Point2D endPoint=teil1.getMaxDistCoord();
-					Point2D startPoint=teil2.getMaxDistCoord();
+					ArrayList<Point2D> list= teil1.getMaxDistCoord();
+					Point2D endPoint=list.get(list.size()/2);
+					ArrayList<Point2D> list2= teil2.getMaxDistCoord();
+					
+					Point2D startPoint=list2.get(list2.size()/2);
 				/*	Line polygonRoi = new Line(startPoint.getX(), startPoint.getY(),endPoint.getX(), endPoint.getY());
 					polygonRoi.setStrokeColor(Color.green);
 				*/	
@@ -192,10 +204,15 @@ public class ConcavityRegionAdministration
 					{
 					ArrayList<Double> doubleListInner = computeDistance(embeddedPoints, (int)startPoint.getX(), (int)startPoint.getY(), (int)endPoint.getX(), (int)endPoint.getY());
 					double[] maxDataInner = getMaxDist(doubleListInner);
+					ArrayList<Integer> maxDataList= new ArrayList<Integer>();
+					for(int i=1;i<maxDataInner.length;i++)
+					{
+						maxDataList.add((int)maxDataInner[i]);
+					}
 					if (maxDataInner[0] > Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
 					{
 						
-						ConcavityRegion crReal=new ConcavityRegion((int)startPoint.getX(),(int)startPoint.getY(),(int)endPoint.getX(),(int)endPoint.getY(),embeddedPoints,doubleListInner,maxDataInner[0],(int)maxDataInner[1]);
+						ConcavityRegion crReal=new ConcavityRegion((int)startPoint.getX(),(int)startPoint.getY(),(int)endPoint.getX(),(int)endPoint.getY(),embeddedPoints,doubleListInner,maxDataInner[0],maxDataList);
 								//	tempInner.add(crReal);
 					//	IJ.log("innen");
 						concavityRegionList.add(crReal);
@@ -364,8 +381,9 @@ public class ConcavityRegionAdministration
 		double max = 0;
 		int index = 0;
 		ArrayList<Integer> moreThanOneMax= new ArrayList<Integer>();
-		for (double d : distList)
+		for (int i=0;i<distList.size();i++)
 		{
+			double d = distList.get(i);
 			if(d>=max)
 			{
 				if (d > max)
@@ -385,13 +403,13 @@ public class ConcavityRegionAdministration
 			}
 			index++;
 		}
-		int indexMax=0;
-		if(moreThanOneMax.size()>0)
+		double[] tmp= new double[moreThanOneMax.size()+1];
+		tmp[0]=max;
+		for(int i=0;i<moreThanOneMax.size();i++)
 		{
-			indexMax=moreThanOneMax.get((moreThanOneMax.size()/2));
+			tmp[i+1]=moreThanOneMax.get(i);
 		}
-		double[] tmp =
-		{ max, indexMax };
+		
 		return tmp;
 	}
 

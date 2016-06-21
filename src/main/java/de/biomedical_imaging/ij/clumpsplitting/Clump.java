@@ -207,6 +207,7 @@ public class Clump
 		ConcavityRegionAdministration cra = new ConcavityRegionAdministration(this);
 		ArrayList<ConcavityRegion> concavityRegionList = cra.computeConcavityRegions();
 
+		System.out.println(concavityRegionList.size());
 		for (ConcavityRegion cr : concavityRegionList)
 		{
 

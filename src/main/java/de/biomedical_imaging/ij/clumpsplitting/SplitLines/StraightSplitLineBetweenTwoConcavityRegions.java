@@ -69,6 +69,8 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 	 * which is used to evaluate the quality of the possible Splitline
 	 */
 	private double chi;
+	private Point2D startPoint;
+	private Point2D endPoint;
 	private double saliency;
 	/**
 	 * angle between the orientation of the two concavityRegions, which is used
@@ -98,7 +100,7 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 	 *            orientation of the concavityRegion
 	 */
 	public StraightSplitLineBetweenTwoConcavityRegions(ConcavityRegion cI, ConcavityRegion cJ, double saliency,
-			double concavityConcavityAlignment, double concavityLineAlignment,double chi)
+			double concavityConcavityAlignment, double concavityLineAlignment,double chi, Point2D startPoint,Point2D endPoint)
 	{
 		this.cI = cI;
 		this.cJ = cJ;
@@ -106,6 +108,8 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 		this.concavityConcavityAlignment = concavityConcavityAlignment;
 		this.concavityConcavityAlignment = concavityLineAlignment;
 		this.chi=chi;
+		this.startPoint=startPoint;
+		this.endPoint=endPoint;
 	}
 
 	public double getConcavityConcavityAlignment()
@@ -124,11 +128,11 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 	}
 	public Point2D getStartPoint()
 	{
-		return cI.getMaxDistCoord();
+		return this.startPoint;
 	}
 	public Point2D getEndPoint()
 	{
-		return cJ.getMaxDistCoord();
+		return this.endPoint;
 	}
 
 	/**
@@ -148,8 +152,8 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 		}
 	//	System.out.println("start drawing");
 	//	System.out.println(this);
-		ip.drawLine((int) cI.getMaxDistCoord().getX()-1, (int) cI.getMaxDistCoord().getY()+1,
-				(int) cJ.getMaxDistCoord().getX(), (int) cJ.getMaxDistCoord().getY());
+		ip.drawLine((int) this.getStartPoint().getX()-1, (int) this.getStartPoint().getY()+1,
+				(int) this.getEndPoint().getX(), (int) this.getEndPoint().getY());
 		//ip.setLineWidth(1);
 	}
 /*	public double computeChi()
@@ -184,7 +188,7 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 	}
 		@Override
 	public String toString(){
-		return "X: " + cJ.getMaxDistCoord().getX() + " Y: " + cJ.getMaxDistCoord().getY() +" X2: " + cI.getMaxDistCoord().getX() +" Y2: " + cI.getMaxDistCoord().getY();
+		return "X: " + this.getStartPoint().getX() + " Y: " + this.getStartPoint().getY() +" X2: " + this.getEndPoint().getX() +" Y2: " + this.getEndPoint().getY();
 		
 	}
 		public ConcavityRegion getCI()

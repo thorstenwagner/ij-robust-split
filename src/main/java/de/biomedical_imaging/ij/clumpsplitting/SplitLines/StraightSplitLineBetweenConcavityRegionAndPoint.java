@@ -37,6 +37,7 @@ package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
 import de.biomedical_imaging.ij.clumpsplitting.Clump;
 import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
@@ -126,7 +127,8 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 	}
 	public Point2D getStartPoint()
 	{
-		return cI.getMaxDistCoord();
+		ArrayList<Point2D> pointList= cI.getMaxDistCoord();
+		return pointList.get(pointList.size()/2);
 	}
 	public ConcavityRegion getCI()
 	{
@@ -150,7 +152,7 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 		else{
 			ip.setColor(Color.white);
 		}
-		ip.drawLine((int) cI.getMaxDistCoord().getX(), (int) cI.getMaxDistCoord().getY(), (int) point.getX(),
+		ip.drawLine((int) this.getStartPoint().getX(), (int) this.getStartPoint().getY(), (int) point.getX(),
 				(int) point.getY());
 		if(Clump_Splitting.SHOWPIXELS)
 		{
@@ -187,7 +189,7 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 
 	@Override
 	public String toString(){
-		return "X: " + point.getX() + " Y: " + point.getY() +" MaxX: " + cI.getMaxDistCoord().getX() +" MaxY: " + cI.getMaxDistCoord().getY();
+		return "X: " + point.getX() + " Y: " + point.getY() +" MaxX: " + this.getStartPoint().getX() +" MaxY: " + this.getStartPoint().getY();
 		
 	}
 	

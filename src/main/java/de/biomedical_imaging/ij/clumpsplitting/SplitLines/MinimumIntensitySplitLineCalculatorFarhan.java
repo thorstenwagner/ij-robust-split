@@ -32,10 +32,11 @@ public class MinimumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 			if(concavityRegionList.size()>0)
 			{
 			ConcavityRegion cr=concavityRegionList.get(concavityRegionList.size()-1);
-			Point2D aktuellerPunkt= cr.getMaxDistCoord();
+			ArrayList<Point2D> maxDistList= cr.getMaxDistCoord();
+			Point2D aktuellerPunkt= maxDistList.get(maxDistList.size()/2);
 		//	System.out.println("Startpunkt: "+aktuellerPunkt.getX()+" "+aktuellerPunkt.getY()+" "+ ip.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY()));
 			points.add(aktuellerPunkt);
-			double orientation=cr.getOrientation();
+			double orientation=cr.getOrientation(aktuellerPunkt);
 			int[][] filter;
 		//	System.out.println(orientation);
 			if(orientation>0&&orientation<=(Math.PI/2))
