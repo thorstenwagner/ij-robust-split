@@ -78,6 +78,7 @@ public class Clump
 	 */
 	public static ArrayList<Roi> overlaySplitPoints = new ArrayList<Roi>();
 
+	public static ArrayList<Roi> boundaryOverlay= new ArrayList<Roi>();
 	/**
 	 * List of all innerContours of a Clump
 	 */
@@ -197,6 +198,13 @@ public class Clump
 		return convexHull;
 	}
 
+	public void drawBoundaryOverlay()
+	{
+		PolygonRoi pr= new PolygonRoi(this.boundary,Roi.POLYGON);
+		pr.setStrokeColor(Color.red);
+		pr.setStrokeWidth(1);
+		Clump.boundaryOverlay.add(pr);
+	}
 	/**
 	 * computes the areas with high concavity
 	 * 

@@ -213,6 +213,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		Clump.overlayForOrientation.clear();
 		Clump.overlayConvexHull.clear();
 		Clump.overlaySplitPoints.clear();
+		Clump.boundaryOverlay.clear();
 		ArrayList<Clump> clumpList = new ArrayList<Clump>();
 
 		ImagePlus imp = IJ.getImage();
@@ -301,6 +302,10 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		 */
 		if (Clump.STOP == clumpList.size())
 		{
+			for(Clump clump: clumpList)
+			{
+				clump.drawBoundaryOverlay();
+			}
 			IJ.log("Die Anzahl der gefundenen Klumpen beträgt: " + clumpList.size());
 		}
 		/*
@@ -316,6 +321,10 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			o.addElement(overlay);
 		}
 		for (Roi overlay : Clump.overlaySplitPoints)
+		{
+			o.addElement(overlay);
+		}
+		for(Roi overlay:Clump.boundaryOverlay)
 		{
 			o.addElement(overlay);
 		}
