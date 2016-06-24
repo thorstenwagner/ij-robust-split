@@ -35,8 +35,8 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
-import java.awt.geom.Point2D;
 
+import de.biomedical_imaging.ij.clumpsplitting.ConcavityPixel;
 import ij.process.ImageProcessor;
 
 /**
@@ -50,7 +50,7 @@ import ij.process.ImageProcessor;
 public abstract class StraightSplitLine implements AbstractSplitLine
 {
 	public abstract void drawLine(ImageProcessor ip);
-	public abstract Point2D getStartPoint();
-	public abstract Point2D getEndPoint();
+	public abstract ConcavityPixel getStartConcavityPixel();
+	public abstract ConcavityPixel getEndConcavityPixel();
 	
 }

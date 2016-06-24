@@ -102,13 +102,7 @@ public class Clump
 	 */
 	public static int STOP = 0;
 
-	/**
-	 * the variable indexOfMaxConcavityRegion represents the index based on the
-	 * concavityRegionList, which contains the concavityRegion with the largest
-	 * distance between convexHull and boundary, this one is used for the
-	 * detection of a Splitline between a concavityRegion and a boundarypoint
-	 */
-	private int indexOfMaxConcavityRegion;
+	private ConcavityPixel largestConcavityPixel;
 	/**
 	 * the variable secondMaxConcavityDepth represents the distance of the
 	 * concavityRegion with the second largest distance from boundary to
@@ -218,6 +212,7 @@ public class Clump
 		System.out.println(concavityRegionList.size());
 		for (ConcavityRegion cr : concavityRegionList)
 		{
+		//	System.out.println(cr.getMaxDistCoord().get(0));
 
 			if (Clump_Splitting.SHOWPIXELS)
 			{
@@ -352,31 +347,37 @@ public class Clump
 
 	private void computeFirstAndSecondLargestConcavityDepth()
 	{
-		double[] max =
-		{ 0, 0, 0, 0 };
-		int i = 0;
+		ConcavityPixel maxDistPixel=null;
+	
+		double max=0;
+		double secondMax=0;
 		for (ConcavityRegion cr : concavityRegionList)
 		{
-			if (cr.getMaxDist() >= max[0])
+			for(ConcavityPixel cp: cr.getConcavityPixelList())
 			{
-				max[0] = cr.getMaxDist();
-				max[1] = i;
+			
+			if (cp.distance() >= max)
+			{
+				secondMax=max;
+				maxDistPixel=cp;
+				max= cp.distance();
+				
 			} else
 			{
-				if (cr.getMaxDist() >= max[2])
+				if (cp.distance() >= secondMax)
 				{
-					max[2] = cr.getMaxDist();
-					max[3] = i;
+					secondMax= cp.distance();
 				}
 			}
-			i++;
+			
+			}
 		}
-		if (max[2] < Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
+		if (secondMax < Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
 		{
-			max[2] = Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD;
+			secondMax = Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD;
 		}
-		this.indexOfMaxConcavityRegion = (int) max[1];
-		this.secondMaxConcavityDepth = max[2];
+		this.largestConcavityPixel= maxDistPixel;
+		this.secondMaxConcavityDepth = secondMax;
 
 	}
 
@@ -386,10 +387,10 @@ public class Clump
 	 * 
 	 * @return the concavityRegion with the largest ConcavityDepth of the Clump
 	 */
-	public ConcavityRegion getRegionOfMaxConcavityDepth()
+	public ConcavityPixel getPixelOfMaxConcavityDepth()
 	{
 
-		return concavityRegionList.get(indexOfMaxConcavityRegion);
+		return this.largestConcavityPixel;
 	}
 
 	/**

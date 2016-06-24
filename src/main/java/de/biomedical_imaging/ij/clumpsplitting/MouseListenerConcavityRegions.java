@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.Point2D;
 
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -41,7 +40,7 @@ public class MouseListenerConcavityRegions implements MouseListener
 		{
 			if((this.getImageCoordinateY(e.getY())>minY)&&(this.getImageCoordinateY(e.getY())<maxY))
 			{
-				for(Point2D point:cr.getMaxDistCoord())
+				for(ConcavityPixel point:cr.getConcavityPixelList())
 				{
 				Clump_Splitting.textAreaForConcavityInformation.setText(cr.getInformation(point));
 				Clump_Splitting.textAreaForConcavityInformation.setBackground(Color.lightGray);

@@ -34,7 +34,8 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.AWTEvent;import java.awt.Polygon;
+import java.awt.AWTEvent;
+import java.awt.Polygon;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,6 +81,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * splitline or not.
 	 */
 	public static ArrayList<SplitLineAssignmentSVM> listOfAllPossibleSplitLinesAndClassForSVM = new ArrayList<SplitLineAssignmentSVM>();
+	public static int CONCAVITYPIXELDETECOTORTYPE = 0;
 	/**
 	 * represents the status of the Plugin, if ok button is pressed it is true,
 	 * shows if preview is running or if the final decision is made
@@ -302,7 +304,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		 */
 		if (Clump.STOP == clumpList.size())
 		{
-			for(Clump clump: clumpList)
+			for (Clump clump : clumpList)
 			{
 				clump.drawBoundaryOverlay();
 			}
@@ -324,7 +326,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		{
 			o.addElement(overlay);
 		}
-		for(Roi overlay:Clump.boundaryOverlay)
+		for (Roi overlay : Clump.boundaryOverlay)
 		{
 			o.addElement(overlay);
 		}
@@ -361,7 +363,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		 * ArrayList<LabeledPoint> listOfAllLabeledPoints = new
 		 * ArrayList<LabeledPoint>();
 		 */
-		
+
 		FileWriter writer = null;
 		try
 		{
@@ -384,16 +386,16 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			distance = distance / 1000;
 			// feed in your array (or convert your data to an array)
 			String[] entrie =
-			{  String.valueOf(slaSVM.getClassificationValue()),maxDistSum.toString(), distance.toString() };
+			{ String.valueOf(slaSVM.getClassificationValue()), maxDistSum.toString(), distance.toString() };
 			try
 			{
-				writer.write(entrie[0]+","+entrie[1]+","+ entrie[2]+"\n");
+				writer.write(entrie[0] + "," + entrie[1] + "," + entrie[2] + "\n");
 			} catch (IOException e)
 			{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 		try
 		{
@@ -504,6 +506,10 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				"Geodesic-Distance-Split-Line", "Maximum-Intensity-Split-Line Farhan",
 				"Minimum-Intensity-Split-Line Farhan" };
 		gd.addChoice("Split-Line-Type:", items, "Straight Split-Line");
+		String[] itemsDetector =
+		{ "Detect all Concavity-Pixels", "Detect all Concavity-Pixels with largest Concavity-Depth" };
+		gd.addChoice("Concavity-Pixel-Detector-Type", itemsDetector, "Detect all Concavity-Pixels");
+
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -517,6 +523,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			 * different Menues to chose parameter for each SplitLineType
 			 */
 			String splitLineType = gd.getNextChoice();
+			String detectorType = gd.getNextChoice();
+			
 			if (splitLineType.equals("Straight Split-Line") || splitLineType.equals("Maximum-Intensity-Split-Line")
 					|| splitLineType.equals("Minimum-Intensity-Split-Line")
 					|| splitLineType.equals("Geodesic-Distance-Split-Line"))
@@ -542,6 +550,16 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 							}
 
 						}
+					}
+				}
+				if (detectorType.equals("Detect all Concavity-Pixels"))
+				{
+					Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = 0;
+				}
+				else{
+					if(detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
+					{
+						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE=1;
 					}
 				}
 				GenericDialog dialog1 = new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");
@@ -591,6 +609,17 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 						if (splitLineType.equals("Minimum-Intensity-Split-Line Farhan"))
 						{
 							Clump_Splitting.SPLITLINETYPE = 5;
+						}
+					}
+					
+					if (detectorType.equals("Detect all Concavity-Pixels"))
+					{
+						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = 0;
+					}
+					else{
+						if(detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
+						{
+							Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE=1;
 						}
 					}
 					GenericDialog dialog1 = new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");

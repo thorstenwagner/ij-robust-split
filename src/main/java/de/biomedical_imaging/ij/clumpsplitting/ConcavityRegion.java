@@ -75,14 +75,10 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	 */
 	private int endY;
 	/**
-	 * max is the largest ConcavityDepth of the ConcavityRegion
-	 */
-	private double max;
-	/**
 	 * indexMax is the index of the Point with the largest concavityDepth of the
 	 * ConcavityRegion based on the boundaryPointList
 	 */
-	private ArrayList<Integer> indexMax;
+	private ArrayList<ConcavityPixel> concavityPixelList;
 	/**
 	 * distList is the List of the concavityDepht of each Point on the boundary
 	 * to the convexHull
@@ -106,9 +102,9 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	 */
 	public void markMax()
 	{
-		for (int i = 0; i < indexMax.size(); i++)
+		for (int i = 0; i < concavityPixelList.size(); i++)
 		{
-			Point2D p = boundaryPointList.get(indexMax.get(i));
+			Point2D p = concavityPixelList.get(i).getPosition();
 
 			Line polygonRoi = new Line(p.getX(), p.getY(), p.getX(), p.getY());
 
@@ -297,7 +293,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	 *            the boundaryPointList
 	 */
 	public ConcavityRegion(int startX, int startY, int endX, int endY, ArrayList<Point2D> boundaryPointList,
-			ArrayList<Double> distList, double max, ArrayList<Integer> maxIndex)
+			ArrayList<Double> distList, ArrayList<ConcavityPixel> concavityPixelList)
 	{
 		this.startX = startX;
 		this.startY = startY;
@@ -306,12 +302,37 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 
 		this.boundaryPointList = boundaryPointList;
 		this.distList = distList;
-		this.max = max;
-		this.indexMax = maxIndex;
+		this.concavityPixelList = concavityPixelList;
 		this.midPointOfConvexHull = this.computeMidPointOfConvexHull();
 
 	}
 
+	public ConcavityRegion(int startX, int startY, int endX, int endY, ArrayList<Point2D> boundaryPointList,
+			ArrayList<Double> distList)
+	{
+		this.startX = startX;
+		this.startY = startY;
+		this.endX = endX;
+		this.endY = endY;
+
+		this.boundaryPointList = boundaryPointList;
+		this.distList = distList;
+		this.midPointOfConvexHull = this.computeMidPointOfConvexHull();
+
+	}
+	
+
+	public void setConcavityPixelList(ArrayList<ConcavityPixel> cpl)
+	{
+		this.concavityPixelList=cpl;
+		
+	}
+	
+	public void addConcavityPixel(ConcavityPixel cp)
+	{
+		this.concavityPixelList.add(cp);
+		
+	}
 	public int getStartX()
 	{
 		return startX;
@@ -340,10 +361,11 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	public ArrayList<Point2D> getMaxDistCoord()
 	{
 		ArrayList<Point2D> maxDistList = new ArrayList<Point2D>();
-		for (int i = 0; i < indexMax.size(); i++)
+		for (int i = 0; i < concavityPixelList.size(); i++)
 		{
-		//	System.out.println(boundaryPointList.get(indexMax.get(i))+ "MaxDistKoords"+ indexMax.get(i));
-			maxDistList.add(boundaryPointList.get(indexMax.get(i)));
+			// System.out.println(boundaryPointList.get(indexMax.get(i))+
+			// "MaxDistKoords"+ indexMax.get(i));
+			maxDistList.add((concavityPixelList.get(i).getPosition()));
 		}
 		return maxDistList;
 	}
@@ -353,18 +375,18 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		return boundaryPointList;
 	}
 
-	public String getInformation(Point2D maxDistPoint)
+	public String getInformation(ConcavityPixel maxDistPoint)
 	{
 
-		double cangle = (360 / (2 * Math.PI)) * this.getOrientation(maxDistPoint);
+		double cangle = (360 / (2 * Math.PI)) * this.getOrientation(maxDistPoint.getPosition());
 
 		cangle = Math.round(cangle * 100);
 		cangle = cangle / 100;
-		double concavityDepth = Math.round(this.getMaxDist() * 100);
+		double concavityDepth = Math.round(maxDistPoint.distance() * 100);
 		concavityDepth = concavityDepth / 100;
 		Point2D.Double a = new Point2D.Double(this.getStartX(), this.getStartY());
 		Point2D.Double b = new Point2D.Double(this.getEndX(), this.getEndY());
-		Point2D c = maxDistPoint;
+		Point2D c = maxDistPoint.getPosition();
 
 		double clength = Math
 				.sqrt((b.getX() - a.getX()) * (b.getX() - a.getX()) + (b.getY() - a.getY()) * (b.getY() - a.getY()));
@@ -405,20 +427,34 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		return midPointOfConvexHull;
 	}
 
-	public double getMaxDist()
+	public ArrayList<ConcavityPixel> getConcavityPixelList()
 	{
+		return concavityPixelList;
+	}
+
+	private double getMaxDistToCompare()
+	{
+		double max = 0;
+		for (int i = 0; i < concavityPixelList.size(); i++)
+		{
+			if (concavityPixelList.get(i).distance() > max)
+			{
+				max = concavityPixelList.get(i).distance();
+			}
+		}
 		return max;
 	}
 
 	@Override
 	public int compareTo(ConcavityRegion o)
 	{
-		if (this.getMaxDist() < o.getMaxDist())
+
+		if (this.getMaxDistToCompare() < o.getMaxDistToCompare())
 		{
 			return -1;
 		} else
 		{
-			if (this.getMaxDist() > o.getMaxDist())
+			if (this.getMaxDistToCompare() > o.getMaxDistToCompare())
 			{
 				return 1;
 			} else
@@ -468,8 +504,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	@Override
 	public String toString()
 	{
-		String st = "StartX:" + this.startX + " StartY:" + this.startY + " EndX:" + this.endX + " EndY:" + this.endY
-				+ " Max:" + this.max;
+		String st = "StartX:" + this.startX + " StartY:" + this.startY + " EndX:" + this.endX + " EndY:" + this.endY;
 		return st;
 	}
 }

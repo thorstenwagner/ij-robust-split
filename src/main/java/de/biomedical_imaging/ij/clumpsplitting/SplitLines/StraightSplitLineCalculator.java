@@ -45,6 +45,7 @@ import javax.vecmath.Vector2d;
 
 import de.biomedical_imaging.ij.clumpsplitting.Clump;
 import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
+import de.biomedical_imaging.ij.clumpsplitting.ConcavityPixel;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
 import ij.process.ImageProcessor;
 
@@ -250,7 +251,8 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				if (bestSplitLine != null)
 				{
 					AbstractSplitLineCalculator mmislc = new MaximumIntensitySplitLineCalculator(
-							bestSplitLine.getStartPoint(), bestSplitLine.getEndPoint());
+							bestSplitLine.getStartConcavityPixel().getPosition(),
+							bestSplitLine.getStartConcavityPixel().getPosition());
 					possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, c, ip);
 				}
 			} else
@@ -261,7 +263,8 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 					if (bestSplitLine != null)
 					{
 						GeodesicDistanceSplitLineCalculator gdslc = new GeodesicDistanceSplitLineCalculator(
-								bestSplitLine.getStartPoint(), bestSplitLine.getEndPoint());
+								bestSplitLine.getStartConcavityPixel().getPosition(),
+								bestSplitLine.getEndConcavityPixel().getPosition());
 						possibleSplitLines = gdslc.calculatePossibleSplitLines(concavityRegionList, c, ip);
 					}
 				} else
@@ -271,7 +274,8 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 						if (bestSplitLine != null)
 						{
 							AbstractSplitLineCalculator mmislc = new MinimumIntensitySplitLineCalculator(
-									bestSplitLine.getStartPoint(), bestSplitLine.getEndPoint());
+									bestSplitLine.getStartConcavityPixel().getPosition(),
+									bestSplitLine.getStartConcavityPixel().getPosition());
 							possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, c, ip);
 						}
 
@@ -311,19 +315,22 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 			{
 				StraightSplitLineBetweenTwoConcavityRegions sslbtcr = (StraightSplitLineBetweenTwoConcavityRegions) bestSplitLine;
 
-				double distance = sslbtcr.getStartPoint().distance(sslbtcr.getEndPoint());
+				double distance = sslbtcr.getStartConcavityPixel().getPosition()
+						.distance(sslbtcr.getEndConcavityPixel().getPosition());
 				distance = distance * 1000;
 				distance = Math.round(distance);
 				distance = distance / 1000;
-				double maxDistSum = sslbtcr.getCI().getMaxDist() + sslbtcr.getCJ().getMaxDist();
+				double maxDistSum = sslbtcr.getStartConcavityPixel().distance()
+						+ sslbtcr.getEndConcavityPixel().distance();
 				maxDistSum = maxDistSum * 1000;
 				maxDistSum = Math.round(maxDistSum);
 				maxDistSum = maxDistSum / 1000;
 
 				SplitLineAssignmentSVM slaSVMComparison = new SplitLineAssignmentSVM(
-						(int) sslbtcr.getStartPoint().getX(), (int) sslbtcr.getStartPoint().getY(),
-						(int) sslbtcr.getEndPoint().getX(), (int) sslbtcr.getEndPoint().getY(),
-						0, distance, maxDistSum);
+						(int) sslbtcr.getStartConcavityPixel().getPosition().getX(),
+						(int) sslbtcr.getStartConcavityPixel().getPosition().getY(),
+						(int) sslbtcr.getEndConcavityPixel().getPosition().getX(),
+						(int) sslbtcr.getEndConcavityPixel().getPosition().getY(), 0, distance, maxDistSum);
 
 				for (SplitLineAssignmentSVM slaSVM : Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM)
 				{
@@ -385,12 +392,13 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				// cTwo.getMaxDistCoord().getY());
 				if (!cOne.equals(cTwo))
 				{
-					
-					System.out.println(cOne.getMaxDistCoord().size()+ " "+ cTwo.getMaxDistCoord().size()+"SIIIIIIIIIIIIZE");
-					for (Point2D pointCOne : cOne.getMaxDistCoord())
+
+					System.out.println(
+							cOne.getMaxDistCoord().size() + " " + cTwo.getMaxDistCoord().size() + "SIIIIIIIIIIIIZE");
+					for (ConcavityPixel cpOne : cOne.getConcavityPixelList())
 					{
 
-						for (Point2D pointCTwo : cTwo.getMaxDistCoord())
+						for (ConcavityPixel cpTwo : cTwo.getConcavityPixelList())
 						{
 
 							// String str= cOne.getMaxDistCoord().getX()+", "+
@@ -405,18 +413,19 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 							 * (IOException e) { // TODO Auto-generated catch
 							 * block e.printStackTrace(); }
 							 */
-							double chi = this.computeChi(cOne, cTwo,pointCOne,pointCTwo);
-							double distance = pointCOne.distance(pointCTwo);
+							double chi = this.computeChi(cOne, cTwo, cpOne, cpTwo);
+							double distance = cpOne.getPosition().distance(cpTwo.getPosition());
 							distance = distance * 1000;
 							distance = Math.round(distance);
 							distance = distance / 1000;
-							double maxDistSum = cOne.getMaxDist() + cTwo.getMaxDist();
+							double maxDistSum = cpOne.distance() + cpTwo.distance();
 							maxDistSum = maxDistSum * 1000;
 							maxDistSum = Math.round(maxDistSum);
 							maxDistSum = maxDistSum / 1000;
 
-							SplitLineAssignmentSVM splitLine = new SplitLineAssignmentSVM((int) pointCOne.getX(),
-									(int) pointCOne.getY(), (int) pointCTwo.getX(), (int) pointCTwo.getY(), 0, distance,
+							SplitLineAssignmentSVM splitLine = new SplitLineAssignmentSVM(
+									(int) cpOne.getPosition().getX(), (int) cpOne.getPosition().getY(),
+									(int) cpTwo.getPosition().getX(), (int) cpTwo.getPosition().getY(), 0, distance,
 									maxDistSum);
 							if (!Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.contains(splitLine))
 							{
@@ -424,19 +433,21 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 							}
 							if (chi > 0.5)
 							{
-							//	System.out.println(c);
+								// System.out.println(c);
 								if (chi > 0.8)
 								{
-									double saliency = this.computeSaliency(cOne, cTwo, pointCOne,pointCTwo);
+									double saliency = this.computeSaliency(cOne, cTwo, cpOne,
+											cpTwo);
 									// IJ.log(saliency+"");
 									double concavityConcavityAlignment = this.computeConcavityConcavityAlignment(cOne,
-											cTwo,pointCOne,pointCTwo);
-									double concavityLineAlignment = this.computeConcavityLineAlignment(cOne, cTwo,pointCOne,pointCTwo);
+											cTwo, cpOne.getPosition(), cpTwo.getPosition());
+									double concavityLineAlignment = this.computeConcavityLineAlignment(cOne, cTwo,
+											cpOne.getPosition(), cpTwo.getPosition());
 
 									possibleSplitLines.clear();
 									StraightSplitLineBetweenTwoConcavityRegions splitLineAll = new StraightSplitLineBetweenTwoConcavityRegions(
 											cOne, cTwo, saliency, concavityConcavityAlignment, concavityLineAlignment,
-											chi,pointCOne,pointCTwo);
+											chi, cpOne, cpTwo);
 											/*
 											 * double[] values= new double[2];
 											 * double
@@ -468,17 +479,19 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 									possibleSplitLines.add(splitLineAll);
 									return possibleSplitLines;
 								}
-								double saliency = this.computeSaliency(cOne, cTwo,pointCOne, pointCTwo);
+								double saliency = this.computeSaliency(cOne, cTwo, cpOne,
+										cpOne);
 								// IJ.log(saliency+"");
 								if (saliency > Clump_Splitting.SALIENCY_THRESHOLD)
 								{
 									// IJ.log("Nicht aussortiert");
 									double concavityConcavityAlignment = this.computeConcavityConcavityAlignment(cOne,
-											cTwo, pointCOne,pointCTwo);
+											cTwo, cpOne.getPosition(), cpTwo.getPosition());
 
 									if (concavityConcavityAlignment < Clump_Splitting.CONCAVITYCONCAVITY_THRESHOLD)
 									{
-										double concavityLineAlignment = this.computeConcavityLineAlignment(cOne, cTwo, pointCOne, pointCTwo);
+										double concavityLineAlignment = this.computeConcavityLineAlignment(cOne, cTwo,
+												cpOne.getPosition(), cpTwo.getPosition());
 
 										if (concavityLineAlignment < Clump_Splitting.CONCAVITYLINE_THRESHOLD)
 										{
@@ -515,7 +528,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 
 											StraightSplitLineBetweenTwoConcavityRegions splitLineAll = new StraightSplitLineBetweenTwoConcavityRegions(
 													cOne, cTwo, saliency, concavityConcavityAlignment,
-													concavityLineAlignment, chi,pointCOne,pointCTwo);
+													concavityLineAlignment, chi, cpOne, cpTwo);
 
 											possibleSplitLines.add(splitLineAll);
 										}
@@ -533,22 +546,22 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 
 	}
 
-	private double computeChi(ConcavityRegion cI, ConcavityRegion cJ,Point2D pointcI, Point2D pointcJ)
+	private double computeChi(ConcavityRegion cI, ConcavityRegion cJ, ConcavityPixel cpOne, ConcavityPixel cpTwo)
 	{
 		double distance;
-		Point2D pOne = pointcI;
-		Point2D pTwo = pointcJ;
-		/*double distX;
-		double distY;
-		distX = Math.abs(pOne.getX() - pTwo.getX());
-		distY = Math.abs(pOne.getY() - pTwo.getY());
-		distance = Math.sqrt((distX * distX) + (distY * distY));
-		*/
-		distance=pOne.distance(pTwo);
-		double chi = ((Clump_Splitting.C1 * cI.getMaxDist() + Clump_Splitting.C1 * cJ.getMaxDist() + Clump_Splitting.C2)
-				/ (distance + Clump_Splitting.C1 * cI.getMaxDist() + Clump_Splitting.C1 * cJ.getMaxDist()
+		Point2D pOne = cpOne.getPosition();
+		Point2D pTwo = cpTwo.getPosition();
+		/*
+		 * double distX; double distY; distX = Math.abs(pOne.getX() -
+		 * pTwo.getX()); distY = Math.abs(pOne.getY() - pTwo.getY()); distance =
+		 * Math.sqrt((distX * distX) + (distY * distY));
+		 */
+		distance = pOne.distance(pTwo);
+		double chi = ((Clump_Splitting.C1 * cpOne.distance() + Clump_Splitting.C1 * cpTwo.distance()
+				+ Clump_Splitting.C2)
+				/ (distance + Clump_Splitting.C1 * cpOne.distance() + Clump_Splitting.C1 * cpTwo.distance()
 						+ Clump_Splitting.C2));
-	//	System.out.println(chi);
+		// System.out.println(chi);
 		// IJ.log(chi+" ");
 		return chi;
 	}
@@ -578,20 +591,24 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		if (concavityRegionList.size() > 0)
 		{
 
-			
-			ConcavityRegion concavityRegion = c.getRegionOfMaxConcavityDepth();
-			for(Point2D pointCI:concavityRegion.getMaxDistCoord())
+			ConcavityPixel concavityPixel = c.getPixelOfMaxConcavityDepth();
+			if( concavityPixel!=null)
 			{
-			double concavityAngle = this.computeConcavityAngle(concavityRegion,pointCI);
-			double concavityRatio = this.computeConcavityRatio(c, concavityRegion);
+			ConcavityRegion concavityRegion = concavityPixel.getConcavityRegion();
+			for (ConcavityPixel cpOne : concavityRegion.getConcavityPixelList())
+			{
+				double concavityAngle = this.computeConcavityAngle(concavityRegion, cpOne.getPosition());
+				double concavityRatio = this.computeConcavityRatio(c, cpOne);
 
-			StraightSplitLineBetweenConcavityRegionAndPoint ssl = this
-					.computeSplitLineBetweenConcavityPointAndPoint(concavityRegion, c, concavityAngle, concavityRatio, pointCI);
-			if (concavityAngle < Clump_Splitting.CONCAVITYANGLE_THRESHOLD)
-			{
-				if (concavityRatio > Clump_Splitting.CONCAVITYRATIO_THRESHOLD)
+				StraightSplitLineBetweenConcavityRegionAndPoint ssl = this
+						.computeSplitLineBetweenConcavityPointAndPoint(concavityRegion, c, concavityAngle,
+								concavityRatio, cpOne);
+				if (concavityAngle < Clump_Splitting.CONCAVITYANGLE_THRESHOLD)
 				{
-					liste.add(ssl);
+					if (concavityRatio > Clump_Splitting.CONCAVITYRATIO_THRESHOLD)
+					{
+						liste.add(ssl);
+					}
 				}
 			}
 			}
@@ -613,20 +630,20 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 *            the ConcavityPoint of this ConcavityRegion
 	 * @return value of saliency
 	 */
-	private double computeSaliency(ConcavityRegion cI, ConcavityRegion cJ,Point2D pointcI,Point2D pointcJ)
+	private double computeSaliency(ConcavityRegion cI, ConcavityRegion cJ, ConcavityPixel cpOne, ConcavityPixel cpTwo)
 	{
 		double minCDi = 0;
-		if (cI.getMaxDist() > cJ.getMaxDist())
+		if (cpOne.distance() > cpTwo.distance())
 		{
-			minCDi = cJ.getMaxDist();
+			minCDi = cpTwo.distance();
 		} else
 		{
-			minCDi = cI.getMaxDist();
+			minCDi = cpOne.distance();
 		}
 		double distance;
 		double saliency = 0;
-		Point2D pOne = pointcI;
-		Point2D pTwo = pointcJ;
+		Point2D pOne = cpOne.getPosition();
+		Point2D pTwo = cpTwo.getPosition();
 		double distX;
 		double distY;
 		distX = Math.abs(pOne.getX() - pTwo.getX());
@@ -651,7 +668,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 *         concavityPoint of the ConcavityRegion
 	 */
 
-	private Vector2d computeVi(ConcavityRegion cI,Point2D pointcI)
+	private Vector2d computeVi(ConcavityRegion cI, Point2D pointcI)
 	{
 		Point2D midPointI = cI.getMidPointOfConvexHull();
 		Point2D maxPointI = pointcI;
@@ -674,11 +691,12 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 *            the ConcavityPoint of this ConcavityRegion
 	 * @return value of concavityConcavityAlignment
 	 */
-	private double computeConcavityConcavityAlignment(ConcavityRegion cI, ConcavityRegion cJ, Point2D pointCI,Point2D pointCJ)
+	private double computeConcavityConcavityAlignment(ConcavityRegion cI, ConcavityRegion cJ, Point2D pointCI,
+			Point2D pointCJ)
 	{
 		double concavityConcavityAlignment = 0;
-		Vector2d vI = this.computeVi(cI,pointCI);
-		Vector2d vJ = this.computeVi(cJ,pointCJ);
+		Vector2d vI = this.computeVi(cI, pointCI);
+		Vector2d vJ = this.computeVi(cJ, pointCJ);
 		vI.normalize();
 		vJ.normalize();
 
@@ -702,7 +720,8 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 * @return value of concavityLineAlignment
 	 */
 
-	private double computeConcavityLineAlignment(ConcavityRegion cI, ConcavityRegion cJ, Point2D pointCI,Point2D pointCJ)
+	private double computeConcavityLineAlignment(ConcavityRegion cI, ConcavityRegion cJ, Point2D pointCI,
+			Point2D pointCJ)
 	{
 		double concavityLineAlignment = 0;
 		Point2D maxPointOne = pointCI;
@@ -711,8 +730,8 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		double yDist = maxPointTwo.getY() - maxPointOne.getY();
 
 		Vector2d uij = new Vector2d(xDist, yDist);
-		Vector2d vOne = this.computeVi(cI,pointCI);
-		Vector2d vTwo = this.computeVi(cJ,pointCJ);
+		Vector2d vOne = this.computeVi(cI, pointCI);
+		Vector2d vTwo = this.computeVi(cJ, pointCJ);
 		uij.normalize();
 		vOne.normalize();
 		vTwo.normalize();
@@ -774,10 +793,10 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 *            ConcavityRegion with the largest concavityDepth
 	 * @return value of concavityRatio
 	 */
-	private double computeConcavityRatio(Clump c, ConcavityRegion cI)
+	private double computeConcavityRatio(Clump c, ConcavityPixel cpOne)
 	{
 		double concavityRatio;
-		concavityRatio = ((cI.getMaxDist()) / (c.getSecondMaxConcavityRegionDepth()));
+		concavityRatio = ((cpOne.distance()) / (c.getSecondMaxConcavityRegionDepth()));
 		return concavityRatio;
 	}
 
@@ -798,10 +817,10 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 * @return Straight SplitLine for the concavityRegion
 	 */
 	private StraightSplitLineBetweenConcavityRegionAndPoint computeSplitLineBetweenConcavityPointAndPoint(
-			ConcavityRegion cI, Clump c, double concavityAngle, double concavityRatio, Point2D pointCI)
+			ConcavityRegion cI, Clump c, double concavityAngle, double concavityRatio, ConcavityPixel cpOne)
 	{
 		Point2D midPoint = cI.getMidPointOfConvexHull();
-		Point2D concavityPoint = pointCI;
+		Point2D concavityPoint = cpOne.getPosition();
 		Line2D.Double line = new Line2D.Double(midPoint, concavityPoint);
 		Polygon p = c.getBoundary();
 		HashSet<Point2D.Double> test = new HashSet<Point2D.Double>();
@@ -832,7 +851,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 			}
 		}
 		StraightSplitLineBetweenConcavityRegionAndPoint s = new StraightSplitLineBetweenConcavityRegionAndPoint(cI,
-				concavityAngle, concavityRatio, minDistPoint);
+				concavityAngle, concavityRatio, minDistPoint,cpOne);
 		return s;
 	}
 }

@@ -37,10 +37,10 @@ package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 
 import de.biomedical_imaging.ij.clumpsplitting.Clump;
 import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
+import de.biomedical_imaging.ij.clumpsplitting.ConcavityPixel;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
 import ij.gui.Line;
 import ij.process.ImageProcessor;
@@ -74,7 +74,9 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 	/**
 	 * the selected Point to split the Clump
 	 */
-	Point2D.Double point;
+	private ConcavityPixel endConcavityPixel;
+
+	private ConcavityPixel startConcavityPixel;
 
 	/**
 	 * 
@@ -93,104 +95,112 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 	 *            the selected Point to split the Clump
 	 */
 	public StraightSplitLineBetweenConcavityRegionAndPoint(ConcavityRegion cI, double concavityAngle,
-			double concavityRatio, Point2D.Double point)
+			double concavityRatio, Point2D endConcavityPixel, ConcavityPixel startConcavityPixel)
 	{
 		this.cI = cI;
 		this.concavityAngle = concavityAngle;
 		this.concavityRatio = concavityRatio;
-		this.point = point;
+		this.endConcavityPixel = new ConcavityPixel(endConcavityPixel,0,null);
+		this.startConcavityPixel = startConcavityPixel;
 	}
 
-/*	public boolean contains(Point2D p)
-	{
-		Line2D.Double linie=new Line2D.Double((int) cI.getMaxDistCoord().getX(), (int) cI.getMaxDistCoord().getY(), (int) point.getX(),
-				(int) point.getY());
-		if(linie.contains(p))
-		{
-			return true;
-		}
-		else{
-			return false;
-		}
-	}*/
+	/*
+	 * public boolean contains(Point2D p) { Line2D.Double linie=new
+	 * Line2D.Double((int) cI.getMaxDistCoord().getX(), (int)
+	 * cI.getMaxDistCoord().getY(), (int) point.getX(), (int) point.getY());
+	 * if(linie.contains(p)) { return true; } else{ return false; } }
+	 */
 	public double getConcavityAngle()
 	{
 		return concavityAngle;
 	}
+
 	public double getConcavityRatio()
 	{
 		return concavityRatio;
 	}
-	public Point2D getEndPoint()
+
+	public ConcavityPixel getEndConcavityPixel()
 	{
-		return point;
+		return endConcavityPixel;
 	}
-	public Point2D getStartPoint()
+
+	public ConcavityPixel getStartConcavityPixel()
 	{
-		ArrayList<Point2D> pointList= cI.getMaxDistCoord();
-		return pointList.get(pointList.size()/2);
+		// ArrayList<Point2D> pointList= cI.getMaxDistCoord();
+		return this.startConcavityPixel;
 	}
+
 	public ConcavityRegion getCI()
 	{
 		return cI;
 	}
-		/**
+
+	/**
 	 * draws the Splitline
-	 * @param ip ImageProcessor to draw the SplitLine
+	 * 
+	 * @param ip
+	 *            ImageProcessor to draw the SplitLine
 	 */
 	public void drawLine(ImageProcessor ip)
 	{
-		//System.out.println("ConcAndPoint Error");
-		if(cI!=null){
-			if(point!=null)
+		// System.out.println("ConcAndPoint Error");
+		if (cI != null)
+		{
+			if (this.getEndConcavityPixel().getPosition() != null)
 			{
-		ip.setLineWidth(3);
-		if(Clump_Splitting.BACKGROUNDCOLOR==0)
-		{
-		ip.setColor(Color.black);
-		}
-		else{
-			ip.setColor(Color.white);
-		}
-		ip.drawLine((int) this.getStartPoint().getX(), (int) this.getStartPoint().getY(), (int) point.getX(),
-				(int) point.getY());
-		if(Clump_Splitting.SHOWPIXELS)
-		{
-		//	ip.setColor(Color.gray);
-		//ip.setLineWidth(10);
-		
-		
-		Line polygonRoi = new Line(point.getX(), point.getY(),point.getX(), point.getY());
+				ip.setLineWidth(3);
+				if (Clump_Splitting.BACKGROUNDCOLOR == 0)
+				{
+					ip.setColor(Color.black);
+				} else
+				{
+					ip.setColor(Color.white);
+				}
+				ip.drawLine((int) this.getStartConcavityPixel().getPosition().getX(),
+						(int) this.getStartConcavityPixel().getPosition().getY(),
+						(int) this.getEndConcavityPixel().getPosition().getX(),
+						(int) this.getEndConcavityPixel().getPosition().getY());
+				if (Clump_Splitting.SHOWPIXELS)
+				{
+					// ip.setColor(Color.gray);
+					// ip.setLineWidth(10);
 
+					Line polygonRoi = new Line(this.getEndConcavityPixel().getPosition().getX(),
+							this.getEndConcavityPixel().getPosition().getY(),
+							this.getEndConcavityPixel().getPosition().getX(),
+							this.getEndConcavityPixel().getPosition().getY());
 
-	      polygonRoi.setStrokeWidth(10);
-	      polygonRoi.setStrokeColor(Color.red);
-		     
-	    // Roi.setColor(Color.red);
-	      
-	      Clump.overlaySplitPoints.add(polygonRoi);
-		/*ip.drawDot((int) point.getX(), (int) point.getY());
-		ip.setLineWidth(1);
-		if(Clump_Splitting.BACKGROUNDCOLOR==0)
-		{
-		ip.setColor(Color.black);
+					polygonRoi.setStrokeWidth(10);
+					polygonRoi.setStrokeColor(Color.red);
+
+					// Roi.setColor(Color.red);
+
+					Clump.overlaySplitPoints.add(polygonRoi);
+					/*
+					 * ip.drawDot((int) point.getX(), (int) point.getY());
+					 * ip.setLineWidth(1);
+					 * if(Clump_Splitting.BACKGROUNDCOLOR==0) {
+					 * ip.setColor(Color.black); } else{
+					 * ip.setColor(Color.white); }
+					 */
+				} else
+				{
+					Clump.overlaySplitPoints.clear();
+				}
+
+			}
 		}
-		else{
-			ip.setColor(Color.white);
-		}*/
-		}
-		else{
-			Clump.overlaySplitPoints.clear();
-		}
-		
-	}
-	}
 	}
 
 	@Override
-	public String toString(){
-		return "X: " + point.getX() + " Y: " + point.getY() +" MaxX: " + this.getStartPoint().getX() +" MaxY: " + this.getStartPoint().getY();
-		
+	public String toString()
+	{
+		return "X: " + this.getEndConcavityPixel().getPosition().getX() + " Y: "
+				+ this.getEndConcavityPixel().getPosition().getY() + " MaxX: "
+				+ this.getStartConcavityPixel().getPosition().getX() + " MaxY: "
+				+ this.getStartConcavityPixel().getPosition().getY();
+
 	}
-	
-	}
+
+}
