@@ -47,6 +47,7 @@ import de.biomedical_imaging.ij.clumpsplitting.Clump;
 import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityPixel;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
+import de.biomedical_imaging.ij.clumpsplitting.SplitLineType;
 import ij.process.ImageProcessor;
 
 /**
@@ -240,13 +241,13 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		}
 		ArrayList<AbstractSplitLine> possibleSplitLines = new ArrayList<AbstractSplitLine>();
 
-		if (Clump_Splitting.SPLITLINETYPE == 0)
+		if (Clump_Splitting.SPLITLINETYPE == SplitLineType.STRAIGHTSPLITLINE)
 		{
 			possibleSplitLines.add(bestSplitLine);
 		} else
 		{
 
-			if (Clump_Splitting.SPLITLINETYPE == 1)
+			if (Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINE)
 			{
 				if (bestSplitLine != null)
 				{
@@ -257,7 +258,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				}
 			} else
 			{
-				if (Clump_Splitting.SPLITLINETYPE == 3)
+				if (Clump_Splitting.SPLITLINETYPE == SplitLineType.GEODESICDISTANCESPLITLINE)
 				{
 					// System.out.println(bestSplitLine);
 					if (bestSplitLine != null)
@@ -269,7 +270,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 					}
 				} else
 				{
-					if (Clump_Splitting.SPLITLINETYPE == 2)
+					if (Clump_Splitting.SPLITLINETYPE == SplitLineType.MINIMUMINTENSITYSPLITLINE)
 					{
 						if (bestSplitLine != null)
 						{
@@ -431,7 +432,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 							{
 								Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.add(splitLine);
 							}
-							if (chi > 0.5)
+							if (chi > Clump_Splitting.CHI_THRESHOLD)
 							{
 								// System.out.println(c);
 								if (chi > 0.8)

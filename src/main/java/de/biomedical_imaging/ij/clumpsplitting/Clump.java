@@ -244,21 +244,21 @@ public class Clump
 		 * For SplitLineTypes 0-3 first the Concavitypixels of a
 		 * StraightSplitLine are detected
 		 */
-		if (Clump_Splitting.SPLITLINETYPE == 0 || Clump_Splitting.SPLITLINETYPE == 1
-				|| Clump_Splitting.SPLITLINETYPE == 2 || Clump_Splitting.SPLITLINETYPE == 3)
+		if (Clump_Splitting.SPLITLINETYPE == SplitLineType.STRAIGHTSPLITLINE || Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINE
+				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.MINIMUMINTENSITYSPLITLINE || Clump_Splitting.SPLITLINETYPE == SplitLineType.GEODESICDISTANCESPLITLINE)
 		{
 			AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
 			possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this, ip);
 		} else
 		{
-			if (Clump_Splitting.SPLITLINETYPE == 4)
+			if (Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINEFARHAN)
 			{
 				AbstractSplitLineCalculator mislcf = new MaximumIntensitySplitLineCalculatorFarhan();
 				possibleSplitLines = mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip);
 
 			} else
 			{
-				if (Clump_Splitting.SPLITLINETYPE == 5)
+				if (Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINEFARHAN)
 				{
 					AbstractSplitLineCalculator mislcf = new MinimumIntensitySplitLineCalculatorFarhan();
 					possibleSplitLines = mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip);

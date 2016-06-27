@@ -81,7 +81,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * splitline or not.
 	 */
 	public static ArrayList<SplitLineAssignmentSVM> listOfAllPossibleSplitLinesAndClassForSVM = new ArrayList<SplitLineAssignmentSVM>();
-	public static int CONCAVITYPIXELDETECOTORTYPE = 0;
+	public static ConcavityPixelDetectorType CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
 	/**
 	 * represents the status of the Plugin, if ok button is pressed it is true,
 	 * shows if preview is running or if the final decision is made
@@ -111,7 +111,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * Maximum-Intensity-Split-Line Farhan and 5 corresponds to
 	 * Minimum-Intensity-Split-Line Farhan"))
 	 */
-	public static int SPLITLINETYPE = 0;
+	public static SplitLineType SPLITLINETYPE = SplitLineType.STRAIGHTSPLITLINE;
 	/**
 	 * the threshold defines if a ConcavityRegion is valid or not. If the
 	 * largest concavityDepth of a concavityRegion is larger than the threshold
@@ -148,6 +148,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * valid SplitLine
 	 */
 	public static double CONCAVITYANGLE_THRESHOLD = 1.5707963;
+	public static double CHI_THRESHOLD=0.5;
 	/**
 	 * used for SplitLinesBetweenConcavityRegionAndPoint. ratio between the
 	 * actual largest concavityDepth and the second largest concavityDepth. If
@@ -424,8 +425,9 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		Double concavityRatioThreshold = 0.0;
 		Double c1 = 0.0;
 		Double c2 = 0.0;
-		if (Clump_Splitting.SPLITLINETYPE == 0 || Clump_Splitting.SPLITLINETYPE == 1
-				|| Clump_Splitting.SPLITLINETYPE == 2 || Clump_Splitting.SPLITLINETYPE == 3)
+		Double chi=0.0;
+		if (Clump_Splitting.SPLITLINETYPE == SplitLineType.STRAIGHTSPLITLINE || Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINE
+				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.MINIMUMINTENSITYSPLITLINE || Clump_Splitting.SPLITLINETYPE == SplitLineType.GEODESICDISTANCESPLITLINE)
 		{
 			writeDataInFile = gd.getNextBoolean();
 			saliencyThreshold = gd.getNextNumber();
@@ -435,6 +437,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			concavityRatioThreshold = gd.getNextNumber();
 			c1 = gd.getNextNumber();
 			c2 = gd.getNextNumber();
+			chi=gd.getNextNumber();
 		}
 		if (gd.invalidNumber())
 		{
@@ -489,6 +492,12 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				Clump_Splitting.C2 = c2;
 			}
 
+			if (!chi.isNaN())
+			{
+				Clump_Splitting.CHI_THRESHOLD = chi;
+			}
+			
+
 			return true;
 		}
 	}
@@ -531,22 +540,22 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			{
 				if (splitLineType.equals("Straight Split-Line"))
 				{
-					Clump_Splitting.SPLITLINETYPE = 0;
+					Clump_Splitting.SPLITLINETYPE = SplitLineType.STRAIGHTSPLITLINE;
 				} else
 				{
 					if (splitLineType.equals("Maximum-Intensity-Split-Line"))
 					{
-						Clump_Splitting.SPLITLINETYPE = 1;
+						Clump_Splitting.SPLITLINETYPE = SplitLineType.MAXIMUMINTENSITYSPLITLINE;
 					} else
 					{
 						if (splitLineType.equals("Minimum-Intensity-Split-Line"))
 						{
-							Clump_Splitting.SPLITLINETYPE = 2;
+							Clump_Splitting.SPLITLINETYPE = SplitLineType.MINIMUMINTENSITYSPLITLINE;
 						} else
 						{
 							if (splitLineType.equals("Geodesic-Distance-Split-Line"))
 							{
-								Clump_Splitting.SPLITLINETYPE = 3;
+								Clump_Splitting.SPLITLINETYPE = SplitLineType.GEODESICDISTANCESPLITLINE;
 							}
 
 						}
@@ -554,12 +563,12 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				}
 				if (detectorType.equals("Detect all Concavity-Pixels"))
 				{
-					Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = 0;
+					Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
 				}
 				else{
 					if(detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
 					{
-						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE=1;
+						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE=ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH;
 					}
 				}
 				GenericDialog dialog1 = new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");
@@ -579,7 +588,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				dialog1.addNumericField("Concavity-Ratio threshold", 6, 1);
 				dialog1.addNumericField("C1", 1.73, 3);
 				dialog1.addNumericField("C2", -4.72, 3);
-
+				dialog1.addNumericField("Chi-Threshold", 0.5, 3);
 				dialog1.addPreviewCheckbox(pfr);
 				dialog1.addDialogListener(this);
 				dialog1.showDialog();
@@ -603,23 +612,23 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				{
 					if (splitLineType.equals("Maximum-Intensity-Split-Line Farhan"))
 					{
-						Clump_Splitting.SPLITLINETYPE = 4;
+						Clump_Splitting.SPLITLINETYPE = SplitLineType.MAXIMUMINTENSITYSPLITLINEFARHAN;
 					} else
 					{
 						if (splitLineType.equals("Minimum-Intensity-Split-Line Farhan"))
 						{
-							Clump_Splitting.SPLITLINETYPE = 5;
+							Clump_Splitting.SPLITLINETYPE = SplitLineType.MINIMUMINTENSITYSPLITLINEFARHAN;
 						}
 					}
 					
 					if (detectorType.equals("Detect all Concavity-Pixels"))
 					{
-						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = 0;
+						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
 					}
 					else{
 						if(detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
 						{
-							Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE=1;
+							Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE=ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH;
 						}
 					}
 					GenericDialog dialog1 = new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");

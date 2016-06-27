@@ -95,12 +95,12 @@ public class ConcavityRegionAdministration
 				{
 					ArrayList<Double> doubleList = computeDistance(pointList, startX, startY, endX, endY);
 					AbstractConcavityPixelDetector acpd = null;
-					if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == 0)
+					if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS)
 					{
 						acpd = new AllConcavityPixelDetector();
 					} else
 					{
-						if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == 1)
+						if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH)
 						{
 							acpd = new LargestDistanceConcavityPixelDetector();
 						}
@@ -200,12 +200,12 @@ public class ConcavityRegionAdministration
 						ArrayList<Double> doubleListInner = computeDistance(embeddedPoints, (int) startPoint.getX(),
 								(int) startPoint.getY(), (int) endPoint.getX(), (int) endPoint.getY());
 						AbstractConcavityPixelDetector acpd=null;
-								if(Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE==0)
+								if(Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE==ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS)
 								{
 									acpd= new AllConcavityPixelDetector();
 								}
 								else{
-									if(Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE==1)
+									if(Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE==ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH)
 									{
 								acpd=new LargestDistanceConcavityPixelDetector();
 									}
