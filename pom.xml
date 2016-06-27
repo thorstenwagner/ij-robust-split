@@ -1,63 +1,62 @@
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi=
-"http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
- 
+
 	<parent>
 		<groupId>net.imagej</groupId>
 		<artifactId>pom-imagej</artifactId>
 		<version>7.0.0</version>
 		<relativePath />
 	</parent>
-	
+
 	<groupId>de.biomedical-imaging.ij</groupId>
 	<artifactId>ij_robust_split</artifactId>
 	<version>1.0</version>
 	<packaging>jar</packaging>
- 
+
 	<name>Robust clump splitting</name>
 	<url>https://github.com/jumpfunky/ij-robust-split</url>
-	
-	<profiles>
-	  <profile>
-		<id>doclint-java8-disable</id>
-		<activation>
-		  <jdk>[1.8,)</jdk>
-		</activation>
 
-		<build>
-		  <plugins>
-		    <plugin>
-		      <groupId>org.apache.maven.plugins</groupId>
-		      <artifactId>maven-javadoc-plugin</artifactId>
-		      <configuration>
-		        <additionalparam>-Xdoclint:none</additionalparam>
-		      </configuration>
-		    </plugin>
-		  </plugins>
-		</build>
-	  </profile>
+	<profiles>
+		<profile>
+			<id>doclint-java8-disable</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
-	
- 	<dependencies>
+
+	<dependencies>
 		<dependency>
-   	 		<groupId>net.imagej</groupId>
-   	 		<artifactId>ij</artifactId>
-  	 		<version>1.49r</version>
+			<groupId>net.imagej</groupId>
+			<artifactId>ij</artifactId>
+			<version>1.51d</version>
 		</dependency>
 		<dependency>
-    			<groupId>de.biomedical-imaging.ij</groupId>
-    			<artifactId>ij_blob</artifactId>
-    			<version>1.4.1</version>
+			<groupId>de.biomedical-imaging.ij</groupId>
+			<artifactId>ij_blob</artifactId>
+			<version>1.4.1</version>
 		</dependency>
 		<dependency>
-    			<groupId>javax.vecmath</groupId>
-    			<artifactId>vecmath</artifactId>
-    			<version>1.5.2</version>
+			<groupId>javax.vecmath</groupId>
+			<artifactId>vecmath</artifactId>
+			<version>1.5.2</version>
 		</dependency>
- 	</dependencies>
+	</dependencies>
 	<developers>
 		<developer>
 			<id>twagner</id>
@@ -76,11 +75,11 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 			</properties>
 		</developer>
 	</developers>
-	
+
 	<scm>
 		<url>https://github.com/thorstenwagner/ij-robust-split</url>
 		<connection>scm:git:git://github.com/thorstenwagner/ij-robust-split.git</connection>
 		<developerConnection>scm:git:git@github.com:thorstenwagner/ij-robust-split.git</developerConnection>
-   </scm>
+	</scm>
 
 </project>
