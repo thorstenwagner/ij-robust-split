@@ -18,7 +18,7 @@ public class GeodesicDistanceSplitLine implements AbstractSplitLine
 	@Override
 	public void drawLine(ImageProcessor ip)
 	{
-		ip.setLineWidth(3);
+		//ip.setLineWidth(3);
 		if(Clump_Splitting.BACKGROUNDCOLOR==0)
 		{
 		ip.setColor(Color.black);
@@ -29,7 +29,7 @@ public class GeodesicDistanceSplitLine implements AbstractSplitLine
 		for(Point2D point:cutPoints)
 		{
 			
-			ip.drawDot((int)point.getX(), (int)point.getY());
+			ip.drawLine4((int)point.getX(), (int)point.getY(),(int)point.getX(), (int)point.getY());
 	
 		}
 	}

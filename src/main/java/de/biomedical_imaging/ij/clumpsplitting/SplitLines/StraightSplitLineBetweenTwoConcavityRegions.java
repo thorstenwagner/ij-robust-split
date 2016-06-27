@@ -148,7 +148,7 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 	public void drawLine(ImageProcessor ip)
 	{
 		// System.out.println("TwoConc error");
-		ip.setLineWidth(3);
+		//ip.setLineWidth(3);
 		if (Clump_Splitting.BACKGROUNDCOLOR == 0)
 		{
 			ip.setColor(Color.black);
@@ -158,7 +158,7 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 		}
 		// System.out.println("start drawing");
 		// System.out.println(this);
-		ip.drawLine((int) this.getStartConcavityPixel().getPosition().getX() - 1,
+		ip.drawLine4((int) this.getStartConcavityPixel().getPosition().getX() - 1,
 				(int) this.getStartConcavityPixel().getPosition().getY() + 1,
 				(int) this.getEndConcavityPixel().getPosition().getX(),
 				(int) this.getEndConcavityPixel().getPosition().getY());

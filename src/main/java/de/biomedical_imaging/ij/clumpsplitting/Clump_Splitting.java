@@ -235,7 +235,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			int threshold = at.getThreshold(Method.Default, histogram);
 
 			// pre-processing
-			imageProcessorBinary.blurGaussian(2.0);
+			//imageProcessorBinary.blurGaussian(2.0);
 			imageProcessorBinary.threshold(threshold);
 			// preprocessing /*TODO*/
 			/*

@@ -37,7 +37,7 @@ public class MaximumMinimumIntensitySplitLine implements AbstractSplitLine
 	{
 		for(Point2D p: points)
 		{
-			ip.setLineWidth(3);
+		//	ip.setLineWidth(3);
 			if(Clump_Splitting.BACKGROUNDCOLOR==0)
 			{
 			ip.setColor(Color.black);
@@ -45,7 +45,7 @@ public class MaximumMinimumIntensitySplitLine implements AbstractSplitLine
 			else{
 				ip.setColor(Color.white);
 			}
-			ip.drawDot((int)p.getX(), (int)p.getY());
+			ip.drawLine4((int)p.getX(), (int)p.getY(),(int)p.getX(), (int)p.getY());
 		}
 	
 	}		
