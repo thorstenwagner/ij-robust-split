@@ -15,6 +15,7 @@ public class AllConcavityPixelDetector implements AbstractConcavityPixelDetector
 			p[i]=concavityRegion.getDistList().get(i);
 		}
 		boolean excludeOnEdges= true;
+		
 		int[] maxima= MaximumFinder.findMaxima(p, Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD, excludeOnEdges);
 		
 		ArrayList<ConcavityPixel> concavityPixelList= new ArrayList<ConcavityPixel>();

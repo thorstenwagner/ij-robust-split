@@ -162,8 +162,8 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		m.setStrokeColor(Color.red);
 		Clump.overlayForOrientation.add(l);
 		Clump.overlayForOrientation.add(m);
-		System.out.println("WICHTIG" + midPointI.getX() + " " + midPointI.getY() + " " + maxPointI.getX() + " "
-				+ maxPointI.getY());
+	//	System.out.println("WICHTIG" + midPointI.getX() + " " + midPointI.getY() + " " + maxPointI.getX() + " "
+		//		+ maxPointI.getY());
 		Vector2d vi = new Vector2d(xPointDistOne, yPointDistOne);
 		Vector2d vj = new Vector2d(10, 0);
 		vi.normalize();
@@ -315,6 +315,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		this.endX = endX;
 		this.endY = endY;
 
+		this.concavityPixelList= new ArrayList<ConcavityPixel>();
 		this.boundaryPointList = boundaryPointList;
 		this.distList = distList;
 		this.midPointOfConvexHull = this.computeMidPointOfConvexHull();

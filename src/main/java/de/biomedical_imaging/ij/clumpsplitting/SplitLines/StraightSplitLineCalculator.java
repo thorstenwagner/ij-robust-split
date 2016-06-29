@@ -394,8 +394,8 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				if (!cOne.equals(cTwo))
 				{
 
-					System.out.println(
-							cOne.getMaxDistCoord().size() + " " + cTwo.getMaxDistCoord().size() + "SIIIIIIIIIIIIZE");
+					//System.out.println(
+					//		cOne.getMaxDistCoord().size() + " " + cTwo.getMaxDistCoord().size() + "SIIIIIIIIIIIIZE");
 					for (ConcavityPixel cpOne : cOne.getConcavityPixelList())
 					{
 

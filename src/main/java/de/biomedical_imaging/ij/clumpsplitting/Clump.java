@@ -39,6 +39,7 @@ import java.awt.Color;
 import java.awt.Polygon;
 import java.util.ArrayList;
 import de.biomedical_imaging.ij.clumpsplitting.SplitLines.*;
+import ij.gui.Line;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
@@ -131,12 +132,22 @@ public class Clump
 		{
 			for (Polygon innerContour : innerContours)
 			{
+				Polygon p=new Polygon();
+				for(int i= innerContour.npoints-1;i>=0;i--)
+				{
+					p.addPoint(innerContour.xpoints[i], innerContour.ypoints[i]);
+				}
 				/*
 				 * convex Hull of inner Contour to seperate the outstanding
 				 * points of each inner Contour
 				 */
-				Polygon innerConvexHull = this.computeConvexHull(innerContour);
-				InnerContour inner = new InnerContour(innerContour, innerConvexHull);
+				Polygon innerConvexHull = this.computeConvexHull(p);
+				Polygon innerCH= new Polygon();
+				for(int i=innerConvexHull.npoints-1;i>=0;i--)
+				{
+					innerCH.addPoint(innerConvexHull.xpoints[i], innerConvexHull.ypoints[i]);
+				}
+				InnerContour inner = new InnerContour(innerContour, innerCH);
 				innerList.add(inner);
 			}
 
@@ -188,7 +199,18 @@ public class Clump
 	{
 		PolygonRoi pr = new PolygonRoi(contour, Roi.POLYGON);
 		Polygon convexHull = pr.getConvexHull();
-
+		if(convexHull!=null)
+		{
+		for(int i=0;i<convexHull.npoints;i++)
+		{
+			Line l= new Line(convexHull.xpoints[i],convexHull.ypoints[i],convexHull.xpoints[i],convexHull.ypoints[i]);
+			l.setStrokeColor(Color.green);
+			l.setStrokeWidth(1);
+			Clump.boundaryOverlay.add(l);
+			
+		}
+		}
+	//	System.out.println(convexHull.npoints-1+ "aaaar");
 		return convexHull;
 	}
 
@@ -209,7 +231,6 @@ public class Clump
 		ConcavityRegionAdministration cra = new ConcavityRegionAdministration(this);
 		ArrayList<ConcavityRegion> concavityRegionList = cra.computeConcavityRegions();
 
-		System.out.println(concavityRegionList.size());
 		for (ConcavityRegion cr : concavityRegionList)
 		{
 		//	System.out.println(cr.getMaxDistCoord().get(0));
