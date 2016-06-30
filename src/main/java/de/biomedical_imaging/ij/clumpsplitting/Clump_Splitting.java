@@ -223,6 +223,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		// int i = 0;
 		/* TODO */
 		IJ.showProgress(0.0);
+		
 		do
 		{
 

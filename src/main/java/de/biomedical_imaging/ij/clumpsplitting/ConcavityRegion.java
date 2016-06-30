@@ -108,8 +108,8 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 
 			Line polygonRoi = new Line(p.getX(), p.getY(), p.getX(), p.getY());
 
-			polygonRoi.setStrokeWidth(10);
-			;
+			polygonRoi.setStrokeWidth(3);
+			
 			polygonRoi.setStrokeColor(Color.red);
 
 			// Roi.setColor(Color.red);
@@ -142,7 +142,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 				(int) this.getMidPointOfConvexHull().getY(), (int) this.getMidPointOfConvexHull().getX(),
 				(int) this.getMidPointOfConvexHull().getY());
 
-		polygonRoi.setStrokeWidth(4);
+		polygonRoi.setStrokeWidth(3);
 		polygonRoi.setStrokeColor(Color.green);
 
 		Clump.overlayConvexHull.add(polygonRoi);

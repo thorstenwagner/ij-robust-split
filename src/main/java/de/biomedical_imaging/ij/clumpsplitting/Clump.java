@@ -199,17 +199,6 @@ public class Clump
 	{
 		PolygonRoi pr = new PolygonRoi(contour, Roi.POLYGON);
 		Polygon convexHull = pr.getConvexHull();
-		if(convexHull!=null)
-		{
-		for(int i=0;i<convexHull.npoints;i++)
-		{
-			Line l= new Line(convexHull.xpoints[i],convexHull.ypoints[i],convexHull.xpoints[i],convexHull.ypoints[i]);
-			l.setStrokeColor(Color.green);
-			l.setStrokeWidth(1);
-			Clump.boundaryOverlay.add(l);
-			
-		}
-		}
 	//	System.out.println(convexHull.npoints-1+ "aaaar");
 		return convexHull;
 	}

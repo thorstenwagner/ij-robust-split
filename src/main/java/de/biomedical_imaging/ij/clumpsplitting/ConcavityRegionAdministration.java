@@ -240,7 +240,7 @@ public class ConcavityRegionAdministration
 		 */
 		// IJ.log("convexHullPoints"+innerConvexHull.npoints);
 
-		int m=0;
+		int m = 0;
 		for (InnerContour inner : clump.getInnerContours())
 		{
 			int innerStartX;
@@ -265,9 +265,9 @@ public class ConcavityRegionAdministration
 				{
 					if (Math.abs(intList.get(i) - intList.get(i - 1)) < 10)
 					{
-						if(!sinnvollePunkte.isEmpty())
+						if (!sinnvollePunkte.isEmpty())
 						{
-						sinnvollePunkte.remove(0);
+							sinnvollePunkte.remove(0);
 						}
 						Point2D punkt = new Point2D.Double(inner.getContour().xpoints[0],
 								inner.getContour().ypoints[0]);
@@ -305,19 +305,19 @@ public class ConcavityRegionAdministration
 			for (int i = 0; i < sinnvollePunkte.size(); i++)
 			{
 
-				if(i==0)
+				if (i == 0)
 				{
-					innerStartX = (int) sinnvollePunkte.get(sinnvollePunkte.size()-1).getX();
-					innerStartY = (int) sinnvollePunkte.get(sinnvollePunkte.size()-1).getY();
+					innerStartX = (int) sinnvollePunkte.get(sinnvollePunkte.size() - 1).getX();
+					innerStartY = (int) sinnvollePunkte.get(sinnvollePunkte.size() - 1).getY();
 					innerEndX = (int) sinnvollePunkte.get(i).getX();
 					innerEndY = (int) sinnvollePunkte.get(i).getY();
 
-				}
-				else{
-				innerStartX = (int) sinnvollePunkte.get(i - 1).getX();
-				innerStartY = (int) sinnvollePunkte.get(i - 1).getY();
-				innerEndX = (int) sinnvollePunkte.get(i).getX();
-				innerEndY = (int) sinnvollePunkte.get(i).getY();
+				} else
+				{
+					innerStartX = (int) sinnvollePunkte.get(i - 1).getX();
+					innerStartY = (int) sinnvollePunkte.get(i - 1).getY();
+					innerEndX = (int) sinnvollePunkte.get(i).getX();
+					innerEndY = (int) sinnvollePunkte.get(i).getY();
 				}
 				// IJ.log(innerStartX+ " "+innerStartY+ " "+innerEndX+ " //
 				// "+innerEndY+ " ");
@@ -412,7 +412,7 @@ public class ConcavityRegionAdministration
 								crReal.getEndY());
 
 						linie.setStrokeWidth(1);
-						; // Roi.setColor(Color.cyan);
+						// Roi.setColor(Color.cyan);
 						linie.setStrokeColor(Color.orange);
 						Clump.overlayConvexHull.add(linie);
 					} //
@@ -422,7 +422,7 @@ public class ConcavityRegionAdministration
 
 			}
 
-			System.out.println(m+ " "+ concavityRegionList.size());
+			System.out.println(m + " " + concavityRegionList.size());
 			m++;
 		}
 
@@ -431,19 +431,6 @@ public class ConcavityRegionAdministration
 
 		return concavityRegionList;
 
-	}
-
-	private Double getMaxDist(ArrayList<Double> distanceList)
-	{
-		double max = 0;
-		for (double d : distanceList)
-		{
-			if (d > max)
-			{
-				max = d;
-			}
-		}
-		return max;
 	}
 
 	private int getPositionOfConvexHullPointAtBoundary(InnerContour inner, int concavityPointX, int concavityPointY)

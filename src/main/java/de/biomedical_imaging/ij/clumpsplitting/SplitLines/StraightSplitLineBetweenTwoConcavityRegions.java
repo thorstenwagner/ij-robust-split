@@ -158,8 +158,8 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 		}
 		// System.out.println("start drawing");
 		// System.out.println(this);
-		ip.drawLine4((int) this.getStartConcavityPixel().getPosition().getX() - 1,
-				(int) this.getStartConcavityPixel().getPosition().getY() + 1,
+		ip.drawLine4((int) this.getStartConcavityPixel().getPosition().getX(),
+				(int) this.getStartConcavityPixel().getPosition().getY(),
 				(int) this.getEndConcavityPixel().getPosition().getX(),
 				(int) this.getEndConcavityPixel().getPosition().getY());
 		// ip.setLineWidth(1);
