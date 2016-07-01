@@ -148,7 +148,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * valid SplitLine
 	 */
 	public static double CONCAVITYANGLE_THRESHOLD = 1.5707963;
-	public static double CHI_THRESHOLD=0.5;
+	public static double CHI_THRESHOLD = 0.5;
 	/**
 	 * used for SplitLinesBetweenConcavityRegionAndPoint. ratio between the
 	 * actual largest concavityDepth and the second largest concavityDepth. If
@@ -223,7 +223,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		// int i = 0;
 		/* TODO */
 		IJ.showProgress(0.0);
-		
+
 		do
 		{
 
@@ -236,20 +236,25 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			int threshold = at.getThreshold(Method.Default, histogram);
 
 			// pre-processing
-			//imageProcessorBinary.blurGaussian(2.0);
+			// imageProcessorBinary.blurGaussian(2.0);
 			imageProcessorBinary.threshold(threshold);
+
 			// preprocessing /*TODO*/
-			/*
-			 * if(Clump_Splitting.BACKGROUNDCOLOR==1) {
-			 * imageProcessorBinary.erode();
-			 * 
-			 * imageProcessorBinary.dilate(); } else{
-			 * imageProcessorBinary.invert(); imageProcessorBinary.erode();
-			 * 
-			 * imageProcessorBinary.dilate(); imageProcessorBinary.invert();
-			 * 
-			 * }
-			 */
+
+			/*if (Clump_Splitting.BACKGROUNDCOLOR == 1)
+			{
+				imageProcessorBinary.dilate();
+
+				imageProcessorBinary.erode();
+			} else
+			{
+				imageProcessorBinary.invert();
+				imageProcessorBinary.dilate();
+
+				imageProcessorBinary.erode();
+				imageProcessorBinary.invert();
+			}*/
+
 			// computes the blobs at the image
 			ManyBlobs blobList = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 			blobList.setBackground(BACKGROUNDCOLOR);
@@ -426,9 +431,11 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		Double concavityRatioThreshold = 0.0;
 		Double c1 = 0.0;
 		Double c2 = 0.0;
-		Double chi=0.0;
-		if (Clump_Splitting.SPLITLINETYPE == SplitLineType.STRAIGHTSPLITLINE || Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINE
-				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.MINIMUMINTENSITYSPLITLINE || Clump_Splitting.SPLITLINETYPE == SplitLineType.GEODESICDISTANCESPLITLINE)
+		Double chi = 0.0;
+		if (Clump_Splitting.SPLITLINETYPE == SplitLineType.STRAIGHTSPLITLINE
+				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINE
+				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.MINIMUMINTENSITYSPLITLINE
+				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.GEODESICDISTANCESPLITLINE)
 		{
 			writeDataInFile = gd.getNextBoolean();
 			saliencyThreshold = gd.getNextNumber();
@@ -438,7 +445,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			concavityRatioThreshold = gd.getNextNumber();
 			c1 = gd.getNextNumber();
 			c2 = gd.getNextNumber();
-			chi=gd.getNextNumber();
+			chi = gd.getNextNumber();
 		}
 		if (gd.invalidNumber())
 		{
@@ -497,7 +504,6 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			{
 				Clump_Splitting.CHI_THRESHOLD = chi;
 			}
-			
 
 			return true;
 		}
@@ -534,7 +540,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			 */
 			String splitLineType = gd.getNextChoice();
 			String detectorType = gd.getNextChoice();
-			
+
 			if (splitLineType.equals("Straight Split-Line") || splitLineType.equals("Maximum-Intensity-Split-Line")
 					|| splitLineType.equals("Minimum-Intensity-Split-Line")
 					|| splitLineType.equals("Geodesic-Distance-Split-Line"))
@@ -565,11 +571,11 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				if (detectorType.equals("Detect all Concavity-Pixels"))
 				{
 					Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
-				}
-				else{
-					if(detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
+				} else
+				{
+					if (detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
 					{
-						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE=ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH;
+						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH;
 					}
 				}
 				GenericDialog dialog1 = new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");
@@ -621,15 +627,15 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 							Clump_Splitting.SPLITLINETYPE = SplitLineType.MINIMUMINTENSITYSPLITLINEFARHAN;
 						}
 					}
-					
+
 					if (detectorType.equals("Detect all Concavity-Pixels"))
 					{
 						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
-					}
-					else{
-						if(detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
+					} else
+					{
+						if (detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
 						{
-							Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE=ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH;
+							Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH;
 						}
 					}
 					GenericDialog dialog1 = new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");

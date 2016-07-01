@@ -12,290 +12,292 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 
 	private Point2D startPoint;
 	private Point2D endPoint;
-	private double[][] prewittHor={{1,2,1},{0,0,0},{-1,-2,-1}};
-	private double[][] prewittVer={{-1,0,1},{-2,0,2},{-1,0,1}};
-	
+	private double[][] prewittHor =
+	{
+			{ 1, 2, 1 },
+			{ 0, 0, 0 },
+			{ -1, -2, -1 } };
+	private double[][] prewittVer =
+	{
+			{ -1, 0, 1 },
+			{ -2, 0, 2 },
+			{ -1, 0, 1 } };
+
 	public GeodesicDistanceSplitLineCalculator(Point2D startPoint, Point2D endPoint)
 	{
-		this.startPoint=startPoint;
-		this.endPoint=endPoint;
+		this.startPoint = startPoint;
+		this.endPoint = endPoint;
 	}
+
 	@Override
 	public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
 			Clump c, ImageProcessor ip)
 	{
-		
-		ArrayList<AbstractSplitLine> splitLineList=new ArrayList<AbstractSplitLine>();
-/*		if(startPoint.equals(endPoint))
-		{
-			return splitLineList;
-		}*/
-	int minX;
-	int maxX;
-	if(startPoint.getX()<endPoint.getX())
-	{
-		//TODO Konstante
-		minX=(int)startPoint.getX();
-		maxX=(int)endPoint.getX();
-		
-	}
-	else{
-		minX=(int)endPoint.getX();
-		maxX=(int)startPoint.getX();
-		
-	}
-	int minY;
-	int maxY;
-	if(startPoint.getY()<endPoint.getY())
-	{
-		//TODO Konstante
-		minY=(int)startPoint.getY();
-		maxY=(int)endPoint.getY();
-		
-	}
-	else{
-		minY=(int)endPoint.getY();
-		maxY=(int)startPoint.getY();
-		
-	}
-	double[][] partialDerivative=new double[maxX-minX+2][maxY-minY+2];
-	
-	//horizontale Ableitung
-	for(int i=minX+1;i<maxX;i++)
-	{
-		for(int j=minY+1;j<maxY;j++)
-		{
-			double wert=0;
-			for(int m=-1;m<=1;m++)
-			{
-				for(int n=-1;n<=1;n++)
-				{
-					wert=wert+prewittHor[m+1][n+1]*ip.getPixel(i+m, j+n);
-				}
-			}
-			wert=Math.abs(wert);
-			partialDerivative[i-minX][j-minY]=wert;
-		}
-		
-	}
-	for(int i=minX+1;i<maxX-1;i++)
-	{
-		for(int j=minY+1;j<maxY-1;j++)
-		{
-			double wert=0;
-			for(int m=-1;m<=1;m++)
-			{
-				for(int n=-1;n<=1;n++)
-				{
-					wert=wert+prewittVer[m+1][n+1]*ip.getPixel(i+m, j+n);
-				}
-			}
-			wert=Math.abs(wert);
-			partialDerivative[i-minX][j-minY]=partialDerivative[i-minX][j-minY]+wert;
-		}
-	}
-	double maxi=0;
-	for(int i=0;i<partialDerivative.length;i++)
-	{
-		
-		for(int j=0;j<partialDerivative[i].length;j++)
-		{if(partialDerivative[i][j]>maxi)
-		{
-			maxi=partialDerivative[i][j];
-		}
-			partialDerivative[i][j]=-partialDerivative[i][j];
-		}
-	}
-	maxi=maxi+1;
-	for(int i=0;i<partialDerivative.length;i++)
-	{
-		
-		for(int j=0;j<partialDerivative[i].length;j++)
-		{
-			partialDerivative[i][j]=partialDerivative[i][j]+maxi;
-		}
-	}
-	
-	Point2D aktuellerPunkt= startPoint;
-	
-/*
-	ArrayList<Point2D> besuchteNichtAbgearbeitetePunkte= new ArrayList<Point2D>();
-	boolean[][] besucht=new boolean[partialDerivative.length][partialDerivative[0].length];
-	double [][] distance=new double[partialDerivative.length][partialDerivative[0].length];
 
-	Point2D[][] vorgaenger=new Point2D[partialDerivative.length][partialDerivative[0].length];
-	
-	while(!besucht[(int)endPoint.getX()-minX][(int)endPoint.getY()-minY])
-	{
-		besucht[(int)aktuellerPunkt.getX()-minX][(int)aktuellerPunkt.getY()-minY]=true;
-		distance[(int)aktuellerPunkt.getX()-minX][(int)aktuellerPunkt.getY()-minY]=0;
-		besuchteNichtAbgearbeitetePunkte.add(aktuellerPunkt);
-		*/
-		//Hier vor muss noch das berechnen des Pfades
-		
-		ArrayList<AccessiblePoint> unusedPoints = new ArrayList<AccessiblePoint>();
-		ArrayList<AccessiblePoint> usedPoints= new ArrayList<AccessiblePoint>();
-		AccessiblePoint first= new AccessiblePoint(aktuellerPunkt,0,null);
-		usedPoints.add(first);
-		
-		//While
-		while(!(aktuellerPunkt.getX()==endPoint.getX()&&aktuellerPunkt.getY()==endPoint.getY()))
+		ArrayList<AbstractSplitLine> splitLineList = new ArrayList<AbstractSplitLine>();
+		/*
+		 * if(startPoint.equals(endPoint)) { return splitLineList; }
+		 */
+		int minX;
+		int maxX;
+		if (startPoint != null && endPoint != null)
 		{
-		for(int i=-1;i<=1;i++)
-		{
-			for(int j=-1;j<=1;j++)
+			if (startPoint.getX() < endPoint.getX())
 			{
-				if(aktuellerPunkt.getX()+i>=minX&&aktuellerPunkt.getX()+i<=maxX)
+				// TODO Konstante
+				minX = (int) startPoint.getX();
+				maxX = (int) endPoint.getX();
+
+			} else
+			{
+				minX = (int) endPoint.getX();
+				maxX = (int) startPoint.getX();
+
+			}
+			int minY;
+			int maxY;
+			if (startPoint.getY() < endPoint.getY())
+			{
+				// TODO Konstante
+				minY = (int) startPoint.getY();
+				maxY = (int) endPoint.getY();
+
+			} else
+			{
+				minY = (int) endPoint.getY();
+				maxY = (int) startPoint.getY();
+
+			}
+			double[][] partialDerivative = new double[maxX - minX+1][maxY - minY+1];
+
+			// horizontale Ableitung
+			for (int i = minX + 1; i < maxX; i++)
+			{
+				for (int j = minY + 1; j < maxY; j++)
 				{
-				
-					if(aktuellerPunkt.getY()+j>=minY&&aktuellerPunkt.getY()+j<=maxY)
+					double wert = 0;
+					for (int m = -1; m <= 1; m++)
 					{
-					
-						boolean besucht=false;
-						boolean ready=false;
-						for(AccessiblePoint ap:unusedPoints)
+						for (int n = -1; n <= 1; n++)
 						{
-							if(ap.getPoint().getX()==aktuellerPunkt.getX()+i&&ap.getPoint().getY()==aktuellerPunkt.getY()+j)
-							{
-								besucht=true;
-								if(ap.getWeight()>(partialDerivative[(int)aktuellerPunkt.getX()+i-minX][(int)aktuellerPunkt.getY()+j-minY]+first.getWeight()))
-								{
-									ap.setWeight((partialDerivative[(int)aktuellerPunkt.getX()+i-minX][(int)aktuellerPunkt.getY()+j-minY]+first.getWeight()));
-								}
-							}
-						}
-						for(AccessiblePoint ap:usedPoints)
-						{
-							if(ap.getPoint().getX()==aktuellerPunkt.getX()+i&&ap.getPoint().getY()==aktuellerPunkt.getY()+j)
-							{
-								ready=true;
-							}
-						}
-						
-						if(besucht==false&&ready==false)
-						{
-							Point2D temp= new Point2D.Double(aktuellerPunkt.getX()+i,aktuellerPunkt.getY()+j);
-							AccessiblePoint ap=new AccessiblePoint(temp,(partialDerivative[(int)aktuellerPunkt.getX()+i-minX][(int)aktuellerPunkt.getY()+j-minY]+first.getWeight()),first);
-							unusedPoints.add(ap);
+							wert = wert + prewittHor[m + 1][n + 1] * ip.getPixel(i + m, j + n);
 						}
 					}
+					wert = Math.abs(wert);
+					partialDerivative[i - minX][j - minY] = wert;
+				}
+
+			}
+			for (int i = minX + 1; i < maxX - 1; i++)
+			{
+				for (int j = minY + 1; j < maxY - 1; j++)
+				{
+					double wert = 0;
+					for (int m = -1; m <= 1; m++)
+					{
+						for (int n = -1; n <= 1; n++)
+						{
+							wert = wert + prewittVer[m + 1][n + 1] * ip.getPixel(i + m, j + n);
+						}
+					}
+					wert = Math.abs(wert);
+					partialDerivative[i - minX][j - minY] = partialDerivative[i - minX][j - minY] + wert;
 				}
 			}
-		}
-		Collections.sort(unusedPoints);
-		if(unusedPoints.size()!=0)
-		{
-			aktuellerPunkt=unusedPoints.get(0).getPoint();
-			first=unusedPoints.get(0);
-			usedPoints.add(unusedPoints.get(0));
-			unusedPoints.remove(0);
-		}
-	}
-		ArrayList<Point2D> pointList = new ArrayList<Point2D>(); 
-		while(first.getPrevious()!=null)
-		{
-			pointList.add(first.getPoint());
-			first=first.getPrevious();
-		}
-		//	System.out.println(pointList.size());
-	/*	if(pointList.size()<=0)
-		{
-			Clump.STOP++;
-		}*/
-		//	for(Point2D punkt:besuchteNichtAbgearbeitetePunkte)	
-	/*	{
-			for(int i=-1;i<=1;i++)
+			double maxi = 0;
+			for (int i = 0; i < partialDerivative.length; i++)
 			{
-				for(int j=-1;j<=1;j++)
+
+				for (int j = 0; j < partialDerivative[i].length; j++)
 				{
-					if(aktuellerPunkt.getX()+i>minX&&aktuellerPunkt.getX()+i<maxX)
+					if (partialDerivative[i][j] > maxi)
 					{
-					
-						if(aktuellerPunkt.getY()+j>minY&&aktuellerPunkt.getY()+j<maxY)
+						maxi = partialDerivative[i][j];
+					}
+					partialDerivative[i][j] = -partialDerivative[i][j];
+				}
+			}
+			maxi = maxi + 1;
+			for (int i = 0; i < partialDerivative.length; i++)
+			{
+
+				for (int j = 0; j < partialDerivative[i].length; j++)
+				{
+					partialDerivative[i][j] = partialDerivative[i][j] + maxi;
+				}
+			}
+
+			Point2D aktuellerPunkt = startPoint;
+
+			/*
+			 * ArrayList<Point2D> besuchteNichtAbgearbeitetePunkte= new
+			 * ArrayList<Point2D>(); boolean[][] besucht=new
+			 * boolean[partialDerivative.length][partialDerivative[0].length];
+			 * double [][] distance=new
+			 * double[partialDerivative.length][partialDerivative[0].length];
+			 * 
+			 * Point2D[][] vorgaenger=new
+			 * Point2D[partialDerivative.length][partialDerivative[0].length];
+			 * 
+			 * while(!besucht[(int)endPoint.getX()-minX][(int)endPoint.getY()-
+			 * minY]) {
+			 * besucht[(int)aktuellerPunkt.getX()-minX][(int)aktuellerPunkt.getY
+			 * ()- minY]=true;
+			 * distance[(int)aktuellerPunkt.getX()-minX][(int)aktuellerPunkt.
+			 * getY()- minY]=0;
+			 * besuchteNichtAbgearbeitetePunkte.add(aktuellerPunkt);
+			 */
+			// Hier vor muss noch das berechnen des Pfades
+
+			ArrayList<AccessiblePoint> unusedPoints = new ArrayList<AccessiblePoint>();
+			ArrayList<AccessiblePoint> usedPoints = new ArrayList<AccessiblePoint>();
+			AccessiblePoint first = new AccessiblePoint(aktuellerPunkt, 0, null);
+			usedPoints.add(first);
+
+			// While
+			while (!(aktuellerPunkt.getX() == endPoint.getX() && aktuellerPunkt.getY() == endPoint.getY()))
+			{
+				for (int i = -1; i <= 1; i++)
+				{
+					for (int j = -1; j <= 1; j++)
+					{
+						if (aktuellerPunkt.getX() + i >= minX && aktuellerPunkt.getX() + i <= maxX)
 						{
-							if(!besucht[(int) (aktuellerPunkt.getX()+i-minX)][(int) (aktuellerPunkt.getY()+j-minY)])
+
+							if (aktuellerPunkt.getY() + j >= minY && aktuellerPunkt.getY() + j <= maxY)
 							{
-								if(partialDerivative[(int) (aktuellerPunkt.getX()+i-minX)][(int) (aktuellerPunkt.getY()+j-minY)]<min)
+
+								boolean besucht = false;
+								boolean ready = false;
+								for (AccessiblePoint ap : unusedPoints)
 								{
-									min=partialDerivative[(int) (aktuellerPunkt.getX()+i-minX)][(int) (aktuellerPunkt.getY()+j-minY)];
-									vorgaenger[(int) (aktuellerPunkt.getX()+i-minX)][(int) (aktuellerPunkt.getY()+j-minY)]=aktuellerPunkt;
+									if (ap.getPoint().getX() == aktuellerPunkt.getX() + i
+											&& ap.getPoint().getY() == aktuellerPunkt.getY() + j)
+									{
+										besucht = true;
+										if (ap.getWeight() > (partialDerivative[(int) aktuellerPunkt.getX() + i
+												- minX][(int) aktuellerPunkt.getY() + j - minY] + first.getWeight()))
+										{
+											ap.setWeight((partialDerivative[(int) aktuellerPunkt.getX() + i
+													- minX][(int) aktuellerPunkt.getY() + j - minY]
+													+ first.getWeight()));
+										}
+									}
+								}
+								for (AccessiblePoint ap : usedPoints)
+								{
+									if (ap.getPoint().getX() == aktuellerPunkt.getX() + i
+											&& ap.getPoint().getY() == aktuellerPunkt.getY() + j)
+									{
+										ready = true;
+									}
+								}
+
+								if (besucht == false && ready == false)
+								{
+									Point2D temp = new Point2D.Double(aktuellerPunkt.getX() + i,
+											aktuellerPunkt.getY() + j);
+									AccessiblePoint ap = new AccessiblePoint(temp,
+											(partialDerivative[(int) aktuellerPunkt.getX() + i
+													- minX][(int) aktuellerPunkt.getY() + j - minY]
+													+ first.getWeight()),
+											first);
+									unusedPoints.add(ap);
 								}
 							}
 						}
 					}
 				}
-			}
-		}
-	}
-	/////////////////////////////////////////////////////
-	System.out.println(partialDerivative.length);
-
-	System.out.println(partialDerivative[0].length);
-	ArrayList<Point2D> cutPoints=new ArrayList<Point2D>();
-		Point2D aktuellerPunkt= startPoint;
-		//for(int test=0;test<100;test++)
-	
-	while(!aktuellerPunkt.equals(endPoint))
-		{
-//		System.out.println((int)aktuellerPunkt.getX()+" "+minX + " "+ (int)aktuellerPunkt.getY()+" "+minY);
-			double max=0;
-			Point2D maxPoint=null;
-			double distXV=0;
-			double distYV=0;
-			double distV=0;
-			for(int i=-1;i<=1;i++)
-			{
-				for(int j=-1;j<=1;j++)
+				Collections.sort(unusedPoints);
+				if (unusedPoints.size() != 0)
 				{
-					if(i!=0||j!=0)
-					{
-						if((int)aktuellerPunkt.getX()-minX+i+1>0&&(int)aktuellerPunkt.getX()-minX+i+1<partialDerivative.length)
-						{
-
-							if(aktuellerPunkt.getY()-minY+j+1>0&&aktuellerPunkt.getY()-minY+j+1<partialDerivative[0].length)
-							{
-									
-					if(partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)aktuellerPunkt.getY()-minY+j+1]>max||maxPoint==null)
-					{
-						max=partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)aktuellerPunkt.getY()-minY+j+1];
-						maxPoint= new Point2D.Double(aktuellerPunkt.getX()+i,aktuellerPunkt.getY()+j);
-						distXV=Math.abs(aktuellerPunkt.getX()+i-endPoint.getX());
-						distYV=Math.abs(aktuellerPunkt.getY()+j-endPoint.getY());
-						
-						distV=Math.sqrt(distXV*distXV+distYV*distYV);
-					}else
-					{
-						if(partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)aktuellerPunkt.getY()-minY+j+1]==max)
-						{
-							double distX=Math.abs(aktuellerPunkt.getX()+i-endPoint.getX());
-							double distY=Math.abs(aktuellerPunkt.getY()+j-endPoint.getY());
-							
-							double dist=Math.sqrt(distX*distX+distY*distY);
-							if(dist<distV)
-							{
-								maxPoint= new Point2D.Double(aktuellerPunkt.getX()+i,aktuellerPunkt.getY()+j);
-								
-							}
-						}
-					}
-						}
-					}
-					}
-					}
+					aktuellerPunkt = unusedPoints.get(0).getPoint();
+					first = unusedPoints.get(0);
+					usedPoints.add(unusedPoints.get(0));
+					unusedPoints.remove(0);
+				}
 			}
-			partialDerivative[(int)aktuellerPunkt.getX()-minX+1][(int)aktuellerPunkt.getY()-minY+1]=0;
-		//	System.out.println("Maximaler Punkt: " +maxPoint.getX()+ " y: " + maxPoint.getY()+ " Grenzen: "+ minX+ " " + maxX+ " "+ minY+ " "+ maxY );
-					cutPoints.add(aktuellerPunkt);
-					aktuellerPunkt=maxPoint;
-				
-			
-		
-		
-	}*/
-		GeodesicDistanceSplitLine gdsl=new GeodesicDistanceSplitLine(pointList);
-		splitLineList.add(gdsl);
+			ArrayList<Point2D> pointList = new ArrayList<Point2D>();
+			while (first.getPrevious() != null)
+			{
+				pointList.add(first.getPoint());
+				first = first.getPrevious();
+			}
+			if(first.getPoint().equals(startPoint))
+			{
+				pointList.add(first.getPoint());
+			}
+			// System.out.println(pointList.size());
+			/*
+			 * if(pointList.size()<=0) { Clump.STOP++; }
+			 */
+			// for(Point2D punkt:besuchteNichtAbgearbeitetePunkte)
+			/*
+			 * { for(int i=-1;i<=1;i++) { for(int j=-1;j<=1;j++) {
+			 * if(aktuellerPunkt.getX()+i>minX&&aktuellerPunkt.getX()+i<maxX) {
+			 * 
+			 * if(aktuellerPunkt.getY()+j>minY&&aktuellerPunkt.getY()+j<maxY) {
+			 * if(!besucht[(int) (aktuellerPunkt.getX()+i-minX)][(int)
+			 * (aktuellerPunkt.getY()+j-minY)]) { if(partialDerivative[(int)
+			 * (aktuellerPunkt.getX()+i-minX)][(int)
+			 * (aktuellerPunkt.getY()+j-minY)]<min) {
+			 * min=partialDerivative[(int) (aktuellerPunkt.getX()+i-minX)][(int)
+			 * (aktuellerPunkt.getY()+j-minY)]; vorgaenger[(int)
+			 * (aktuellerPunkt.getX()+i-minX)][(int)
+			 * (aktuellerPunkt.getY()+j-minY)]=aktuellerPunkt; } } } } } } } }
+			 * /////////////////////////////////////////////////////
+			 * System.out.println(partialDerivative.length);
+			 * 
+			 * System.out.println(partialDerivative[0].length);
+			 * ArrayList<Point2D> cutPoints=new ArrayList<Point2D>(); Point2D
+			 * aktuellerPunkt= startPoint; //for(int test=0;test<100;test++)
+			 * 
+			 * while(!aktuellerPunkt.equals(endPoint)) { //
+			 * System.out.println((int)aktuellerPunkt.getX()+" "+minX + " "+
+			 * (int)aktuellerPunkt.getY()+" "+minY); double max=0; Point2D
+			 * maxPoint=null; double distXV=0; double distYV=0; double distV=0;
+			 * for(int i=-1;i<=1;i++) { for(int j=-1;j<=1;j++) { if(i!=0||j!=0)
+			 * { if((int)aktuellerPunkt.getX()-minX+i+1>0&&(int)aktuellerPunkt.
+			 * getX()- minX+i+1<partialDerivative.length) {
+			 * 
+			 * if(aktuellerPunkt.getY()-minY+j+1>0&&aktuellerPunkt.getY()-minY+j
+			 * +1< partialDerivative[0].length) {
+			 * 
+			 * if(partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)
+			 * aktuellerPunkt.getY()-minY+j+1]>max||maxPoint==null) {
+			 * max=partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)
+			 * aktuellerPunkt.getY()-minY+j+1]; maxPoint= new
+			 * Point2D.Double(aktuellerPunkt.getX()+i,aktuellerPunkt.getY()+j);
+			 * distXV=Math.abs(aktuellerPunkt.getX()+i-endPoint.getX());
+			 * distYV=Math.abs(aktuellerPunkt.getY()+j-endPoint.getY());
+			 * 
+			 * distV=Math.sqrt(distXV*distXV+distYV*distYV); }else {
+			 * if(partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)
+			 * aktuellerPunkt.getY()-minY+j+1]==max) { double
+			 * distX=Math.abs(aktuellerPunkt.getX()+i-endPoint.getX()); double
+			 * distY=Math.abs(aktuellerPunkt.getY()+j-endPoint.getY());
+			 * 
+			 * double dist=Math.sqrt(distX*distX+distY*distY); if(dist<distV) {
+			 * maxPoint= new
+			 * Point2D.Double(aktuellerPunkt.getX()+i,aktuellerPunkt.getY()+j);
+			 * 
+			 * } } } } } } } }
+			 * partialDerivative[(int)aktuellerPunkt.getX()-minX+1][(int)
+			 * aktuellerPunkt.getY()-minY+1]=0; // System.out.println(
+			 * "Maximaler Punkt: " +maxPoint.getX()+ " y: " + maxPoint.getY()+
+			 * " Grenzen: "+ minX+ " " + maxX+ " "+ minY+ " "+ maxY );
+			 * cutPoints.add(aktuellerPunkt); aktuellerPunkt=maxPoint;
+			 * 
+			 * 
+			 * 
+			 * 
+			 * }
+			 */
+			pointList.add(endPoint);
+			GeodesicDistanceSplitLine gdsl = new GeodesicDistanceSplitLine(pointList);
+			splitLineList.add(gdsl);
+		}
 		return splitLineList;
 	}
-	
 
 }

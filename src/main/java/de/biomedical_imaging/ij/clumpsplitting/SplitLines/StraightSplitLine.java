@@ -49,7 +49,7 @@ import ij.process.ImageProcessor;
 
 public abstract class StraightSplitLine implements AbstractSplitLine
 {
-	public abstract void drawLine(ImageProcessor ip);
+	//public abstract void drawLine(ImageProcessor ip, Im);
 	public abstract ConcavityPixel getStartConcavityPixel();
 	public abstract ConcavityPixel getEndConcavityPixel();
 	

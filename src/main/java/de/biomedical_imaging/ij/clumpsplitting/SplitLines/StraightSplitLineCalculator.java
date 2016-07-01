@@ -253,7 +253,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				{
 					AbstractSplitLineCalculator mmislc = new MaximumIntensitySplitLineCalculator(
 							bestSplitLine.getStartConcavityPixel().getPosition(),
-							bestSplitLine.getStartConcavityPixel().getPosition());
+							bestSplitLine.getEndConcavityPixel().getPosition());
 					possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, c, ip);
 				}
 			} else
@@ -276,7 +276,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 						{
 							AbstractSplitLineCalculator mmislc = new MinimumIntensitySplitLineCalculator(
 									bestSplitLine.getStartConcavityPixel().getPosition(),
-									bestSplitLine.getStartConcavityPixel().getPosition());
+									bestSplitLine.getEndConcavityPixel().getPosition());
 							possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, c, ip);
 						}
 
@@ -831,7 +831,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		}
 		test.removeAll(cI.getBoundaryPointList());
 
-		double minDist = line.ptLineDist(p.xpoints[0], p.ypoints[0]);
+		double minDist = 10000;
 		// int indexMinDist = 0;
 		double dist = 0;
 		java.util.Iterator<Point2D.Double> it = test.iterator();
@@ -842,7 +842,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 			if (point.getX() != concavityPoint.getX() && point.getY() != concavityPoint.getY())
 			{
 				dist = line.ptLineDist(point);
-				if (dist < minDist)
+				if (dist <= minDist)
 				{
 
 					minDist = dist;

@@ -161,6 +161,7 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 						(int) this.getStartConcavityPixel().getPosition().getY(),
 						(int) this.getEndConcavityPixel().getPosition().getX(),
 						(int) this.getEndConcavityPixel().getPosition().getY());
+				
 				if (Clump_Splitting.SHOWPIXELS)
 				{
 					// ip.setColor(Color.gray);

@@ -288,7 +288,7 @@ public class MaximumIntensitySplitLineCalculator implements AbstractSplitLineCal
 			
 		
 		
-	}*/
+	}*/pointList.add(endPoint);
 		MaximumMinimumIntensitySplitLine gdsl=new MaximumMinimumIntensitySplitLine(pointList);
 		splitLineList.add(gdsl);
 		return splitLineList;
