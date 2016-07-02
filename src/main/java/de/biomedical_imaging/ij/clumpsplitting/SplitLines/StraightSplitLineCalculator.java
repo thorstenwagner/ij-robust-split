@@ -435,7 +435,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 							if (chi > Clump_Splitting.CHI_THRESHOLD)
 							{
 								// System.out.println(c);
-								if (chi > 0.8)
+								/*if (chi > 0.8)
 								{
 									double saliency = this.computeSaliency(cOne, cTwo, cpOne,
 											cpTwo);
@@ -477,9 +477,9 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 									 * e) { // TODO Auto-generated catch block
 									 * e.printStackTrace(); }
 									 */
-									possibleSplitLines.add(splitLineAll);
+								/*	possibleSplitLines.add(splitLineAll);
 									return possibleSplitLines;
-								}
+								}*/
 								double saliency = this.computeSaliency(cOne, cTwo, cpOne,
 										cpOne);
 								// IJ.log(saliency+"");

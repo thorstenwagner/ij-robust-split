@@ -68,7 +68,7 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 				maxY = (int) startPoint.getY();
 
 			}
-			double[][] partialDerivative = new double[maxX - minX+1][maxY - minY+1];
+			double[][] partialDerivative = new double[maxX - minX + 1][maxY - minY + 1];
 
 			// horizontale Ableitung
 			for (int i = minX + 1; i < maxX; i++)
@@ -161,48 +161,53 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 				{
 					for (int j = -1; j <= 1; j++)
 					{
-						if (aktuellerPunkt.getX() + i >= minX && aktuellerPunkt.getX() + i <= maxX)
+						if (j == 0 || i == 0)
 						{
 
-							if (aktuellerPunkt.getY() + j >= minY && aktuellerPunkt.getY() + j <= maxY)
+							if (aktuellerPunkt.getX() + i >= minX && aktuellerPunkt.getX() + i <= maxX)
 							{
 
-								boolean besucht = false;
-								boolean ready = false;
-								for (AccessiblePoint ap : unusedPoints)
+								if (aktuellerPunkt.getY() + j >= minY && aktuellerPunkt.getY() + j <= maxY)
 								{
-									if (ap.getPoint().getX() == aktuellerPunkt.getX() + i
-											&& ap.getPoint().getY() == aktuellerPunkt.getY() + j)
+
+									boolean besucht = false;
+									boolean ready = false;
+									for (AccessiblePoint ap : unusedPoints)
 									{
-										besucht = true;
-										if (ap.getWeight() > (partialDerivative[(int) aktuellerPunkt.getX() + i
-												- minX][(int) aktuellerPunkt.getY() + j - minY] + first.getWeight()))
+										if (ap.getPoint().getX() == aktuellerPunkt.getX() + i
+												&& ap.getPoint().getY() == aktuellerPunkt.getY() + j)
 										{
-											ap.setWeight((partialDerivative[(int) aktuellerPunkt.getX() + i
+											besucht = true;
+											if (ap.getWeight() > (partialDerivative[(int) aktuellerPunkt.getX() + i
 													- minX][(int) aktuellerPunkt.getY() + j - minY]
-													+ first.getWeight()));
+													+ first.getWeight()))
+											{
+												ap.setWeight((partialDerivative[(int) aktuellerPunkt.getX() + i
+														- minX][(int) aktuellerPunkt.getY() + j - minY]
+														+ first.getWeight()));
+											}
 										}
 									}
-								}
-								for (AccessiblePoint ap : usedPoints)
-								{
-									if (ap.getPoint().getX() == aktuellerPunkt.getX() + i
-											&& ap.getPoint().getY() == aktuellerPunkt.getY() + j)
+									for (AccessiblePoint ap : usedPoints)
 									{
-										ready = true;
+										if (ap.getPoint().getX() == aktuellerPunkt.getX() + i
+												&& ap.getPoint().getY() == aktuellerPunkt.getY() + j)
+										{
+											ready = true;
+										}
 									}
-								}
 
-								if (besucht == false && ready == false)
-								{
-									Point2D temp = new Point2D.Double(aktuellerPunkt.getX() + i,
-											aktuellerPunkt.getY() + j);
-									AccessiblePoint ap = new AccessiblePoint(temp,
-											(partialDerivative[(int) aktuellerPunkt.getX() + i
-													- minX][(int) aktuellerPunkt.getY() + j - minY]
-													+ first.getWeight()),
-											first);
-									unusedPoints.add(ap);
+									if (besucht == false && ready == false)
+									{
+										Point2D temp = new Point2D.Double(aktuellerPunkt.getX() + i,
+												aktuellerPunkt.getY() + j);
+										AccessiblePoint ap = new AccessiblePoint(temp,
+												(partialDerivative[(int) aktuellerPunkt.getX() + i
+														- minX][(int) aktuellerPunkt.getY() + j - minY]
+														+ first.getWeight()),
+												first);
+										unusedPoints.add(ap);
+									}
 								}
 							}
 						}
@@ -218,15 +223,12 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 				}
 			}
 			ArrayList<Point2D> pointList = new ArrayList<Point2D>();
-			while (first.getPrevious() != null)
+			while (first != null)
 			{
 				pointList.add(first.getPoint());
 				first = first.getPrevious();
 			}
-			if(first.getPoint().equals(startPoint))
-			{
-				pointList.add(first.getPoint());
-			}
+
 			// System.out.println(pointList.size());
 			/*
 			 * if(pointList.size()<=0) { Clump.STOP++; }
@@ -293,7 +295,7 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 			 * 
 			 * }
 			 */
-			pointList.add(endPoint);
+			// pointList.add(endPoint);
 			GeodesicDistanceSplitLine gdsl = new GeodesicDistanceSplitLine(pointList);
 			splitLineList.add(gdsl);
 		}

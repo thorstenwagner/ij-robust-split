@@ -217,9 +217,11 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		Clump.overlayConvexHull.clear();
 		Clump.overlaySplitPoints.clear();
 		Clump.boundaryOverlay.clear();
+		
 		ArrayList<Clump> clumpList = new ArrayList<Clump>();
 
 		ImagePlus imp = IJ.getImage();
+		imp.setOverlay(null);
 		// int i = 0;
 		/* TODO */
 		IJ.showProgress(0.0);
@@ -232,11 +234,13 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			ImageProcessor imageProcessorBinary = ip.duplicate();
 
 			AutoThresholder at = new AutoThresholder();
+			// imageProcessorBinary.blurGaussian(0.9);
+				
 			int[] histogram = imageProcessorBinary.getHistogram();
+				
 			int threshold = at.getThreshold(Method.Default, histogram);
 
 			// pre-processing
-			// imageProcessorBinary.blurGaussian(2.0);
 			imageProcessorBinary.threshold(threshold);
 
 			// preprocessing /*TODO*/
