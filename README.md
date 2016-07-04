@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/thorstenwagner/ij-robust-split.svg?branch=master)](https://travis-ci.org/thorstenwagner/ij-robust-split)
+
 #Robust clump splitting
 Implementation of the algorithm descriped in [1] as ImageJ plugin. Some improvements specified in [2] will be factored in as well.
 
