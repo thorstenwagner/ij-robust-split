@@ -152,9 +152,12 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 				//ip.setLineWidth(3);
 				if (Clump_Splitting.BACKGROUNDCOLOR == 0)
 				{
+					Clump_Splitting.binary.setColor(Color.black);
 					ip.setColor(Color.black);
 				} else
 				{
+
+					Clump_Splitting.binary.setColor(Color.white);
 					ip.setColor(Color.white);
 				}
 				ip.drawLine4((int) this.getStartConcavityPixel().getPosition().getX(),
@@ -162,6 +165,11 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 						(int) this.getEndConcavityPixel().getPosition().getX(),
 						(int) this.getEndConcavityPixel().getPosition().getY());
 				
+				Clump_Splitting.binary.drawLine4((int) this.getStartConcavityPixel().getPosition().getX(),
+						(int) this.getStartConcavityPixel().getPosition().getY(),
+						(int) this.getEndConcavityPixel().getPosition().getX(),
+						(int) this.getEndConcavityPixel().getPosition().getY());
+			
 				if (Clump_Splitting.SHOWPIXELS)
 				{
 					// ip.setColor(Color.gray);

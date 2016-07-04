@@ -39,7 +39,6 @@ import java.awt.Color;
 import java.awt.Polygon;
 import java.util.ArrayList;
 import de.biomedical_imaging.ij.clumpsplitting.SplitLines.*;
-import ij.gui.Line;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
@@ -79,7 +78,6 @@ public class Clump
 	 */
 	public static ArrayList<Roi> overlaySplitPoints = new ArrayList<Roi>();
 
-	public static ArrayList<Roi> boundaryOverlay= new ArrayList<Roi>();
 	/**
 	 * List of all innerContours of a Clump
 	 */
@@ -203,13 +201,7 @@ public class Clump
 		return convexHull;
 	}
 
-	public void drawBoundaryOverlay()
-	{
-		PolygonRoi pr= new PolygonRoi(this.boundary,Roi.POLYGON);
-		pr.setStrokeColor(Color.red);
-		pr.setStrokeWidth(1);
-		Clump.boundaryOverlay.add(pr);
-	}
+	
 	/**
 	 * computes the areas with high concavity
 	 * 

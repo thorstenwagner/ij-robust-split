@@ -151,14 +151,22 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 		//ip.setLineWidth(3);
 		if (Clump_Splitting.BACKGROUNDCOLOR == 0)
 		{
+
+			Clump_Splitting.binary.setColor(Color.black);
 			ip.setColor(Color.black);
 		} else
 		{
+
+			Clump_Splitting.binary.setColor(Color.white);
 			ip.setColor(Color.white);
 		}
 		// System.out.println("start drawing");
 		// System.out.println(this);
 		ip.drawLine4((int) this.getStartConcavityPixel().getPosition().getX(),
+				(int) this.getStartConcavityPixel().getPosition().getY(),
+				(int) this.getEndConcavityPixel().getPosition().getX(),
+				(int) this.getEndConcavityPixel().getPosition().getY());
+		Clump_Splitting.binary.drawLine4((int) this.getStartConcavityPixel().getPosition().getX(),
 				(int) this.getStartConcavityPixel().getPosition().getY(),
 				(int) this.getEndConcavityPixel().getPosition().getX(),
 				(int) this.getEndConcavityPixel().getPosition().getY());

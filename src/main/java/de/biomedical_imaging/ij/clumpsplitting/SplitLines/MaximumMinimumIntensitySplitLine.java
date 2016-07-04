@@ -40,12 +40,17 @@ public class MaximumMinimumIntensitySplitLine implements AbstractSplitLine
 		//	ip.setLineWidth(3);
 			if(Clump_Splitting.BACKGROUNDCOLOR==0)
 			{
+
+				Clump_Splitting.binary.setColor(Color.black);
 			ip.setColor(Color.black);
 			}
 			else{
+
+				Clump_Splitting.binary.setColor(Color.white);
 				ip.setColor(Color.white);
 			}
 			ip.drawLine4((int)p.getX(), (int)p.getY(),(int)p.getX(), (int)p.getY());
+			Clump_Splitting.binary.drawLine4((int)p.getX(), (int)p.getY(),(int)p.getX(), (int)p.getY());
 		}
 	
 	}		

@@ -1,9 +1,8 @@
 package de.biomedical_imaging.ij.clumpsplitting.SVM;
 
-
-
 import java.awt.GridLayout;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -22,36 +21,45 @@ public class SVM
 
 	public static void svm()
 	{
-		FileReader fr =
-		null;
-		try
-		{
-			fr = new FileReader("yourfile.csv");
-		} catch (FileNotFoundException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		BufferedReader br = new BufferedReader(fr);
-		String s;
 		ArrayList<Double[]> featureList = new ArrayList<Double[]>();
-		try
+
+		File f = new File("D:/Bachelorthesis/GitHubThesis/ij-robust-split/test/");
+		if (f.isDirectory())
 		{
-			while ((s = br.readLine()) != null)
+			File[] files = f.listFiles();
+			for (int i = 0; i < files.length; i++)
 			{
-				String[] split = s.split(",");
-				Double[] doubles =
-				{ Double.valueOf(split[0]), Double.valueOf(split[1]), Double.valueOf(split[2]) };
-				featureList.add(doubles);
+				FileReader fr = null;
+				try
+				{
+					fr = new FileReader(files[i]);
+				} catch (FileNotFoundException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				BufferedReader br = new BufferedReader(fr);
+				String s;
+				try
+				{
+					while ((s = br.readLine()) != null)
+					{
+						String[] split = s.split(",");
+						Double[] doubles =
+						{ Double.valueOf(split[0]), Double.valueOf(split[1]), Double.valueOf(split[2]) };
+						featureList.add(doubles);
+					}
+				} catch (NumberFormatException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
-		} catch (NumberFormatException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		svm_parameter param = new svm_parameter();
 		param.probability = 1;
@@ -88,7 +96,7 @@ public class SVM
 				System.out.println(i + " " + j + " " + node.value + "test");
 			}
 			System.out.println(features[0]);
-				prob.y[i] = features[0];
+			prob.y[i] = features[0];
 			// if()
 			// prob.y[i] = features[0];
 		}
@@ -151,23 +159,22 @@ public class SVM
 			System.out.print(prob_estimates[i] + " ");
 		}
 		System.out.println("");
-		int[] labels=model.label;
-		System.out.println(labels[0]+ " "+ labels[1] );
+		int[] labels = model.label;
+		System.out.println(labels[0] + " " + labels[1]);
 		System.out.println(intercept + "intercept");
 
 		System.out.println(d + "prediction");
-	
-		SVMPanel panel= new SVMPanel(featureList,weights,intercept);
-		 JFrame frame = new JFrame("Oval Sample");
-		   frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		   frame.setLayout(new GridLayout(1, 1));
-		   frame.add(panel);
-		  
+		SVMPanel panel = new SVMPanel(featureList, weights, intercept);
+		JFrame frame = new JFrame("Oval Sample");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		   frame.setSize(500, 500);
-		   frame.setVisible(true);
-		  
+		frame.setLayout(new GridLayout(1, 1));
+		frame.add(panel);
+
+		frame.setSize(500, 500);
+		frame.setVisible(true);
+
 	}
 
 	public static void main(String[] args)

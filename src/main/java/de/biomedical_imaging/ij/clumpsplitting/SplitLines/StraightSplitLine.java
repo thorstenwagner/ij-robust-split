@@ -37,7 +37,6 @@ package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
 
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityPixel;
-import ij.process.ImageProcessor;
 
 /**
  * a StraightSplitLine is defined by an start and an endPoint which are
@@ -49,7 +48,6 @@ import ij.process.ImageProcessor;
 
 public abstract class StraightSplitLine implements AbstractSplitLine
 {
-	//public abstract void drawLine(ImageProcessor ip, Im);
 	public abstract ConcavityPixel getStartConcavityPixel();
 	public abstract ConcavityPixel getEndConcavityPixel();
 	
