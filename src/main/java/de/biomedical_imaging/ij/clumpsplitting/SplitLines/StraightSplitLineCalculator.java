@@ -331,7 +331,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 						(int) sslbtcr.getStartConcavityPixel().getPosition().getX(),
 						(int) sslbtcr.getStartConcavityPixel().getPosition().getY(),
 						(int) sslbtcr.getEndConcavityPixel().getPosition().getX(),
-						(int) sslbtcr.getEndConcavityPixel().getPosition().getY(), 0, distance, maxDistSum);
+						(int) sslbtcr.getEndConcavityPixel().getPosition().getY(), -1, distance, maxDistSum);
 
 				for (SplitLineAssignmentSVM slaSVM : Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM)
 				{
@@ -426,7 +426,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 
 							SplitLineAssignmentSVM splitLine = new SplitLineAssignmentSVM(
 									(int) cpOne.getPosition().getX(), (int) cpOne.getPosition().getY(),
-									(int) cpTwo.getPosition().getX(), (int) cpTwo.getPosition().getY(), 0, distance,
+									(int) cpTwo.getPosition().getX(), (int) cpTwo.getPosition().getY(), -1, distance,
 									maxDistSum);
 							if (!Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.contains(splitLine))
 							{
