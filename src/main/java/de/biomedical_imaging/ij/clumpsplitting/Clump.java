@@ -69,6 +69,7 @@ public class Clump
 	 * List of rois, which manages the overlay for the Orientation
 	 */
 	public static ArrayList<Roi> overlayForOrientation = new ArrayList<Roi>();
+	public static ArrayList<Roi> overlayTextConvexHull = new ArrayList<Roi>();
 	/**
 	 * List of rois, which manages the overlay for the ConvexHulls
 	 */
@@ -130,8 +131,8 @@ public class Clump
 		{
 			for (Polygon innerContour : innerContours)
 			{
-				Polygon p=new Polygon();
-				for(int i= innerContour.npoints-1;i>=0;i--)
+				Polygon p = new Polygon();
+				for (int i = innerContour.npoints - 1; i >= 0; i--)
 				{
 					p.addPoint(innerContour.xpoints[i], innerContour.ypoints[i]);
 				}
@@ -140,8 +141,8 @@ public class Clump
 				 * points of each inner Contour
 				 */
 				Polygon innerConvexHull = this.computeConvexHull(p);
-				Polygon innerCH= new Polygon();
-				for(int i=innerConvexHull.npoints-1;i>=0;i--)
+				Polygon innerCH = new Polygon();
+				for (int i = innerConvexHull.npoints - 1; i >= 0; i--)
 				{
 					innerCH.addPoint(innerConvexHull.xpoints[i], innerConvexHull.ypoints[i]);
 				}
@@ -197,11 +198,10 @@ public class Clump
 	{
 		PolygonRoi pr = new PolygonRoi(contour, Roi.POLYGON);
 		Polygon convexHull = pr.getConvexHull();
-	//	System.out.println(convexHull.npoints-1+ "aaaar");
+		// System.out.println(convexHull.npoints-1+ "aaaar");
 		return convexHull;
 	}
 
-	
 	/**
 	 * computes the areas with high concavity
 	 * 
@@ -214,7 +214,7 @@ public class Clump
 
 		for (ConcavityRegion cr : concavityRegionList)
 		{
-		//	System.out.println(cr.getMaxDistCoord().get(0));
+			// System.out.println(cr.getMaxDistCoord().get(0));
 
 			if (Clump_Splitting.SHOWPIXELS)
 			{
@@ -246,8 +246,10 @@ public class Clump
 		 * For SplitLineTypes 0-3 first the Concavitypixels of a
 		 * StraightSplitLine are detected
 		 */
-		if (Clump_Splitting.SPLITLINETYPE == SplitLineType.STRAIGHTSPLITLINE || Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINE
-				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.MINIMUMINTENSITYSPLITLINE || Clump_Splitting.SPLITLINETYPE == SplitLineType.GEODESICDISTANCESPLITLINE)
+		if (Clump_Splitting.SPLITLINETYPE == SplitLineType.STRAIGHTSPLITLINE
+				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINE
+				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.MINIMUMINTENSITYSPLITLINE
+				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.GEODESICDISTANCESPLITLINE)
 		{
 			AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
 			possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this, ip);
@@ -349,36 +351,36 @@ public class Clump
 
 	private void computeFirstAndSecondLargestConcavityDepth()
 	{
-		ConcavityPixel maxDistPixel=null;
-	
-		double max=0;
-		double secondMax=0;
+		ConcavityPixel maxDistPixel = null;
+
+		double max = 0;
+		double secondMax = 0;
 		for (ConcavityRegion cr : concavityRegionList)
 		{
-			for(ConcavityPixel cp: cr.getConcavityPixelList())
+			for (ConcavityPixel cp : cr.getConcavityPixelList())
 			{
-			
-			if (cp.distance() >= max)
-			{
-				secondMax=max;
-				maxDistPixel=cp;
-				max= cp.distance();
-				
-			} else
-			{
-				if (cp.distance() >= secondMax)
+
+				if (cp.distance() >= max)
 				{
-					secondMax= cp.distance();
+					secondMax = max;
+					maxDistPixel = cp;
+					max = cp.distance();
+
+				} else
+				{
+					if (cp.distance() >= secondMax)
+					{
+						secondMax = cp.distance();
+					}
 				}
-			}
-			
+
 			}
 		}
 		if (secondMax < Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
 		{
 			secondMax = Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD;
 		}
-		this.largestConcavityPixel= maxDistPixel;
+		this.largestConcavityPixel = maxDistPixel;
 		this.secondMaxConcavityDepth = secondMax;
 
 	}

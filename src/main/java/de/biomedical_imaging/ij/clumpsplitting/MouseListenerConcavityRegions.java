@@ -7,6 +7,7 @@ import java.awt.event.MouseListener;
 
 import ij.ImagePlus;
 import ij.WindowManager;
+import ij.gui.TextRoi;
 
 
 public class MouseListenerConcavityRegions implements MouseListener
@@ -42,6 +43,10 @@ public class MouseListenerConcavityRegions implements MouseListener
 			{
 				for(ConcavityPixel point:cr.getConcavityPixelList())
 				{
+			/*		
+					TextRoi text= new TextRoi(minX, minY,cr.getInformation(point));
+					Clump.overlayTextConvexHull.add(text);
+					*/
 				Clump_Splitting.textAreaForConcavityInformation.setText(cr.getInformation(point));
 				Clump_Splitting.textAreaForConcavityInformation.setBackground(Color.lightGray);
 				Clump_Splitting.windowPanelConcavityRegion.add(Clump_Splitting.textAreaForConcavityInformation);
