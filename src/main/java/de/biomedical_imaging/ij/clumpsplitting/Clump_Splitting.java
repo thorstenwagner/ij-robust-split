@@ -72,7 +72,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * panel to show Information about the ConcavityRegions to optimize
 	 * parameter
 	 */
-	public static JWindow windowPanelConcavityRegion = new JWindow();
+	//public static JWindow windowPanelConcavityRegion = new JWindow();
 	/**
 	 * List To Train SVM for SplitLineParameters C1 and C2. It contains the sum
 	 * of both ConcavityDepths of the ConcavityRegions for a SplitLine and the
@@ -90,7 +90,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	/**
 	 * TextBox to write Information about the ConcavityRegions into
 	 */
-	public static JTextArea textAreaForConcavityInformation = new JTextArea();
+	//public static JTextArea textAreaForConcavityInformation = new JTextArea();
 	/**
 	 * variable which tells if all ConvexHull for the Clumps in the original
 	 * image are drawn. A Convex Hull for all seperated clumps is very
@@ -325,22 +325,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		/*
 		 * manages the overlays
 		 */
-		Overlay o = new Overlay();
-		for (Roi overlay : Clump.overlayForOrientation)
-		{
-			o.addElement(overlay);
-		}
-		for (Roi overlay : Clump.overlayConvexHull)
-		{
-			o.addElement(overlay);
-		}
-		for (Roi overlay : Clump.overlaySplitPoints)
-		{
-			o.addElement(overlay);
-		}
-	
-		imp.setOverlay(o);
-		/*
+		this.showOverlay();
+				/*
 		 * adds MouseListener to each ConcavityRegion for the Bounding Box to
 		 * show information about the ConcavityRegions
 		 */
@@ -677,6 +663,31 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	{
 		// TODO Auto-generated method stub
 
+	}
+
+	public static void showOverlay()
+	{
+		Overlay o = new Overlay();
+		/*for (Roi overlay : Clump.overlayForOrientation)
+		{
+			o.addElement(overlay);
+		}*/
+		for (Roi overlay : Clump.overlayConvexHull)
+		{
+			o.addElement(overlay);
+		}
+		for (Roi overlay : Clump.overlaySplitPoints)
+		{
+			o.addElement(overlay);
+		}
+	
+		for(Roi overlay: Clump.overlayTextConvexHull)
+		{
+			o.addElement(overlay);
+		}
+		imp.setOverlay(o);
+
+		
 	}
 
 }

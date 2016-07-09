@@ -1,6 +1,7 @@
 package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -43,17 +44,22 @@ public class MouseListenerConcavityRegions implements MouseListener
 			{
 				for(ConcavityPixel point:cr.getConcavityPixelList())
 				{
-			/*		
+			
+					Clump.overlayTextConvexHull.clear();
 					TextRoi text= new TextRoi(minX, minY,cr.getInformation(point));
+					TextRoi.setFont("Default", 10, Font.PLAIN);
+					text.setStrokeWidth(5);
+					text.setStrokeColor(Color.red);
 					Clump.overlayTextConvexHull.add(text);
-					*/
-				Clump_Splitting.textAreaForConcavityInformation.setText(cr.getInformation(point));
+					
+				/*Clump_Splitting.textAreaForConcavityInformation.setText(cr.getInformation(point));
 				Clump_Splitting.textAreaForConcavityInformation.setBackground(Color.lightGray);
 				Clump_Splitting.windowPanelConcavityRegion.add(Clump_Splitting.textAreaForConcavityInformation);
 				Clump_Splitting.windowPanelConcavityRegion.setLocation(e.getXOnScreen(), e.getYOnScreen());
 				Clump_Splitting.windowPanelConcavityRegion.setBackground(Color.gray);
 				Clump_Splitting.windowPanelConcavityRegion.pack();
-				Clump_Splitting.windowPanelConcavityRegion.setVisible(true);
+				Clump_Splitting.windowPanelConcavityRegion.setVisible(true);*/
+				Clump_Splitting.showOverlay();
 				}
 			}
 		}
