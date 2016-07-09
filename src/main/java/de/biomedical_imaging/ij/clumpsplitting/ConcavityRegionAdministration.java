@@ -242,7 +242,7 @@ public class ConcavityRegionAdministration
 		// IJ.log("convexHullPoints"+innerConvexHull.npoints);
 
 		///////////////////////////////////////////////////////////////////////
-		int konstante = 3;
+		int konstante = 2;
 
 		for (InnerContour inner : clump.getInnerContours())
 		{
@@ -413,6 +413,7 @@ public class ConcavityRegionAdministration
 					punkt2 = intList.get(l);
 
 				}
+
 				int xDist = (int) Math.round((punkt.getX() + punkt2.getX()) / 2);
 				int yDist = (int) Math.round((punkt.getY() + punkt2.getY()) / 2);
 				Point2D midPoint = new Point2D.Double(xDist, yDist);
@@ -487,6 +488,37 @@ public class ConcavityRegionAdministration
 				}
 			}
 
+			Point2D punkt = reducedPointList.get(reducedPointList.size() - 1);
+			Point2D punkt2 = reducedPointList.get(0);
+
+			int xDist = (int) Math.round((punkt.getX() + punkt2.getX()) / 2);
+			int yDist = (int) Math.round((punkt.getY() + punkt2.getY()) / 2);
+			Point2D midPoint = new Point2D.Double(xDist, yDist);
+
+			if (Clump_Splitting.BACKGROUNDCOLOR == 0)
+			{
+				if (Clump_Splitting.binary.getPixel((int) Math.round(midPoint.getX()),
+						(int) Math.round(midPoint.getY())) != 0)
+				{
+					if (reducedPointList.size() > 0)
+					{
+						reducedPointList.remove(0);
+					}
+
+				}
+			} else
+			{
+				if (Clump_Splitting.binary.getPixel((int) Math.round(midPoint.getX()),
+						(int) Math.round(midPoint.getY())) != 255)
+				{
+					if (reducedPointList.size() > 0)
+					{
+						reducedPointList.remove(0);
+
+					}
+				}
+
+			}
 			for (int k = 0; k < reducedPointList.size(); k++)
 			{
 				int innerStartX = 0;
@@ -519,7 +551,7 @@ public class ConcavityRegionAdministration
 				}
 
 				if (this.getPositionOfConvexHullPointAtBoundary(inner, innerStartX, innerStartY) < this
-						.getPositionOfConvexHullPointAtBoundary(inner, innerEndX, innerEndY))
+						.getPositionOfConvexHullPointAtBoundary(inner, innerEndX, innerEndY)||k==0)
 				{
 					ArrayList<Point2D> pointList = getAllEmbeddedPointsFromInnerContour(innerStartX, innerStartY,
 							innerEndX, innerEndY, inner); //
@@ -541,6 +573,10 @@ public class ConcavityRegionAdministration
 								ldcpd = new LargestDistanceConcavityPixelDetector();
 							}
 						}
+						Line l = new Line(innerEndX, innerEndY, innerEndX, innerEndY);
+						l.setStrokeColor(Color.blue);
+						l.setStrokeWidth(3);
+						Clump.overlaySplitPoints.add(l);
 						ConcavityRegion concavityRegion = new ConcavityRegion(innerStartX, innerStartY, innerEndX,
 								innerEndY, pointList, doubleList);
 
