@@ -40,9 +40,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.swing.JTextArea;
-import javax.swing.JWindow;
-
 import de.biomedical_imaging.ij.clumpsplitting.SplitLines.SplitLineAssignmentSVM;
 import ij.IJ;
 import ij.ImagePlus;
@@ -72,7 +69,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * panel to show Information about the ConcavityRegions to optimize
 	 * parameter
 	 */
-	//public static JWindow windowPanelConcavityRegion = new JWindow();
+	// public static JWindow windowPanelConcavityRegion = new JWindow();
 	/**
 	 * List To Train SVM for SplitLineParameters C1 and C2. It contains the sum
 	 * of both ConcavityDepths of the ConcavityRegions for a SplitLine and the
@@ -90,7 +87,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	/**
 	 * TextBox to write Information about the ConcavityRegions into
 	 */
-	//public static JTextArea textAreaForConcavityInformation = new JTextArea();
+	// public static JTextArea textAreaForConcavityInformation = new
+	// JTextArea();
 	/**
 	 * variable which tells if all ConvexHull for the Clumps in the original
 	 * image are drawn. A Convex Hull for all seperated clumps is very
@@ -195,7 +193,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 */
 	public static ImagePlus imp;
 
-	public static ImageProcessor binary;
+	//public static ImageProcessor binary;
+
 	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
@@ -217,10 +216,9 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		Clump.overlayForOrientation.clear();
 		Clump.overlayConvexHull.clear();
 		Clump.overlaySplitPoints.clear();
-		
+
 		ArrayList<Clump> clumpList = new ArrayList<Clump>();
 
-		
 		ImagePlus imp = IJ.getImage();
 		imp.setOverlay(null);
 		// int i = 0;
@@ -231,14 +229,14 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 		AutoThresholder at = new AutoThresholder();
 		// imageProcessorBinary.blurGaussian(0.9);
-			
+
 		int[] histogram = imageProcessorBinary.getHistogram();
-			
+
 		int threshold = at.getThreshold(Method.Default, histogram);
 
 		// pre-processing
 		imageProcessorBinary.threshold(threshold);
-		
+
 		if (Clump_Splitting.BACKGROUNDCOLOR == 1)
 		{
 			imageProcessorBinary.dilate();
@@ -253,55 +251,17 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			imageProcessorBinary.invert();
 		}
 
-		Clump_Splitting.binary=imageProcessorBinary;
+		ImageProcessor binary = imageProcessorBinary;
 		do
 		{
 
 			// generates a copy of the original image to binarize the image to
 			// find ConcavityRegions and SplitPoints
-	
+
 			// preprocessing /*TODO*/
 
-			
-
 			// computes the blobs at the image
-			ManyBlobs blobList = new ManyBlobs(new ImagePlus("", Clump_Splitting.binary));
-			blobList.setBackground(BACKGROUNDCOLOR);
-
-			/*
-			 * Counter of ready Clumps has to be zero at the beginning of each
-			 * step, because all Clumps are detected at first. Counts the number
-			 * of Clumps for which no possible splitlines can be found
-			 */
-			Clump.STOP = 0;
-
-			clumpList.clear();
-			/*
-			 * if the background is white backgroundColor must be 1 Clumps of
-			 * the Image will be detected
-			 */
-			blobList.findConnectedComponents();
-
-			Clump clump = null;
-			for (Blob b : blobList)
-			{
-				// outerContour is detected
-				Polygon p = b.getOuterContour();
-				// innerContours of a Clump are detected
-				ArrayList<Polygon> q = b.getInnerContours();
-				clump = new Clump(p, q, ip);
-				clumpList.add(clump);
-			}
-
-			if (!Clump_Splitting.done)
-			{
-				Clump_Splitting.count = clumpList.size();
-				Clump_Splitting.done = true;
-			}
-			/*
-			 * crash condition stops, if no more possible best SplitLines are
-			 * found
-			 */
+			clumpList = Clump_Splitting.computeClumps(ip,binary);
 		} while (clumpList.size() > Clump.STOP);
 
 		/*
@@ -320,13 +280,13 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		 */
 		if (Clump.STOP == clumpList.size())
 		{
-				IJ.log("Die Anzahl der gefundenen Klumpen beträgt: " + clumpList.size());
+			IJ.log("Die Anzahl der gefundenen Klumpen beträgt: " + clumpList.size());
 		}
 		/*
 		 * manages the overlays
 		 */
-		this.showOverlay();
-				/*
+		Clump_Splitting.showOverlay();
+		/*
 		 * adds MouseListener to each ConcavityRegion for the Bounding Box to
 		 * show information about the ConcavityRegions
 		 */
@@ -336,6 +296,49 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 			imp.getCanvas().addMouseListener(new MouseListenerConcavityRegions(cr));
 		}
+
+	}
+
+	private static ArrayList<Clump> computeClumps(ImageProcessor ip,ImageProcessor binary)
+	{
+		ManyBlobs blobList = new ManyBlobs(new ImagePlus("", binary));
+		blobList.setBackground(BACKGROUNDCOLOR);
+
+		/*
+		 * Counter of ready Clumps has to be zero at the beginning of each step,
+		 * because all Clumps are detected at first. Counts the number of Clumps
+		 * for which no possible splitlines can be found
+		 */
+		Clump.STOP = 0;
+
+		ArrayList<Clump> clumpList = new ArrayList<Clump>();
+		/*
+		 * if the background is white backgroundColor must be 1 Clumps of the
+		 * Image will be detected
+		 */
+		blobList.findConnectedComponents();
+
+		Clump clump = null;
+		for (Blob b : blobList)
+		{
+			// outerContour is detected
+			Polygon p = b.getOuterContour();
+			// innerContours of a Clump are detected
+			ArrayList<Polygon> q = b.getInnerContours();
+			clump = new Clump(p, q, ip,binary);
+			clumpList.add(clump);
+		}
+
+		if (!Clump_Splitting.done)
+		{
+			Clump_Splitting.count = clumpList.size();
+			Clump_Splitting.done = true;
+		}
+		/*
+		 * crash condition stops, if no more possible best SplitLines are found
+		 */
+
+		return clumpList;
 
 	}
 
@@ -361,9 +364,9 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		FileWriter writer = null;
 		try
 		{
-			String title= imp.getTitle();
-			
-			String st= "test/"+ title.split("\\.")[0] + "ConcavityRegionInformationForSVM.csv";
+			String title = imp.getTitle();
+
+			String st = "test/" + title.split("\\.")[0] + "ConcavityRegionInformationForSVM.csv";
 			writer = new FileWriter(st);
 		} catch (IOException e1)
 		{
@@ -668,10 +671,10 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	public static void showOverlay()
 	{
 		Overlay o = new Overlay();
-		/*for (Roi overlay : Clump.overlayForOrientation)
-		{
-			o.addElement(overlay);
-		}*/
+		/*
+		 * for (Roi overlay : Clump.overlayForOrientation) {
+		 * o.addElement(overlay); }
+		 */
 		for (Roi overlay : Clump.overlayConvexHull)
 		{
 			o.addElement(overlay);
@@ -680,14 +683,13 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		{
 			o.addElement(overlay);
 		}
-	
-		for(Roi overlay: Clump.overlayTextConvexHull)
+
+		for (Roi overlay : Clump.overlayTextConvexHull)
 		{
 			o.addElement(overlay);
 		}
 		imp.setOverlay(o);
 
-		
 	}
 
 }

@@ -123,7 +123,7 @@ public class Clump
 	 *            ImageProcessor to visualize the detected Points and lines of
 	 *            the Image
 	 */
-	public Clump(Polygon boundary, ArrayList<Polygon> innerContours, ImageProcessor ip)
+	public Clump(Polygon boundary, ArrayList<Polygon> innerContours, ImageProcessor ip, ImageProcessor binary)
 	{
 		this.boundary = boundary;
 		this.convexHull = this.computeConvexHull(boundary);
@@ -172,7 +172,7 @@ public class Clump
 		/*
 		 * computes all concavityRegions
 		 */
-		this.concavityRegionList = this.computeConcavityRegions();
+		this.concavityRegionList = this.computeConcavityRegions(binary);
 		/*
 		 * adds all ConcavityRegions to ConcavityRegionList to draw information
 		 * about it
@@ -185,7 +185,7 @@ public class Clump
 			}
 
 		}
-		this.computeSplitLines(ip);
+		this.computeSplitLines(ip,binary);
 	}
 
 	/**
@@ -207,10 +207,10 @@ public class Clump
 	 * 
 	 * @return returns the valid concavityRegions detected in the Clump
 	 */
-	private ArrayList<ConcavityRegion> computeConcavityRegions()
+	private ArrayList<ConcavityRegion> computeConcavityRegions(ImageProcessor binary)
 	{
 		ConcavityRegionAdministration cra = new ConcavityRegionAdministration(this);
-		ArrayList<ConcavityRegion> concavityRegionList = cra.computeConcavityRegions();
+		ArrayList<ConcavityRegion> concavityRegionList = cra.computeConcavityRegions(binary);
 
 		for (ConcavityRegion cr : concavityRegionList)
 		{
@@ -238,7 +238,7 @@ public class Clump
 	 *            ImageProcessor to draw the detectedSplitLine
 	 */
 
-	private ArrayList<AbstractSplitLine> computeSplitLines(ImageProcessor ip)
+	private ArrayList<AbstractSplitLine> computeSplitLines(ImageProcessor ip, ImageProcessor binary)
 	{
 		this.computeFirstAndSecondLargestConcavityDepth();
 		ArrayList<AbstractSplitLine> possibleSplitLines = null;
@@ -291,7 +291,7 @@ public class Clump
 		{
 			if (asl != null)
 			{
-				this.drawSplitLine(ip, asl);
+				this.drawSplitLine(ip,binary, asl);
 			}
 		}
 
@@ -306,10 +306,10 @@ public class Clump
 	 * @param asl
 	 *            SplitLine to draw
 	 */
-	private void drawSplitLine(ImageProcessor ip, AbstractSplitLine asl)
+	private void drawSplitLine(ImageProcessor ip,ImageProcessor binary, AbstractSplitLine asl)
 	{
 
-		asl.drawLine(ip);
+		asl.drawLine(ip, binary);
 	}
 
 	/**
@@ -395,6 +395,10 @@ public class Clump
 	{
 
 		return this.largestConcavityPixel;
+	}
+	public ArrayList<ConcavityRegion> getConcavityRegionList()
+	{
+		return this.concavityRegionList;
 	}
 
 	/**

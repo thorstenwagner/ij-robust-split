@@ -33,7 +33,7 @@ public class MaximumMinimumIntensitySplitLine implements AbstractSplitLine
 		this.points=points;
 	}
 	@Override
-	public void drawLine(ImageProcessor ip)
+	public void drawLine(ImageProcessor ip, ImageProcessor binary)
 	{
 		for(Point2D p: points)
 		{
@@ -41,16 +41,16 @@ public class MaximumMinimumIntensitySplitLine implements AbstractSplitLine
 			if(Clump_Splitting.BACKGROUNDCOLOR==0)
 			{
 
-				Clump_Splitting.binary.setColor(Color.black);
+				binary.setColor(Color.black);
 			ip.setColor(Color.black);
 			}
 			else{
 
-				Clump_Splitting.binary.setColor(Color.white);
+				binary.setColor(Color.white);
 				ip.setColor(Color.white);
 			}
 			ip.drawLine4((int)p.getX(), (int)p.getY(),(int)p.getX(), (int)p.getY());
-			Clump_Splitting.binary.drawLine4((int)p.getX(), (int)p.getY(),(int)p.getX(), (int)p.getY());
+			binary.drawLine4((int)p.getX(), (int)p.getY(),(int)p.getX(), (int)p.getY());
 		}
 	
 	}		

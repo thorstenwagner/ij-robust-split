@@ -38,5 +38,5 @@ package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 import ij.process.ImageProcessor;
 
 public interface AbstractSplitLine {
-	public void drawLine(ImageProcessor ip);
+	public void drawLine(ImageProcessor ip,ImageProcessor binary);
 }

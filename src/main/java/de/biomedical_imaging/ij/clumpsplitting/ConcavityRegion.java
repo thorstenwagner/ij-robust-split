@@ -109,7 +109,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 			Line polygonRoi = new Line(p.getX(), p.getY(), p.getX(), p.getY());
 
 			polygonRoi.setStrokeWidth(3);
-			
+
 			polygonRoi.setStrokeColor(Color.red);
 
 			// Roi.setColor(Color.red);
@@ -162,8 +162,9 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		m.setStrokeColor(Color.red);
 		Clump.overlayForOrientation.add(l);
 		Clump.overlayForOrientation.add(m);
-	//	System.out.println("WICHTIG" + midPointI.getX() + " " + midPointI.getY() + " " + maxPointI.getX() + " "
-		//		+ maxPointI.getY());
+		// System.out.println("WICHTIG" + midPointI.getX() + " " +
+		// midPointI.getY() + " " + maxPointI.getX() + " "
+		// + maxPointI.getY());
 		Vector2d vi = new Vector2d(xPointDistOne, yPointDistOne);
 		Vector2d vj = new Vector2d(10, 0);
 		vi.normalize();
@@ -315,25 +316,25 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		this.endX = endX;
 		this.endY = endY;
 
-		this.concavityPixelList= new ArrayList<ConcavityPixel>();
+		this.concavityPixelList = new ArrayList<ConcavityPixel>();
 		this.boundaryPointList = boundaryPointList;
 		this.distList = distList;
 		this.midPointOfConvexHull = this.computeMidPointOfConvexHull();
 
 	}
-	
 
 	public void setConcavityPixelList(ArrayList<ConcavityPixel> cpl)
 	{
-		this.concavityPixelList=cpl;
-		
+		this.concavityPixelList = cpl;
+
 	}
-	
+
 	public void addConcavityPixel(ConcavityPixel cp)
 	{
 		this.concavityPixelList.add(cp);
-		
+
 	}
+
 	public int getStartX()
 	{
 		return startX;

@@ -100,7 +100,7 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 		this.cI = cI;
 		this.concavityAngle = concavityAngle;
 		this.concavityRatio = concavityRatio;
-		this.endConcavityPixel = new ConcavityPixel(endConcavityPixel,0,null);
+		this.endConcavityPixel = new ConcavityPixel(endConcavityPixel, 0, null);
 		this.startConcavityPixel = startConcavityPixel;
 	}
 
@@ -142,34 +142,34 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 	 * @param ip
 	 *            ImageProcessor to draw the SplitLine
 	 */
-	public void drawLine(ImageProcessor ip)
+	public void drawLine(ImageProcessor ip, ImageProcessor binary)
 	{
 		// System.out.println("ConcAndPoint Error");
 		if (cI != null)
 		{
 			if (this.getEndConcavityPixel().getPosition() != null)
 			{
-				//ip.setLineWidth(3);
+				// ip.setLineWidth(3);
 				if (Clump_Splitting.BACKGROUNDCOLOR == 0)
 				{
-					Clump_Splitting.binary.setColor(Color.black);
+					binary.setColor(Color.black);
 					ip.setColor(Color.black);
 				} else
 				{
 
-					Clump_Splitting.binary.setColor(Color.white);
+					binary.setColor(Color.white);
 					ip.setColor(Color.white);
 				}
 				ip.drawLine4((int) this.getStartConcavityPixel().getPosition().getX(),
 						(int) this.getStartConcavityPixel().getPosition().getY(),
 						(int) this.getEndConcavityPixel().getPosition().getX(),
 						(int) this.getEndConcavityPixel().getPosition().getY());
-				
-				Clump_Splitting.binary.drawLine4((int) this.getStartConcavityPixel().getPosition().getX(),
+
+				binary.drawLine4((int) this.getStartConcavityPixel().getPosition().getX(),
 						(int) this.getStartConcavityPixel().getPosition().getY(),
 						(int) this.getEndConcavityPixel().getPosition().getX(),
 						(int) this.getEndConcavityPixel().getPosition().getY());
-			
+
 				if (Clump_Splitting.SHOWPIXELS)
 				{
 					// ip.setColor(Color.gray);
