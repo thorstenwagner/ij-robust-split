@@ -2,6 +2,7 @@ package ij_robust_split;
 
 import static org.junit.Assert.*;
 
+import java.net.URL;
 import java.util.ArrayList;
 
 import de.biomedical_imaging.ij.clumpsplitting.AbstractConcavityPixelDetector;
@@ -26,7 +27,10 @@ public class Test
 	@org.junit.Test
 	public void concavityRegionTest()
 	{
-		ImagePlus ip = new ImagePlus("Testbilder/6er.png");
+		URL url = this.getClass().getClassLoader().getResource("6er.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+
+	//	ImagePlus ip = new ImagePlus("Testbilder/6er.png");
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		ImageProcessor imap = ip.getProcessor();
@@ -42,7 +46,10 @@ public class Test
 	@org.junit.Test
 	public void concavityPixelTest()
 	{
-		ImagePlus ip = new ImagePlus("Testbilder/6er.png");
+		URL url = this.getClass().getClassLoader().getResource("6er.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+
+		//ImagePlus ip = new ImagePlus("Testbilder/6er.png");
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		ImageProcessor imap = ip.getProcessor();
@@ -65,7 +72,10 @@ public class Test
 	@org.junit.Test
 	public void concavityDepthTest()
 	{
-		ImagePlus ip = new ImagePlus("Testbilder/6er.png");
+		URL url = this.getClass().getClassLoader().getResource("6er.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+
+		//ImagePlus ip = new ImagePlus("Testbilder/6er.png");
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		ImageProcessor imap = ip.getProcessor();
@@ -96,7 +106,10 @@ public class Test
 	@org.junit.Test
 	public void concavityDepthTest2()
 	{
-		ImagePlus ip = new ImagePlus("Testbilder/6er.png");
+		URL url = this.getClass().getClassLoader().getResource("6er.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+
+		//ImagePlus ip = new ImagePlus("Testbilder/6er.png");
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		ImageProcessor imap = ip.getProcessor();
@@ -130,7 +143,10 @@ public class Test
 	@org.junit.Test
 	public void saliencyTest()
 	{
-		ImagePlus ip = new ImagePlus("Testbilder/2Objekte.png");
+		URL url = this.getClass().getClassLoader().getResource("2Objekte.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+
+		//ImagePlus ip = new ImagePlus("Testbilder/2Objekte.png");
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		ImageProcessor imap = ip.getProcessor();
@@ -152,7 +168,10 @@ public class Test
 	@org.junit.Test
 	public void concavityConcavityAlignmentTest()
 	{
-		ImagePlus ip = new ImagePlus("Testbilder/2Objekte.png");
+		URL url = this.getClass().getClassLoader().getResource("2Objekte.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+
+		//ImagePlus ip = new ImagePlus("Testbilder/2Objekte.png");
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		ImageProcessor imap = ip.getProcessor();
@@ -174,7 +193,10 @@ public class Test
 	@org.junit.Test
 	public void concavityLineAlignmentTest()
 	{
-		ImagePlus ip = new ImagePlus("Testbilder/2Objekte.png");
+		URL url = this.getClass().getClassLoader().getResource("2Objekte.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+
+		//ImagePlus ip = new ImagePlus("Testbilder/2Objekte.png");
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		ImageProcessor imap = ip.getProcessor();
@@ -196,7 +218,10 @@ public class Test
 	@org.junit.Test
 	public void concavityAngleTest()
 	{
-		ImagePlus ip = new ImagePlus("Testbilder/4EineRegion.png");
+		URL url = this.getClass().getClassLoader().getResource("4EineRegion.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+
+		//ImagePlus ip = new ImagePlus("Testbilder/4EineRegion.png");
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.setBackground(0);
 		mb.findConnectedComponents();
@@ -219,7 +244,10 @@ public class Test
 	@org.junit.Test
 	public void concavityRatioTest()
 	{
-		ImagePlus ip = new ImagePlus("Testbilder/4EineRegion.png");
+		URL url = this.getClass().getClassLoader().getResource("4EineRegion.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+
+		//ImagePlus ip = new ImagePlus("Testbilder/4EineRegion.png");
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.setBackground(0);
 		mb.findConnectedComponents();
