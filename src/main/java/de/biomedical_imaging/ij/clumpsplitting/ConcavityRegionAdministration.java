@@ -242,7 +242,7 @@ public class ConcavityRegionAdministration
 		// IJ.log("convexHullPoints"+innerConvexHull.npoints);
 
 		///////////////////////////////////////////////////////////////////////
-		int konstante = 2;
+		int konstante = 3;
 
 		for (InnerContour inner : clump.getInnerContours())
 		{

@@ -107,7 +107,7 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 		this.cJ = cJ;
 		this.saliency = saliency;
 		this.concavityConcavityAlignment = concavityConcavityAlignment;
-		this.concavityConcavityAlignment = concavityLineAlignment;
+		this.concavityLineAlignment = concavityLineAlignment;
 		this.chi = chi;
 		this.startConcavityPixel = startConcavityPixel;
 		this.endConcavityPixel = endConcavityPixel;
