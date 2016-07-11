@@ -35,8 +35,13 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
+import java.awt.geom.Point2D;
+
 import ij.process.ImageProcessor;
 
 public interface AbstractSplitLine {
 	public void drawLine(ImageProcessor ip,ImageProcessor binary);
+	public Point2D getStartPoint();
+	public Point2D getEndPoint();
+	public double distance();
 }

@@ -53,32 +53,8 @@ import ij.process.ImageProcessor;
  */
 public class Clump
 {
-	/**
-	 * List for all possible ConcavityRegions to show parameter for it to choose
-	 * best parameter for the Clump splitting
-	 */
-	public static ArrayList<ConcavityRegion> allRegions = new ArrayList<ConcavityRegion>();
 
-	/**
-	 * the concavityRegionList includes all useful concavityRegion the criteria,
-	 * if a ConcavityRegion is useful is the CONCAVITY_DEPTH_THRESHOLD from
-	 * class ConcavityRegionAdministration
-	 */
-	public static int done = 0;
-	/**
-	 * List of rois, which manages the overlay for the Orientation
-	 */
-	public static ArrayList<Roi> overlayForOrientation = new ArrayList<Roi>();
-	public static ArrayList<Roi> overlayTextConvexHull = new ArrayList<Roi>();
-	/**
-	 * List of rois, which manages the overlay for the ConvexHulls
-	 */
-	public static ArrayList<Roi> overlayConvexHull = new ArrayList<Roi>();
-	/**
-	 * List of rois, which manages the overlay for the SplitPoints
-	 */
-	public static ArrayList<Roi> overlaySplitPoints = new ArrayList<Roi>();
-
+	private ArrayList<AbstractSplitLine> splitLineList=null;
 	/**
 	 * List of all innerContours of a Clump
 	 */
@@ -95,13 +71,7 @@ public class Clump
 	 * the convexHull is detected by Class ij.gui.PolygonRoi
 	 */
 	private Polygon convexHull;
-	/**
-	 * Counter of ready Clumps has to be zero at the beginning of each step,
-	 * because all Clumps are detected at first. Counts the number of Clumps for
-	 * which no possible splitlines can be found
-	 */
-	public static int STOP = 0;
-
+	
 	private ConcavityPixel largestConcavityPixel;
 	/**
 	 * the variable secondMaxConcavityDepth represents the distance of the
@@ -154,16 +124,16 @@ public class Clump
 			 * draws only one ConvexHull for each Clump which is detected in the
 			 * original picture to recieve clarity
 			 */
-			if (Clump_Splitting.SHOWCONVEXHULL && Clump.done < Clump_Splitting.count)
+			if (Clump_Splitting.SHOWCONVEXHULL && Clump_Splitting.done < Clump_Splitting.count)
 			{
 				this.drawConvexHull(ip);
-				Clump.done++;
+				Clump_Splitting.done++;
 			} else
 			{
 				if (!Clump_Splitting.SHOWCONVEXHULL)
 				{
-					Clump.done = 0;
-					Clump.overlayConvexHull.clear();
+					Clump_Splitting.done = 0;
+					Clump_Splitting.overlayConvexHull.clear();
 				}
 			}
 		}
@@ -179,13 +149,13 @@ public class Clump
 		 */
 		for (ConcavityRegion cr : concavityRegionList)
 		{
-			if (!Clump.allRegions.contains(cr))
+			if (!Clump_Splitting.allRegions.contains(cr))
 			{
-				Clump.allRegions.add(cr);
+				Clump_Splitting.allRegions.add(cr);
 			}
 
 		}
-		this.computeSplitLines(ip,binary);
+		this.splitLineList=this.computeSplitLines(ip,binary);
 	}
 
 	/**
@@ -221,7 +191,7 @@ public class Clump
 				cr.markMax();
 			} else
 			{
-				Clump.overlaySplitPoints.clear();
+				Clump_Splitting.overlaySplitPoints.clear();
 			}
 			// cr.markMidPointOfConvexHull();
 
@@ -278,13 +248,13 @@ public class Clump
 		// possibleSplitLines.size());
 		if (possibleSplitLines.size() == 0)
 		{
-			Clump.STOP++;
+			Clump_Splitting.STOP++;
 		} else
 		{
 			if (possibleSplitLines.get(0) == null)
 			{
 
-				Clump.STOP++;
+				Clump_Splitting.STOP++;
 			}
 		}
 		for (AbstractSplitLine asl : possibleSplitLines)
@@ -327,7 +297,7 @@ public class Clump
 		;
 		// Roi.setColor(Color.cyan);
 		polygonRoi.setStrokeColor(Color.cyan);
-		overlayConvexHull.add(polygonRoi);
+		Clump_Splitting.overlayConvexHull.add(polygonRoi);
 
 		// o.setStrokeColor(Color.red);
 		// o.addElement(polygonRoi);
@@ -425,5 +395,9 @@ public class Clump
 	public ArrayList<InnerContour> getInnerContours()
 	{
 		return innerList;
+	}
+	public ArrayList<AbstractSplitLine> getSplitLines()
+	{
+		return splitLineList;
 	}
 }

@@ -66,10 +66,12 @@ import ij.process.ImageProcessor;
 public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 {
 	/**
-	 * panel to show Information about the ConcavityRegions to optimize
-	 * parameter
+	 * Counter of ready Clumps has to be zero at the beginning of each step,
+	 * because all Clumps are detected at first. Counts the number of Clumps for
+	 * which no possible splitlines can be found
 	 */
-	// public static JWindow windowPanelConcavityRegion = new JWindow();
+	public static int STOP = 0;
+
 	/**
 	 * List To Train SVM for SplitLineParameters C1 and C2. It contains the sum
 	 * of both ConcavityDepths of the ConcavityRegions for a SplitLine and the
@@ -90,11 +92,39 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	// public static JTextArea textAreaForConcavityInformation = new
 	// JTextArea();
 	/**
+	 * List for all possible ConcavityRegions to show parameter for it to choose
+	 * best parameter for the Clump splitting
+	 */
+	public static ArrayList<ConcavityRegion> allRegions = new ArrayList<ConcavityRegion>();
+
+	/**
+	 * the concavityRegionList includes all useful concavityRegion the criteria,
+	 * if a ConcavityRegion is useful is the CONCAVITY_DEPTH_THRESHOLD from
+	 * class ConcavityRegionAdministration
+	 */
+	public static int done = 0;
+	/**
+	 * List of rois, which manages the overlay for the Orientation
+	 */
+	public static ArrayList<Roi> overlayForOrientation = new ArrayList<Roi>();
+	public static ArrayList<Roi> overlayTextConvexHull = new ArrayList<Roi>();
+	/**
+	 * List of rois, which manages the overlay for the ConvexHulls
+	 */
+	public static ArrayList<Roi> overlayConvexHull = new ArrayList<Roi>();
+	
+	/**
+	 * List of rois, which manages the overlay for the SplitPoints
+	 */
+	public static ArrayList<Roi> overlaySplitPoints = new ArrayList<Roi>();
+
+	/**
 	 * variable which tells if all ConvexHull for the Clumps in the original
 	 * image are drawn. A Convex Hull for all seperated clumps is very
 	 * irritating, because some of them could overlap
 	 */
-	private static boolean done;
+	
+	private static boolean isReady;
 	/**
 	 * if it is true and the ok button was pressed Data of
 	 * StraightSplitLineBetweenTwoConcavityRegions is written to a LibSVM file
@@ -193,7 +223,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 */
 	public static ImagePlus imp;
 
-	//public static ImageProcessor binary;
+	// public static ImageProcessor binary;
 
 	@Override
 	public int setup(String arg, ImagePlus imp)
@@ -213,9 +243,9 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	{
 
 		// overlays are cleared to show actual overlays
-		Clump.overlayForOrientation.clear();
-		Clump.overlayConvexHull.clear();
-		Clump.overlaySplitPoints.clear();
+		Clump_Splitting.overlayForOrientation.clear();
+		Clump_Splitting.overlayConvexHull.clear();
+		Clump_Splitting.overlaySplitPoints.clear();
 
 		ArrayList<Clump> clumpList = new ArrayList<Clump>();
 
@@ -254,15 +284,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		ImageProcessor binary = imageProcessorBinary;
 		do
 		{
-
-			// generates a copy of the original image to binarize the image to
-			// find ConcavityRegions and SplitPoints
-
-			// preprocessing /*TODO*/
-
-			// computes the blobs at the image
-			clumpList = Clump_Splitting.computeClumps(ip,binary);
-		} while (clumpList.size() > Clump.STOP);
+			clumpList = Clump_Splitting.computeClumps(ip, binary);
+		} while (clumpList.size() > Clump_Splitting.STOP);
 
 		/*
 		 * writes data of each StraightSplitLine into a LibSVM file
@@ -278,7 +301,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		 * If the condition is true all Clumps are split and the plugin is
 		 * completed
 		 */
-		if (Clump.STOP == clumpList.size())
+		if (Clump_Splitting.STOP == clumpList.size())
 		{
 			IJ.log("Die Anzahl der gefundenen Klumpen beträgt: " + clumpList.size());
 		}
@@ -290,16 +313,16 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		 * adds MouseListener to each ConcavityRegion for the Bounding Box to
 		 * show information about the ConcavityRegions
 		 */
-		for (int n = 0; n < Clump.allRegions.size(); n++)
+		for (int n = 0; n < Clump_Splitting.allRegions.size(); n++)
 		{
-			ConcavityRegion cr = Clump.allRegions.get(n);
+			ConcavityRegion cr = Clump_Splitting.allRegions.get(n);
 
 			imp.getCanvas().addMouseListener(new MouseListenerConcavityRegions(cr));
 		}
 
 	}
 
-	private static ArrayList<Clump> computeClumps(ImageProcessor ip,ImageProcessor binary)
+	private static ArrayList<Clump> computeClumps(ImageProcessor ip, ImageProcessor binary)
 	{
 		ManyBlobs blobList = new ManyBlobs(new ImagePlus("", binary));
 		blobList.setBackground(BACKGROUNDCOLOR);
@@ -309,7 +332,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		 * because all Clumps are detected at first. Counts the number of Clumps
 		 * for which no possible splitlines can be found
 		 */
-		Clump.STOP = 0;
+		Clump_Splitting.STOP = 0;
 
 		ArrayList<Clump> clumpList = new ArrayList<Clump>();
 		/*
@@ -325,14 +348,14 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			Polygon p = b.getOuterContour();
 			// innerContours of a Clump are detected
 			ArrayList<Polygon> q = b.getInnerContours();
-			clump = new Clump(p, q, ip,binary);
+			clump = new Clump(p, q, ip, binary);
 			clumpList.add(clump);
 		}
 
-		if (!Clump_Splitting.done)
+		if (!Clump_Splitting.isReady)
 		{
 			Clump_Splitting.count = clumpList.size();
-			Clump_Splitting.done = true;
+			Clump_Splitting.isReady = true;
 		}
 		/*
 		 * crash condition stops, if no more possible best SplitLines are found
@@ -675,16 +698,16 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		 * for (Roi overlay : Clump.overlayForOrientation) {
 		 * o.addElement(overlay); }
 		 */
-		for (Roi overlay : Clump.overlayConvexHull)
+		for (Roi overlay : Clump_Splitting.overlayConvexHull)
 		{
 			o.addElement(overlay);
 		}
-		for (Roi overlay : Clump.overlaySplitPoints)
+		for (Roi overlay : Clump_Splitting.overlaySplitPoints)
 		{
 			o.addElement(overlay);
 		}
 
-		for (Roi overlay : Clump.overlayTextConvexHull)
+		for (Roi overlay : Clump_Splitting.overlayTextConvexHull)
 		{
 			o.addElement(overlay);
 		}

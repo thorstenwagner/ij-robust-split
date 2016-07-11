@@ -53,6 +53,11 @@ public class MaximumMinimumIntensitySplitLine implements AbstractSplitLine
 			binary.drawLine4((int)p.getX(), (int)p.getY(),(int)p.getX(), (int)p.getY());
 		}
 	
+	}
+	@Override
+	public double distance()
+	{
+		return this.points.size();
 	}		
 	
 }

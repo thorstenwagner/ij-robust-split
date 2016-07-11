@@ -40,5 +40,22 @@ public class GeodesicDistanceSplitLine implements AbstractSplitLine
 			
 		}
 	}
+	@Override
+	public Point2D getStartPoint()
+	{
+		
+		return this.cutPoints.get(0);
+	}
+	@Override
+	public Point2D getEndPoint()
+	{
+		return this.cutPoints.get(cutPoints.size()-1);
+	}
+	@Override
+	public double distance()
+	{
+		
+		return this.cutPoints.size();
+	}
 
 }

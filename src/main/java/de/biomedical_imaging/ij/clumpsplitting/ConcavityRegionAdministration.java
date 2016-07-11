@@ -624,7 +624,7 @@ public class ConcavityRegionAdministration
 						Line l = new Line(innerEndX, innerEndY, innerEndX, innerEndY);
 						l.setStrokeColor(Color.blue);
 						l.setStrokeWidth(3);
-						Clump.overlaySplitPoints.add(l);
+						Clump_Splitting.overlaySplitPoints.add(l);
 						ConcavityRegion concavityRegion = new ConcavityRegion(innerStartX, innerStartY, innerEndX,
 								innerEndY, pointList, doubleList);
 

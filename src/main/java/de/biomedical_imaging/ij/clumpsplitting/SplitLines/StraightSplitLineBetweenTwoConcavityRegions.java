@@ -36,6 +36,8 @@ SOFTWARE.
 package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
+
 import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityPixel;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
@@ -216,6 +218,7 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 		return cJ;
 	}
 
+	
 	@Override
 	public int compareTo(StraightSplitLineBetweenTwoConcavityRegions o)
 	{
@@ -232,6 +235,28 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 				return 0;
 			}
 		}
+	}
+
+	@Override
+	public Point2D getStartPoint()
+	{
+		return this.getStartConcavityPixel().getPosition();
+	}
+
+	@Override
+	public Point2D getEndPoint()
+	{
+		return this.getEndConcavityPixel().getPosition();
+	}
+
+	@Override
+	public double distance()
+	{
+	
+		double distX= Math.abs(this.getStartPoint().getX()-this.getEndPoint().getX());
+		double distY=Math.abs(this.getStartPoint().getY()-this.getEndPoint().getY());
+		double dist=Math.sqrt(distX*distX+distY*distY);
+		return dist;
 	}
 
 }

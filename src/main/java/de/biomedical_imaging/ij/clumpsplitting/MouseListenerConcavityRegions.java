@@ -45,12 +45,12 @@ public class MouseListenerConcavityRegions implements MouseListener
 				for(ConcavityPixel point:cr.getConcavityPixelList())
 				{
 			
-					Clump.overlayTextConvexHull.clear();
+					Clump_Splitting.overlayTextConvexHull.clear();
 					TextRoi text= new TextRoi(minX, minY,cr.getInformation(point));
 					TextRoi.setFont("Default", 10, Font.PLAIN);
 					text.setStrokeWidth(5);
 					text.setStrokeColor(Color.red);
-					Clump.overlayTextConvexHull.add(text);
+					Clump_Splitting.overlayTextConvexHull.add(text);
 					
 				/*Clump_Splitting.textAreaForConcavityInformation.setText(cr.getInformation(point));
 				Clump_Splitting.textAreaForConcavityInformation.setBackground(Color.lightGray);

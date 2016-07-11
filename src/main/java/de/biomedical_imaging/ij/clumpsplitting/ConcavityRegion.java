@@ -114,7 +114,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 
 			// Roi.setColor(Color.red);
 
-			Clump.overlaySplitPoints.add(polygonRoi);
+			Clump_Splitting.overlaySplitPoints.add(polygonRoi);
 		}
 		// ip.setColor(Color.gray);
 		// ip.setLineWidth(10);
@@ -145,7 +145,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		polygonRoi.setStrokeWidth(3);
 		polygonRoi.setStrokeColor(Color.green);
 
-		Clump.overlayConvexHull.add(polygonRoi);
+		Clump_Splitting.overlayConvexHull.add(polygonRoi);
 
 	}
 
@@ -160,8 +160,8 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		Line m = new Line(midPointI.getX(), midPointI.getY(), midPointI.getX() + 50, midPointI.getY());
 		l.setStrokeColor(Color.red);
 		m.setStrokeColor(Color.red);
-		Clump.overlayForOrientation.add(l);
-		Clump.overlayForOrientation.add(m);
+		Clump_Splitting.overlayForOrientation.add(l);
+		Clump_Splitting.overlayForOrientation.add(m);
 		// System.out.println("WICHTIG" + midPointI.getX() + " " +
 		// midPointI.getY() + " " + maxPointI.getX() + " "
 		// + maxPointI.getY());

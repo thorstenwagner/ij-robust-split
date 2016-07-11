@@ -37,8 +37,6 @@ package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
-
-import de.biomedical_imaging.ij.clumpsplitting.Clump;
 import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityPixel;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
@@ -185,7 +183,7 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 
 					// Roi.setColor(Color.red);
 
-					Clump.overlaySplitPoints.add(polygonRoi);
+					Clump_Splitting.overlaySplitPoints.add(polygonRoi);
 					/*
 					 * ip.drawDot((int) point.getX(), (int) point.getY());
 					 * ip.setLineWidth(1);
@@ -195,7 +193,7 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 					 */
 				} else
 				{
-					Clump.overlaySplitPoints.clear();
+					Clump_Splitting.overlaySplitPoints.clear();
 				}
 
 			}
@@ -210,6 +208,29 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 				+ this.getStartConcavityPixel().getPosition().getX() + " MaxY: "
 				+ this.getStartConcavityPixel().getPosition().getY();
 
+	}
+
+	@Override
+	public Point2D getStartPoint()
+	{
+
+		return this.getStartConcavityPixel().getPosition();
+	}
+
+	@Override
+	public Point2D getEndPoint()
+	{
+		return this.getEndConcavityPixel().getPosition();
+	}
+
+	@Override
+	public double distance()
+	{
+	
+		double distX= Math.abs(this.getStartPoint().getX()-this.getEndPoint().getX());
+		double distY=Math.abs(this.getStartPoint().getY()-this.getEndPoint().getY());
+		double dist=Math.sqrt(distX*distX+distY*distY);
+		return dist;
 	}
 
 }
