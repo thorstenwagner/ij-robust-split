@@ -72,6 +72,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 */
 	public static int STOP = 0;
 
+	public static int INNERCONTOURPARAMETER = 4;
 	/**
 	 * List To Train SVM for SplitLineParameters C1 and C2. It contains the sum
 	 * of both ConcavityDepths of the ConcavityRegions for a SplitLine and the
@@ -112,7 +113,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * List of rois, which manages the overlay for the ConvexHulls
 	 */
 	public static ArrayList<Roi> overlayConvexHull = new ArrayList<Roi>();
-	
+
 	/**
 	 * List of rois, which manages the overlay for the SplitPoints
 	 */
@@ -123,7 +124,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * image are drawn. A Convex Hull for all seperated clumps is very
 	 * irritating, because some of them could overlap
 	 */
-	
+
 	private static boolean isReady;
 	/**
 	 * if it is true and the ok button was pressed Data of
@@ -184,6 +185,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * valid SplitLine
 	 */
 	public static double CONCAVITYRATIO_THRESHOLD = 6;
+	public static boolean ISPREPROCESSED = false;
 	/**
 	 * user choosed parameter/ optimized by SVM for Nanoparticles to find the
 	 * best splitLine of an actual Clump
@@ -265,22 +267,27 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		int threshold = at.getThreshold(Method.Default, histogram);
 
 		// pre-processing
+
 		imageProcessorBinary.threshold(threshold);
-
-		if (Clump_Splitting.BACKGROUNDCOLOR == 1)
+		if (!Clump_Splitting.ISPREPROCESSED)
 		{
-			imageProcessorBinary.dilate();
+			if (Clump_Splitting.BACKGROUNDCOLOR == 1)
+			{
+				// imageProcessorBinary.filter(ImageProcessor.MAX);
+				imageProcessorBinary.dilate();
 
-			imageProcessorBinary.erode();
-		} else
-		{
-			imageProcessorBinary.invert();
-			imageProcessorBinary.dilate();
+				imageProcessorBinary.erode();
+			} else
+			{
+				imageProcessorBinary.invert();
+				// imageProcessorBinary.filter(ImageProcessor.MAX);
 
-			imageProcessorBinary.erode();
-			imageProcessorBinary.invert();
+				imageProcessorBinary.dilate();
+
+				imageProcessorBinary.erode();
+				imageProcessorBinary.invert();
+			}
 		}
-
 		ImageProcessor binary = imageProcessorBinary;
 		do
 		{
@@ -436,6 +443,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 		gd.setEnabled(true);
 		String selection = gd.getNextRadioButton();
+		boolean isPreprocessed = gd.getNextBoolean();
 		boolean showConvexHull = gd.getNextBoolean();
 		boolean showPixels = gd.getNextBoolean();
 		boolean writeDataInFile = false;
@@ -445,6 +453,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		Double concavityLineAlignmentThreshold = 0.0;
 		Double concavityAngleThreshold = 0.0;
 		Double concavityRatioThreshold = 0.0;
+		int innerContourParameter = 0;
 		Double c1 = 0.0;
 		Double c2 = 0.0;
 		Double chi = 0.0;
@@ -459,6 +468,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			concavityLineAlignmentThreshold = gd.getNextNumber();
 			concavityAngleThreshold = gd.getNextNumber();
 			concavityRatioThreshold = gd.getNextNumber();
+			innerContourParameter = (int) gd.getNextNumber();
 			c1 = gd.getNextNumber();
 			c2 = gd.getNextNumber();
 			chi = gd.getNextNumber();
@@ -480,6 +490,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				}
 			}
 
+			Clump_Splitting.ISPREPROCESSED = isPreprocessed;
 			SHOWCONVEXHULL = showConvexHull;
 			Clump_Splitting.WRITEDATAINFILE = writeDataInFile;
 			SHOWPIXELS = showPixels;
@@ -507,6 +518,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			{
 				CONCAVITYRATIO_THRESHOLD = concavityRatioThreshold;
 			}
+
+			Clump_Splitting.INNERCONTOURPARAMETER = innerContourParameter;
 			if (!c1.isNaN())
 			{
 				Clump_Splitting.C1 = c1;
@@ -584,6 +597,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 						}
 					}
 				}
+
 				if (detectorType.equals("Detect all Concavity-Pixels"))
 				{
 					Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
@@ -600,6 +614,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				{ "black", "white" };
 				dialog1.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
 
+				dialog1.addCheckbox("Is already pre-processed", false);
 				dialog1.addCheckbox("Show Convex Hull", false);
 				dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
 				dialog1.addCheckbox("Write data in file to train SVM", false);
@@ -609,6 +624,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				dialog1.addSlider("Concavity-Line-Alignment threshold in Degrees", 0, 180, 70);
 				dialog1.addSlider("Concavity-Angle threshold in Degrees", 0, 180, 90);
 				dialog1.addNumericField("Concavity-Ratio threshold", 6, 1);
+				dialog1.addNumericField("Inner-Contour-Parameter", 4, 0);
 				dialog1.addNumericField("C1", 1.73, 3);
 				dialog1.addNumericField("C2", -4.72, 3);
 				dialog1.addNumericField("Chi-Threshold", 0.5, 3);

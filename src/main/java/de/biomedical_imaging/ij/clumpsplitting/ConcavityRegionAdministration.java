@@ -242,11 +242,12 @@ public class ConcavityRegionAdministration
 		// IJ.log("convexHullPoints"+innerConvexHull.npoints);
 
 		///////////////////////////////////////////////////////////////////////
-		int konstante = 3;
+		int konstante = Clump_Splitting.INNERCONTOURPARAMETER;
 
 		for (InnerContour inner : clump.getInnerContours())
 		{
-			System.out.println("------------------------------------------------" + concavityRegionList.size());
+			// System.out.println("------------------------------------------------"
+			// + concavityRegionList.size());
 			boolean switched = false;
 			boolean isBackground = false;
 
@@ -389,6 +390,12 @@ public class ConcavityRegionAdministration
 					}
 				}
 			}
+			/*
+			 * if(isStarted=true) { intList.add(new
+			 * Point2D.Double(inner.getContour().xpoints[inner.getContour().
+			 * npoints-konstante],inner.getContour().ypoints[inner.getContour().
+			 * npoints-2-konstante])); }
+			 */
 
 			ArrayList<Point2D> pointsList = new ArrayList<Point2D>();
 			for (int n = 0; n < intList.size(); n++)
@@ -537,108 +544,110 @@ public class ConcavityRegionAdministration
 					}
 				}
 			}
-
-			Point2D punkt = reducedPointList.get(reducedPointList.size() - 1);
-			Point2D punkt2 = reducedPointList.get(0);
-
-			int xDist = (int) Math.round((punkt.getX() + punkt2.getX()) / 2);
-			int yDist = (int) Math.round((punkt.getY() + punkt2.getY()) / 2);
-			Point2D midPoint = new Point2D.Double(xDist, yDist);
-
-			if (Clump_Splitting.BACKGROUNDCOLOR == 0)
+			if (reducedPointList.size() > 0)
 			{
-				if (binary.getPixel((int) Math.round(midPoint.getX()), (int) Math.round(midPoint.getY())) != 0)
-				{
-					if (reducedPointList.size() > 0)
-					{
-						reducedPointList.remove(0);
-					}
+				Point2D punkt = reducedPointList.get(reducedPointList.size() - 1);
+				Point2D punkt2 = reducedPointList.get(0);
 
-				}
-			} else
-			{
-				if (binary.getPixel((int) Math.round(midPoint.getX()), (int) Math.round(midPoint.getY())) != 255)
+				int xDist = (int) Math.round((punkt.getX() + punkt2.getX()) / 2);
+				int yDist = (int) Math.round((punkt.getY() + punkt2.getY()) / 2);
+				Point2D midPoint = new Point2D.Double(xDist, yDist);
+
+				if (Clump_Splitting.BACKGROUNDCOLOR == 0)
 				{
-					if (reducedPointList.size() > 0)
+					if (binary.getPixel((int) Math.round(midPoint.getX()), (int) Math.round(midPoint.getY())) != 0)
 					{
-						reducedPointList.remove(0);
+						if (reducedPointList.size() > 0)
+						{
+							reducedPointList.remove(0);
+						}
 
 					}
-				}
-
-			}
-			for (int k = 0; k < reducedPointList.size(); k++)
-			{
-				int innerStartX = 0;
-				int innerEndX = 0;
-				int innerStartY = 0;
-				int innerEndY = 0;
-				if (k == 0)
-				{
-					innerStartX = (int) reducedPointList.get(reducedPointList.size() - 1).getX();
-					innerStartY = (int) reducedPointList.get(reducedPointList.size() - 1).getY();
-					innerEndX = (int) reducedPointList.get(k).getX();
-					innerEndY = (int) reducedPointList.get(k).getY();
 				} else
 				{
-					/*
-					 * Line l = new Line(iPlus.getX(), iPlus.getY(),
-					 * iPlus.getX(), iPlus.getY()); l.setStrokeWidth(3);
-					 * l.setStrokeColor(Color.green);
-					 * Clump.overlayForOrientation.add(l);
-					 * System.out.println(iPlus.getX() + " " + iPlus.getY());
-					 * System.out.println("Ende");
-					 * 
-					 */
+					if (binary.getPixel((int) Math.round(midPoint.getX()), (int) Math.round(midPoint.getY())) != 255)
+					{
+						if (reducedPointList.size() > 0)
+						{
+							reducedPointList.remove(0);
 
-					innerStartX = (int) reducedPointList.get(k - 1).getX();
-					innerStartY = (int) reducedPointList.get(k - 1).getY();
-					innerEndX = (int) reducedPointList.get(k).getX();
-					innerEndY = (int) reducedPointList.get(k).getY();
+						}
+					}
 
 				}
-
-				if (this.getPositionOfConvexHullPointAtBoundary(inner, innerStartX, innerStartY) < this
-						.getPositionOfConvexHullPointAtBoundary(inner, innerEndX, innerEndY) || k == 0)
+				for (int k = 0; k < reducedPointList.size(); k++)
 				{
-					ArrayList<Point2D> pointList = getAllEmbeddedPointsFromInnerContour(innerStartX, innerStartY,
-							innerEndX, innerEndY, inner); //
-					// IJ.log(innerStartX+ " "+innerStartY+ " "+innerEndX+ " //
-					// "+innerEndY+ " "+pointList.size());
-
-					if (pointList.size() > 3)
+					int innerStartX = 0;
+					int innerEndX = 0;
+					int innerStartY = 0;
+					int innerEndY = 0;
+					if (k == 0)
 					{
-						ArrayList<Double> doubleList = computeDistance(pointList, innerStartX, innerStartY, innerEndX,
-								innerEndY);
-						AbstractConcavityPixelDetector ldcpd = null;
-						if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS)
+						innerStartX = (int) reducedPointList.get(reducedPointList.size() - 1).getX();
+						innerStartY = (int) reducedPointList.get(reducedPointList.size() - 1).getY();
+						innerEndX = (int) reducedPointList.get(k).getX();
+						innerEndY = (int) reducedPointList.get(k).getY();
+					} else
+					{
+						/*
+						 * Line l = new Line(iPlus.getX(), iPlus.getY(),
+						 * iPlus.getX(), iPlus.getY()); l.setStrokeWidth(3);
+						 * l.setStrokeColor(Color.green);
+						 * Clump.overlayForOrientation.add(l);
+						 * System.out.println(iPlus.getX() + " " +
+						 * iPlus.getY()); System.out.println("Ende");
+						 * 
+						 */
+
+						innerStartX = (int) reducedPointList.get(k - 1).getX();
+						innerStartY = (int) reducedPointList.get(k - 1).getY();
+						innerEndX = (int) reducedPointList.get(k).getX();
+						innerEndY = (int) reducedPointList.get(k).getY();
+
+					}
+
+					if (this.getPositionOfConvexHullPointAtBoundary(inner, innerStartX, innerStartY) < this
+							.getPositionOfConvexHullPointAtBoundary(inner, innerEndX, innerEndY) || k == 0)
+					{
+						ArrayList<Point2D> pointList = getAllEmbeddedPointsFromInnerContour(innerStartX, innerStartY,
+								innerEndX, innerEndY, inner); //
+						// IJ.log(innerStartX+ " "+innerStartY+ " "+innerEndX+ "
+						// //
+						// "+innerEndY+ " "+pointList.size());
+
+						if (pointList.size() > 3)
 						{
-							ldcpd = new AllConcavityPixelDetector();
-						} else
-						{
-							if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH)
+							ArrayList<Double> doubleList = computeDistance(pointList, innerStartX, innerStartY,
+									innerEndX, innerEndY);
+							AbstractConcavityPixelDetector ldcpd = null;
+							if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS)
 							{
-								ldcpd = new LargestDistanceConcavityPixelDetector();
+								ldcpd = new AllConcavityPixelDetector();
+							} else
+							{
+								if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH)
+								{
+									ldcpd = new LargestDistanceConcavityPixelDetector();
+								}
 							}
-						}
-						Line l = new Line(innerEndX, innerEndY, innerEndX, innerEndY);
-						l.setStrokeColor(Color.blue);
-						l.setStrokeWidth(3);
-						Clump_Splitting.overlaySplitPoints.add(l);
-						ConcavityRegion concavityRegion = new ConcavityRegion(innerStartX, innerStartY, innerEndX,
-								innerEndY, pointList, doubleList);
+							Line l = new Line(innerEndX, innerEndY, innerEndX, innerEndY);
+							l.setStrokeColor(Color.blue);
+							l.setStrokeWidth(3);
+							Clump_Splitting.overlaySplitPoints.add(l);
+							ConcavityRegion concavityRegion = new ConcavityRegion(innerStartX, innerStartY, innerEndX,
+									innerEndY, pointList, doubleList);
 
-						ArrayList<ConcavityPixel> concavityPixelList = ldcpd.computeConcavityPixel(concavityRegion);
+							ArrayList<ConcavityPixel> concavityPixelList = ldcpd.computeConcavityPixel(concavityRegion);
 
-						if (concavityPixelList.size() > 0)
-						{
-							concavityRegion.setConcavityPixelList(concavityPixelList);
+							if (concavityPixelList.size() > 0)
+							{
+								concavityRegion.setConcavityPixelList(concavityPixelList);
 
-							concavityRegionList.add(concavityRegion);
+								concavityRegionList.add(concavityRegion);
+							}
 						}
 					}
 				}
-
 			}
 		}
 		///////////////////////////////////////////////////////////////////////
