@@ -69,7 +69,7 @@ public class SVMPanel extends JPanel
     	  double y2=-m*x2+b;
     	  
     	  System.out.println(x1+" "+ y1+ " "+ x2+ " "+ y2);*/
-    	  double y =-(weight[1]/weight[0]);
+    	  double y =-(weight[0]/weight[1]);
     	  System.out.println(this.getWidth()+ " "+ y+ "weight");
     	  double wert= y*this.getWidth();
     	  System.out.println(wert);

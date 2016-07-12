@@ -312,36 +312,37 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 					}
 				}
 			}
-			if (bestSplitLine instanceof StraightSplitLineBetweenTwoConcavityRegions)
+			double distance = bestSplitLine.getStartConcavityPixel().getPosition().distance(bestSplitLine.getEndConcavityPixel().getPosition());
+			distance = distance * 1000;
+			distance = Math.round(distance);
+			distance = distance / 1000;
+			double maxDistSum = bestSplitLine.getStartConcavityPixel().distance() + bestSplitLine.distance();
+			maxDistSum = maxDistSum * 1000;
+			maxDistSum = Math.round(maxDistSum);
+			maxDistSum = maxDistSum / 1000;
+
+			SplitLineAssignmentSVM splitLine = new SplitLineAssignmentSVM(
+					(int) bestSplitLine.getStartConcavityPixel().getPosition().getX(), (int) bestSplitLine.getStartConcavityPixel().getPosition().getY(),
+					(int) bestSplitLine.getEndConcavityPixel().getPosition().getX(), (int) bestSplitLine.getEndConcavityPixel().getPosition().getY(),
+					-1, distance, maxDistSum);
+			if (!Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM
+					.contains(splitLine))
 			{
-				StraightSplitLineBetweenTwoConcavityRegions sslbtcr = (StraightSplitLineBetweenTwoConcavityRegions) bestSplitLine;
-
-				double distance = sslbtcr.getStartConcavityPixel().getPosition()
-						.distance(sslbtcr.getEndConcavityPixel().getPosition());
-				distance = distance * 1000;
-				distance = Math.round(distance);
-				distance = distance / 1000;
-				double maxDistSum = sslbtcr.getStartConcavityPixel().distance()
-						+ sslbtcr.getEndConcavityPixel().distance();
-				maxDistSum = maxDistSum * 1000;
-				maxDistSum = Math.round(maxDistSum);
-				maxDistSum = maxDistSum / 1000;
-
-				SplitLineAssignmentSVM slaSVMComparison = new SplitLineAssignmentSVM(
-						(int) sslbtcr.getStartConcavityPixel().getPosition().getX(),
-						(int) sslbtcr.getStartConcavityPixel().getPosition().getY(),
-						(int) sslbtcr.getEndConcavityPixel().getPosition().getX(),
-						(int) sslbtcr.getEndConcavityPixel().getPosition().getY(), -1, distance, maxDistSum);
-
-				for (SplitLineAssignmentSVM slaSVM : Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM)
+				Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM
+						.add(splitLine);
+			}
+			else{
+				for(SplitLineAssignmentSVM slaSVM:Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM)
 				{
-					if (slaSVM.equals(slaSVMComparison))
+					if(slaSVM.equals(splitLine))
 					{
 						slaSVM.setClassificationValue(1);
-
 					}
 				}
 			}
+
+		
+
 			/*
 			 * if(maxChi>0.5) { // return bestSplitLine; } else{
 			 * possibleSplitLines.clear(); }
@@ -394,8 +395,9 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				if (!cOne.equals(cTwo))
 				{
 
-					//System.out.println(
-					//		cOne.getMaxDistCoord().size() + " " + cTwo.getMaxDistCoord().size() + "SIIIIIIIIIIIIZE");
+					// System.out.println(
+					// cOne.getMaxDistCoord().size() + " " +
+					// cTwo.getMaxDistCoord().size() + "SIIIIIIIIIIIIZE");
 					for (ConcavityPixel cpOne : cOne.getConcavityPixelList())
 					{
 
@@ -424,116 +426,114 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 							maxDistSum = Math.round(maxDistSum);
 							maxDistSum = maxDistSum / 1000;
 
-							SplitLineAssignmentSVM splitLine = new SplitLineAssignmentSVM(
-									(int) cpOne.getPosition().getX(), (int) cpOne.getPosition().getY(),
-									(int) cpTwo.getPosition().getX(), (int) cpTwo.getPosition().getY(), -1, distance,
-									maxDistSum);
-							if (!Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.contains(splitLine))
+							// System.out.println(c);
+							/*
+							 * if (chi > 0.8) { double saliency =
+							 * this.computeSaliency(cOne, cTwo, cpOne, cpTwo);
+							 * // IJ.log(saliency+""); double
+							 * concavityConcavityAlignment =
+							 * this.computeConcavityConcavityAlignment(cOne,
+							 * cTwo, cpOne.getPosition(), cpTwo.getPosition());
+							 * double concavityLineAlignment =
+							 * this.computeConcavityLineAlignment(cOne, cTwo,
+							 * cpOne.getPosition(), cpTwo.getPosition());
+							 * 
+							 * possibleSplitLines.clear();
+							 * StraightSplitLineBetweenTwoConcavityRegions
+							 * splitLineAll = new
+							 * StraightSplitLineBetweenTwoConcavityRegions(
+							 * cOne, cTwo, saliency,
+							 * concavityConcavityAlignment,
+							 * concavityLineAlignment, chi, cpOne, cpTwo); /*
+							 * double[] values= new double[2]; double
+							 * maxDistSum=cOne.getMaxDist()+cTwo .getMaxDist();
+							 * maxDistSum=maxDistSum*1000;
+							 * maxDistSum=Math.round(maxDistSum) ;
+							 * maxDistSum=maxDistSum/1000; double distance=
+							 * cOne.getMaxDistCoord().distance(
+							 * cTwo.getMaxDistCoord()); distance= distance*1000;
+							 * distance= Math.round(distance); distance=
+							 * distance/1000; values[0]=maxDistSum;
+							 * values[1]=distance; Vector v= new
+							 * DenseVector(values); LabeledPoint lp= new
+							 * LabeledPoint(1,v); Clump_Splitting.
+							 * listOfAllLabeledPoints.add(lp);
+							 */
+
+							/*
+							 * try { Clump_Splitting.bw.write(
+							 * ", Trennungslinie"); } catch (IOException e) { //
+							 * TODO Auto-generated catch block
+							 * e.printStackTrace(); }
+							 */
+							/*
+							 * possibleSplitLines.add(splitLineAll); return
+							 * possibleSplitLines; }
+							 */
+							double saliency = this.computeSaliency(cOne, cTwo, cpOne, cpOne);
+							// IJ.log(saliency+"");
+							if (saliency > Clump_Splitting.SALIENCY_THRESHOLD)
 							{
-								Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.add(splitLine);
-							}
-							if (chi > Clump_Splitting.CHI_THRESHOLD)
-							{
-								// System.out.println(c);
-								/*if (chi > 0.8)
+								// IJ.log("Nicht aussortiert");
+								double concavityConcavityAlignment = this.computeConcavityConcavityAlignment(cOne, cTwo,
+										cpOne.getPosition(), cpTwo.getPosition());
+
+								if (concavityConcavityAlignment < Clump_Splitting.CONCAVITYCONCAVITY_THRESHOLD)
 								{
-									double saliency = this.computeSaliency(cOne, cTwo, cpOne,
-											cpTwo);
-									// IJ.log(saliency+"");
-									double concavityConcavityAlignment = this.computeConcavityConcavityAlignment(cOne,
-											cTwo, cpOne.getPosition(), cpTwo.getPosition());
 									double concavityLineAlignment = this.computeConcavityLineAlignment(cOne, cTwo,
 											cpOne.getPosition(), cpTwo.getPosition());
 
-									possibleSplitLines.clear();
-									StraightSplitLineBetweenTwoConcavityRegions splitLineAll = new StraightSplitLineBetweenTwoConcavityRegions(
-											cOne, cTwo, saliency, concavityConcavityAlignment, concavityLineAlignment,
-											chi, cpOne, cpTwo);
-											/*
-											 * double[] values= new double[2];
-											 * double
-											 * maxDistSum=cOne.getMaxDist()+cTwo
-											 * .getMaxDist();
-											 * maxDistSum=maxDistSum*1000;
-											 * maxDistSum=Math.round(maxDistSum)
-											 * ; maxDistSum=maxDistSum/1000;
-											 * double distance=
-											 * cOne.getMaxDistCoord().distance(
-											 * cTwo.getMaxDistCoord());
-											 * distance= distance*1000;
-											 * distance= Math.round(distance);
-											 * distance= distance/1000;
-											 * values[0]=maxDistSum;
-											 * values[1]=distance; Vector v= new
-											 * DenseVector(values); LabeledPoint
-											 * lp= new LabeledPoint(1,v);
-											 * Clump_Splitting.
-											 * listOfAllLabeledPoints.add(lp);
-											 */
-
-									/*
-									 * try { Clump_Splitting.bw.write(
-									 * ", Trennungslinie"); } catch (IOException
-									 * e) { // TODO Auto-generated catch block
-									 * e.printStackTrace(); }
-									 */
-								/*	possibleSplitLines.add(splitLineAll);
-									return possibleSplitLines;
-								}*/
-								double saliency = this.computeSaliency(cOne, cTwo, cpOne,
-										cpOne);
-								// IJ.log(saliency+"");
-								if (saliency > Clump_Splitting.SALIENCY_THRESHOLD)
-								{
-									// IJ.log("Nicht aussortiert");
-									double concavityConcavityAlignment = this.computeConcavityConcavityAlignment(cOne,
-											cTwo, cpOne.getPosition(), cpTwo.getPosition());
-
-									if (concavityConcavityAlignment < Clump_Splitting.CONCAVITYCONCAVITY_THRESHOLD)
+									if (concavityLineAlignment < Clump_Splitting.CONCAVITYLINE_THRESHOLD)
 									{
-										double concavityLineAlignment = this.computeConcavityLineAlignment(cOne, cTwo,
-												cpOne.getPosition(), cpTwo.getPosition());
+										/*
+										 * double[] values= new double[2];
+										 * double
+										 * maxDistSum=cOne.getMaxDist()+cTwo
+										 * .getMaxDist();
+										 * maxDistSum=maxDistSum*1000;
+										 * maxDistSum=Math.round(maxDistSum) ;
+										 * maxDistSum=maxDistSum/1000; double
+										 * distance=
+										 * cOne.getMaxDistCoord().distance(
+										 * cTwo.getMaxDistCoord()); distance=
+										 * distance*1000; distance=
+										 * Math.round(distance); distance=
+										 * distance/1000; values[0]=maxDistSum;
+										 * values[1]=distance; Vector v= new
+										 * DenseVector(values); LabeledPoint lp=
+										 * new LabeledPoint(1,v);
+										 * 
+										 * Clump_Splitting.
+										 * listOfAllLabeledPoints.add(lp);
+										 */
 
-										if (concavityLineAlignment < Clump_Splitting.CONCAVITYLINE_THRESHOLD)
+										/*
+										 * try { Clump_Splitting.bw.write(
+										 * ", Trennungslinie"); } catch
+										 * (IOException e) { // TODO
+										 * Auto-generated catch block
+										 * e.printStackTrace(); }
+										 */
+										if (chi > Clump_Splitting.CHI_THRESHOLD)
 										{
-											/*
-											 * double[] values= new double[2];
-											 * double
-											 * maxDistSum=cOne.getMaxDist()+cTwo
-											 * .getMaxDist();
-											 * maxDistSum=maxDistSum*1000;
-											 * maxDistSum=Math.round(maxDistSum)
-											 * ; maxDistSum=maxDistSum/1000;
-											 * double distance=
-											 * cOne.getMaxDistCoord().distance(
-											 * cTwo.getMaxDistCoord());
-											 * distance= distance*1000;
-											 * distance= Math.round(distance);
-											 * distance= distance/1000;
-											 * values[0]=maxDistSum;
-											 * values[1]=distance; Vector v= new
-											 * DenseVector(values); LabeledPoint
-											 * lp= new LabeledPoint(1,v);
-											 * 
-											 * Clump_Splitting.
-											 * listOfAllLabeledPoints.add(lp);
-											 */
-
-											/*
-											 * try { Clump_Splitting.bw.write(
-											 * ", Trennungslinie"); } catch
-											 * (IOException e) { // TODO
-											 * Auto-generated catch block
-											 * e.printStackTrace(); }
-											 */
-
 											StraightSplitLineBetweenTwoConcavityRegions splitLineAll = new StraightSplitLineBetweenTwoConcavityRegions(
 													cOne, cTwo, saliency, concavityConcavityAlignment,
 													concavityLineAlignment, chi, cpOne, cpTwo);
 
 											possibleSplitLines.add(splitLineAll);
 										}
+										SplitLineAssignmentSVM splitLine = new SplitLineAssignmentSVM(
+												(int) cpOne.getPosition().getX(), (int) cpOne.getPosition().getY(),
+												(int) cpTwo.getPosition().getX(), (int) cpTwo.getPosition().getY(), -1,
+												distance, maxDistSum);
+										if (!Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM
+												.contains(splitLine))
+										{
+											Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.add(splitLine);
+										}
+
 									}
+
 								}
 							}
 						}
@@ -593,25 +593,25 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		{
 
 			ConcavityPixel concavityPixel = c.getPixelOfMaxConcavityDepth();
-			if( concavityPixel!=null)
+			if (concavityPixel != null)
 			{
-			ConcavityRegion concavityRegion = concavityPixel.getConcavityRegion();
-			for (ConcavityPixel cpOne : concavityRegion.getConcavityPixelList())
-			{
-				double concavityAngle = this.computeConcavityAngle(concavityRegion, cpOne.getPosition());
-				double concavityRatio = this.computeConcavityRatio(c, cpOne);
-
-				StraightSplitLineBetweenConcavityRegionAndPoint ssl = this
-						.computeSplitLineBetweenConcavityPointAndPoint(concavityRegion, c, concavityAngle,
-								concavityRatio, cpOne);
-				if (concavityAngle < Clump_Splitting.CONCAVITYANGLE_THRESHOLD)
+				ConcavityRegion concavityRegion = concavityPixel.getConcavityRegion();
+				for (ConcavityPixel cpOne : concavityRegion.getConcavityPixelList())
 				{
-					if (concavityRatio > Clump_Splitting.CONCAVITYRATIO_THRESHOLD)
+					double concavityAngle = this.computeConcavityAngle(concavityRegion, cpOne.getPosition());
+					double concavityRatio = this.computeConcavityRatio(c, cpOne);
+
+					StraightSplitLineBetweenConcavityRegionAndPoint ssl = this
+							.computeSplitLineBetweenConcavityPointAndPoint(concavityRegion, c, concavityAngle,
+									concavityRatio, cpOne);
+					if (concavityAngle < Clump_Splitting.CONCAVITYANGLE_THRESHOLD)
 					{
-						liste.add(ssl);
+						if (concavityRatio > Clump_Splitting.CONCAVITYRATIO_THRESHOLD)
+						{
+							liste.add(ssl);
+						}
 					}
 				}
-			}
 			}
 		}
 		return liste;
@@ -852,7 +852,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 			}
 		}
 		StraightSplitLineBetweenConcavityRegionAndPoint s = new StraightSplitLineBetweenConcavityRegionAndPoint(cI,
-				concavityAngle, concavityRatio, minDistPoint,cpOne);
+				concavityAngle, concavityRatio, minDistPoint, cpOne);
 		return s;
 	}
 }

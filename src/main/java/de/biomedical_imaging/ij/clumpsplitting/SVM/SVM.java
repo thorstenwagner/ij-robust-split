@@ -60,13 +60,14 @@ public class SVM
 				}
 
 			}
+			
 		}
 		svm_parameter param = new svm_parameter();
 		param.probability = 1;
 		param.gamma = 0.5;
 		param.nu = 0.5;
-		param.C = 1;
-		param.svm_type = svm_parameter.C_SVC;
+		param.C = 2;
+		param.svm_type = svm_parameter.NU_SVC;
 		param.kernel_type = svm_parameter.LINEAR;
 		param.cache_size = 20000;
 		param.eps = 0.001;
@@ -130,41 +131,34 @@ public class SVM
 				weights[i] = weights[i] + model.SV[j][i].value * model.sv_coef[0][j];
 			}
 		}
-		System.out.println("llaalallalalallalalallalalalalallallallalalallalalallala");
-		System.out.println(weights[0] + " " + weights[1]);
 
 		double[] prob_estimates = new double[2];
 
 		svm_node[] x = new svm_node[2];
 
 		x[0] = new svm_node();
-		x[0].index = 0;
+		x[0].index = 1;
 		x[0].value = 0;
 		x[1] = new svm_node();
-		x[1].index = 1;
-		x[1].value = 100;
+		x[1].index = 2;
+		x[1].value = 0;
 		double intercept = 0;
-		for (int i = 0; i < 10000; i++)
+		
+		do
 		{
 
 			svm.svm_predict_values(model, x, prob_estimates);
-			x[1].index = 1;
-			x[1].value += prob_estimates[0];
-
-			intercept = x[1].value;
-		}
-		double d = svm.svm_predict_values(model, x, prob_estimates);
-		for (int i = 0; i < prob_estimates.length; i++)
-		{
-			System.out.print(prob_estimates[i] + " ");
-		}
-		System.out.println("");
-		int[] labels = model.label;
-		System.out.println(labels[0] + " " + labels[1]);
-		System.out.println(intercept + "intercept");
-
-		System.out.println(d + "prediction");
-
+			
+				x[1].index = 2;
+				x[1].value += prob_estimates[0];
+				intercept = x[1].value;
+			//	before = prob_estimates[0];
+			
+			
+			} while (prob_estimates[0] > 0.01 || prob_estimates[0] < -0.01);
+		double derivate=weights[0]/weights[1];
+		System.out.println(derivate);
+System.out.println(intercept);
 		SVMPanel panel = new SVMPanel(featureList, weights, intercept);
 		JFrame frame = new JFrame("Oval Sample");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
