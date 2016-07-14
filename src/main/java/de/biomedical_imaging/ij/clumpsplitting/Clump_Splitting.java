@@ -72,7 +72,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 */
 	public static int STOP = 0;
 
-	public static int INNERCONTOURPARAMETER = 4;
+	public static int INNERCONTOURPARAMETER = 2;
 	/**
 	 * List To Train SVM for SplitLineParameters C1 and C2. It contains the sum
 	 * of both ConcavityDepths of the ConcavityRegions for a SplitLine and the
@@ -259,6 +259,11 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 		ImageProcessor imageProcessorBinary = ip.duplicate();
 
+		if (!Clump_Splitting.ISPREPROCESSED)
+		{
+			imageProcessorBinary.blurGaussian(2.0);
+		}
+
 		AutoThresholder at = new AutoThresholder();
 		// imageProcessorBinary.blurGaussian(0.9);
 
@@ -269,25 +274,12 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		// pre-processing
 
 		imageProcessorBinary.threshold(threshold);
-		if (!Clump_Splitting.ISPREPROCESSED)
-		{
-			if (Clump_Splitting.BACKGROUNDCOLOR == 1)
-			{
-				// imageProcessorBinary.filter(ImageProcessor.MAX);
-				imageProcessorBinary.dilate();
+		
+		 /* ShapeSmoothingUtil ssu= new ShapeSmoothingUtil();
+		  ssu.setBlackBackground(true);
+		  ssu.fourierFilter(imageProcessorBinary,40, true,false);
+		 */
 
-				imageProcessorBinary.erode();
-			} else
-			{
-				imageProcessorBinary.invert();
-				// imageProcessorBinary.filter(ImageProcessor.MAX);
-
-				imageProcessorBinary.dilate();
-
-				imageProcessorBinary.erode();
-				imageProcessorBinary.invert();
-			}
-		}
 		ImageProcessor binary = imageProcessorBinary;
 		do
 		{
@@ -624,7 +616,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				dialog1.addSlider("Concavity-Line-Alignment threshold in Degrees", 0, 180, 70);
 				dialog1.addSlider("Concavity-Angle threshold in Degrees", 0, 180, 90);
 				dialog1.addNumericField("Concavity-Ratio threshold", 6, 1);
-				dialog1.addNumericField("Inner-Contour-Parameter", 4, 0);
+				dialog1.addNumericField("Inner-Contour-Parameter", 2, 0);
 				dialog1.addNumericField("C1", 1.73, 3);
 				dialog1.addNumericField("C2", -4.72, 3);
 				dialog1.addNumericField("Chi-Threshold", 0.5, 3);

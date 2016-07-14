@@ -155,7 +155,9 @@ public class Clump
 			}
 
 		}
-		this.splitLineList=this.computeSplitLines(ip,binary);
+		this.splitLineList=new ArrayList<AbstractSplitLine>();
+		this.splitLineList.addAll(this.computeSplitLines(ip,binary));
+		System.out.println(this.splitLineList.get(0));
 	}
 
 	/**

@@ -85,7 +85,7 @@ public class SVM
 
 			Double[] features = featureList.get(i);
 
-			System.out.println(features[0] + " " + features[1]);
+//			System.out.println(features[0] + " " + features[1]);
 			prob.x[i] = new svm_node[features.length - 1];
 			for (int j = 1; j < features.length; j++)
 			{
@@ -94,36 +94,16 @@ public class SVM
 				node.value = features[j];
 
 				prob.x[i][j - 1] = node;
-				System.out.println(i + " " + j + " " + node.value + "test");
+			//	System.out.println(i + " " + j + " " + node.value + "test");
 			}
-			System.out.println(features[0]);
+		//	System.out.println(features[0]);
 			prob.y[i] = features[0];
 			// if()
 			// prob.y[i] = features[0];
 		}
 		svm_model model = svm.svm_train(prob, param);
-		System.out.println(model.SV.length + " " + model.SV[0].length);
-		for (int i = 0; i < model.SV.length; i++)
-		{
-			for (int j = 0; j < model.SV[i].length; j++)
-			{
-				System.out.print(" " + model.SV[i][j].value);
-			}
-
-			System.out.println("");
-		}
-		System.out.println("lallalallalalallalalal");
-
-		for (int i = 0; i < model.sv_coef.length; i++)
-		{
-			for (int j = 0; j < model.sv_coef[i].length; j++)
-			{
-				System.out.print(" " + model.sv_coef[i][j]);
-			}
-
-			System.out.println("");
-		}
-		double[] weights = new double[model.SV[0].length];
+	//	System.out.println(model.SV.length + " " + model.SV[0].length);
+				double[] weights = new double[model.SV[0].length];
 		for (int i = 0; i < model.SV[0].length; i++)
 		{
 			for (int j = 0; j < model.SV.length; j++)

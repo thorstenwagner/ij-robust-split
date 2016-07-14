@@ -203,7 +203,7 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 	@Override
 	public String toString()
 	{
-		return "X: " + this.getEndConcavityPixel().getPosition().getX() + " Y: "
+		return "StraightSplitLineBetweenConcavityRegionAndPointX: " + this.getEndConcavityPixel().getPosition().getX() + " Y: "
 				+ this.getEndConcavityPixel().getPosition().getY() + " MaxX: "
 				+ this.getStartConcavityPixel().getPosition().getX() + " MaxY: "
 				+ this.getStartConcavityPixel().getPosition().getY();

@@ -312,7 +312,8 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 					}
 				}
 			}
-			double distance = bestSplitLine.getStartConcavityPixel().getPosition().distance(bestSplitLine.getEndConcavityPixel().getPosition());
+			double distance = bestSplitLine.getStartConcavityPixel().getPosition()
+					.distance(bestSplitLine.getEndConcavityPixel().getPosition());
 			distance = distance * 1000;
 			distance = Math.round(distance);
 			distance = distance / 1000;
@@ -322,26 +323,23 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 			maxDistSum = maxDistSum / 1000;
 
 			SplitLineAssignmentSVM splitLine = new SplitLineAssignmentSVM(
-					(int) bestSplitLine.getStartConcavityPixel().getPosition().getX(), (int) bestSplitLine.getStartConcavityPixel().getPosition().getY(),
-					(int) bestSplitLine.getEndConcavityPixel().getPosition().getX(), (int) bestSplitLine.getEndConcavityPixel().getPosition().getY(),
-					-1, distance, maxDistSum);
-			if (!Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM
-					.contains(splitLine))
+					(int) bestSplitLine.getStartConcavityPixel().getPosition().getX(),
+					(int) bestSplitLine.getStartConcavityPixel().getPosition().getY(),
+					(int) bestSplitLine.getEndConcavityPixel().getPosition().getX(),
+					(int) bestSplitLine.getEndConcavityPixel().getPosition().getY(), -1, distance, maxDistSum);
+			if (!Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.contains(splitLine))
 			{
-				Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM
-						.add(splitLine);
-			}
-			else{
-				for(SplitLineAssignmentSVM slaSVM:Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM)
+				Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.add(splitLine);
+			} else
+			{
+				for (SplitLineAssignmentSVM slaSVM : Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM)
 				{
-					if(slaSVM.equals(splitLine))
+					if (slaSVM.equals(splitLine))
 					{
 						slaSVM.setClassificationValue(1);
 					}
 				}
 			}
-
-		
 
 			/*
 			 * if(maxChi>0.5) { // return bestSplitLine; } else{
@@ -851,8 +849,12 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				}
 			}
 		}
-		StraightSplitLineBetweenConcavityRegionAndPoint s = new StraightSplitLineBetweenConcavityRegionAndPoint(cI,
-				concavityAngle, concavityRatio, minDistPoint, cpOne);
+		StraightSplitLineBetweenConcavityRegionAndPoint s = null;
+		if (minDistPoint != null)
+		{
+			s = new StraightSplitLineBetweenConcavityRegionAndPoint(cI, concavityAngle, concavityRatio, minDistPoint,
+					cpOne);
+		}
 		return s;
 	}
 }
