@@ -70,10 +70,20 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 	 * a measure of the concaveness measure and the distance between the points,
 	 * which is used to evaluate the quality of the possible Splitline
 	 */
-	private double chi;
-	private ConcavityPixel startConcavityPixel;
-	private ConcavityPixel endConcavityPixel;
 	private double saliency;
+	/**
+	 * Value to Classify if a SplitLine is valid or isn't.A high chi value is a
+	 * sign for a good SplitLine
+	 */
+	private double chi;
+	/**
+	 * EndPoint for the SplitLine, which contains to a ConcavityRegion
+	 */
+	private ConcavityPixel endConcavityPixel;
+	/**
+	 * StartPoint for the SplitLine, which contains to a ConcavityRegion
+	 */
+	private ConcavityPixel startConcavityPixel;
 	/**
 	 * angle between the orientation of the two concavityRegions, which is used
 	 * to evaluate the quality of the possible Splitline
@@ -88,6 +98,7 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 
 	/**
 	 * 
+	 * 
 	 * @param cI
 	 *            the first concavityRegion of a SplitLine
 	 * @param cJ
@@ -100,6 +111,18 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 	 * @param concavityLineAlignment
 	 *            Maximum of the angles between the Splitline and the
 	 *            orientation of the concavityRegion
+	 * @param chi
+	 *            Value to Classify if a SplitLine is valid or isn't.A high chi
+	 *            value is a sign for a good SplitLine
+	 * 
+	 * @param startConcavityPixel
+	 *            StartPoint for the SplitLine, which contains to a
+	 *            ConcavityRegion
+	 *
+	 * @param endConcavityPixel
+	 *            EndPoint for the SplitLine, which contains to a
+	 *            ConcavityRegion
+	 *
 	 */
 	public StraightSplitLineBetweenTwoConcavityRegions(ConcavityRegion cI, ConcavityRegion cJ, double saliency,
 			double concavityConcavityAlignment, double concavityLineAlignment, double chi,
@@ -147,10 +170,8 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 	 * @param ip
 	 *            Image Processor to draw the Line
 	 */
-	public void drawLine(ImageProcessor ip,ImageProcessor binary)
+	public void drawLine(ImageProcessor ip, ImageProcessor binary)
 	{
-		// System.out.println("TwoConc error");
-		//ip.setLineWidth(3);
 		if (Clump_Splitting.BACKGROUNDCOLOR == 0)
 		{
 
@@ -162,8 +183,6 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 			binary.setColor(Color.white);
 			ip.setColor(Color.white);
 		}
-		// System.out.println("start drawing");
-		// System.out.println(this);
 		ip.drawLine4((int) this.getStartConcavityPixel().getPosition().getX(),
 				(int) this.getStartConcavityPixel().getPosition().getY(),
 				(int) this.getEndConcavityPixel().getPosition().getX(),
@@ -172,27 +191,8 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 				(int) this.getStartConcavityPixel().getPosition().getY(),
 				(int) this.getEndConcavityPixel().getPosition().getX(),
 				(int) this.getEndConcavityPixel().getPosition().getY());
-		// ip.setLineWidth(1);
 	}
 
-	/*
-	 * public double computeChi() { double distance; Point2D pOne =
-	 * cI.getMaxDistCoord(); Point2D pTwo = cJ.getMaxDistCoord(); double distX;
-	 * double distY; distX = Math.abs(pOne.getX() - pTwo.getX()); distY =
-	 * Math.abs(pOne.getY() - pTwo.getY()); distance = Math.sqrt((distX * distX)
-	 * + (distY * distY)); double
-	 * chi=((Clump_Splitting.C1*cI.getMaxDist()+Clump_Splitting.C1*cJ.getMaxDist
-	 * ()+Clump_Splitting.C2)/(distance+Clump_Splitting.C1*cI.getMaxDist()+
-	 * Clump_Splitting.C1*cJ.getMaxDist()+Clump_Splitting.C2)); // IJ.log(chi+
-	 * " "); return chi; }
-	 */
-	/*
-	 * public boolean contains(Point2D p) { Line2D.Double linie=new
-	 * Line2D.Double((int) cI.getMaxDistCoord().getX(), (int)
-	 * cI.getMaxDistCoord().getY(), (int) cJ.getMaxDistCoord().getX(), (int)
-	 * cJ.getMaxDistCoord().getY()); if(linie.contains(p)) { return true; }
-	 * else{ return false; } }
-	 */
 	public double getChi()
 	{
 		return chi;
@@ -218,7 +218,6 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 		return cJ;
 	}
 
-	
 	@Override
 	public int compareTo(StraightSplitLineBetweenTwoConcavityRegions o)
 	{
@@ -252,10 +251,10 @@ public class StraightSplitLineBetweenTwoConcavityRegions extends StraightSplitLi
 	@Override
 	public double distance()
 	{
-	
-		double distX= Math.abs(this.getStartPoint().getX()-this.getEndPoint().getX());
-		double distY=Math.abs(this.getStartPoint().getY()-this.getEndPoint().getY());
-		double dist=Math.sqrt(distX*distX+distY*distY);
+
+		double distX = Math.abs(this.getStartPoint().getX() - this.getEndPoint().getX());
+		double distY = Math.abs(this.getStartPoint().getY() - this.getEndPoint().getY());
+		double dist = Math.sqrt(distX * distX + distY * distY);
 		return dist;
 	}
 

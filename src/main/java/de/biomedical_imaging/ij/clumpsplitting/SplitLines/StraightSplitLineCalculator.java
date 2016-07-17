@@ -59,180 +59,17 @@ import ij.process.ImageProcessor;
 
 public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 {
-
-	/*
-	 * public static ArrayList<StraightSplitLineBetweenTwoConcavityRegions>
-	 * splitLinesTwoConcavityRegions = new
-	 * ArrayList<StraightSplitLineBetweenTwoConcavityRegions>(); public static
-	 * ArrayList<StraightSplitLineBetweenConcavityRegionAndPoint>
-	 * splitLinesConcavityRegionPoint = new
-	 * ArrayList<StraightSplitLineBetweenConcavityRegionAndPoint>();
+	/**
+	 * Calculates possible Straight SplitLines by validate them by different
+	 * criteria
+	 * 
+	 * Manages the calculation of Minimum and MaximumIntensity SplitLines and of
+	 * Geodesic Distance SplitLines
 	 */
-	/*
-	 * private JWindow toolTip=new JWindow(); private JTextArea label=new
-	 * JTextArea();
-	 */
-	/*
-	 * private void manageSplitLineInformation() { /*
-	 * for(StraightSplitLineBetweenTwoConcavityRegions
-	 * sslbcr:splitLinesTwoConcavityRegions) { String
-	 * st=drawInformationAboutSplitLineTwoConcavityRegions(sslbcr);
-	 * 
-	 * } for(StraightSplitLineBetweenConcavityRegionAndPoint
-	 * sslbcrap:splitLinesConcavityRegionPoint) {
-	 * 
-	 * 
-	 * String st=drawInformationAboutSplitLineConcavityRegionPoint(sslbcrap);
-	 * 
-	 * }
-	 * 
-	 */
-	/*
-	 * label.setBackground(Color.lightGray);
-	 * WindowManager.getCurrentImage().getWindow().getCanvas().
-	 * addMouseMotionListener(new MouseMotionListener() {
-	 * 
-	 * @Override public void mouseDragged(MouseEvent e) { // TODO Auto-generated
-	 * method stub
-	 * 
-	 * }
-	 * 
-	 * @Override public void mouseMoved(MouseEvent e) { int xL=e.getX(); int
-	 * yL=e.getY();
-	 * 
-	 * Line polygonRoi = new Line(xL,yL,xL,yL); polygonRoi.setStrokeWidth(5);
-	 * polygonRoi.setStrokeColor(Color.BLUE);
-	 * 
-	 * // Roi.setColor(Color.red); Clump.overlaySplitLines.add(polygonRoi);
-	 * 
-	 * Overlay o =new Overlay(); for(Roi overlay:Clump.overlaySplitLines) {
-	 * o.addElement(overlay); }
-	 * 
-	 * Clump_Splitting.imp.setOverlay(o);
-	 * System.out.println(splitLinesTwoConcavityRegions.size()+ " "+
-	 * splitLinesConcavityRegionPoint.size()); int x = e.getXOnScreen()+10; int
-	 * y = e.getYOnScreen()+10;
-	 * 
-	 * // int xL=e.getX(); // int yL=e.getY();
-	 * 
-	 * for(StraightSplitLineBetweenTwoConcavityRegions
-	 * sslbcr:splitLinesTwoConcavityRegions) { Point2D.Double point=new
-	 * Point2D.Double(xL, yL); System.out.println(sslbcr.contains(point));
-	 * if(sslbcr.contains(point)) { System.out.println("ahhhhh"); String
-	 * st=drawInformationAboutSplitLineTwoConcavityRegions(sslbcr);
-	 * label.setText(st); } }
-	 * for(StraightSplitLineBetweenConcavityRegionAndPoint
-	 * sslbcrap:splitLinesConcavityRegionPoint) {
-	 * 
-	 * Point2D.Double point=new Point2D.Double(xL, yL);
-	 * System.out.println(sslbcrap.contains(point));
-	 * 
-	 * if(sslbcrap.contains(point)) { System.out.println("teeest");
-	 * 
-	 * String st=drawInformationAboutSplitLineConcavityRegionPoint(sslbcrap);
-	 * label.setText(st); } }
-	 * 
-	 * toolTip.setLocation(x,y); toolTip.setVisible(true);
-	 * System.out.println("moving"); toolTip.repaint(); // TODO Auto-generated
-	 * method stub
-	 * 
-	 * }
-	 * 
-	 * });
-	 * WindowManager.getCurrentImage().getWindow().getCanvas().addMouseListener(
-	 * new MouseListener() {
-	 * 
-	 * 
-	 * @Override public void mouseClicked(MouseEvent e) { }
-	 * 
-	 * @Override public void mousePressed(MouseEvent e) {
-	 * 
-	 * }
-	 * 
-	 * @Override public void mouseReleased(MouseEvent e) { // TODO
-	 * Auto-generated method stub
-	 * 
-	 * }
-	 * 
-	 * @Override public void mouseEntered(MouseEvent e) {
-	 * 
-	 * toolTip.add(label);
-	 * 
-	 * toolTip.pack(); // Component c = (Component)e.getSource(); // Point p=
-	 * e.getLocationOnScreen();
-	 * 
-	 * int x = e.getXOnScreen()+10; int y = e.getYOnScreen()+10;
-	 * 
-	 * 
-	 * toolTip.setLocation(x,y); toolTip.setVisible(true); //
-	 * System.out.println("test");
-	 * 
-	 * //i++; // System.out.println("entered"+ i); }
-	 * 
-	 * @Override public void mouseExited(MouseEvent e) { //
-	 * toolTip.setVisible(false); }
-	 * 
-	 * }); }
-	 */
-
-	/*
-	 * private String drawInformationAboutSplitLineTwoConcavityRegions(
-	 * StraightSplitLineBetweenTwoConcavityRegions sl) { /*int
-	 * hoehe=(int)cI.getMaxDist(); int x=(int)
-	 * (cI.getMaxDistCoord().getX())-hoehe;
-	 * 
-	 * int y=(int) (cI.getMaxDistCoord().getY())-hoehe; int width=2*hoehe; int
-	 * height=2*hoehe;
-	 * 
-	 * int
-	 * gegenkatheteStart=Math.abs((int)cI.getEndY()-(int)cI.getMaxDistCoord().
-	 * getY()); int
-	 * ankatheteStart=Math.abs((int)cI.getEndX()-(int)cI.getMaxDistCoord().getX(
-	 * )); double angleStart=Math.atan(gegenkatheteStart/ankatheteStart);
-	 * angleStart=(360/(2*Math.PI))*angleStart; int
-	 * gegenkatheteEnd=Math.abs((int)cI.getStartY()-(int)cI.getMaxDistCoord().
-	 * getY()); int
-	 * ankatheteEnd=Math.abs((int)cI.getStartX()-(int)cI.getMaxDistCoord().getX(
-	 * )); double angleEnd=Math.atan(gegenkatheteEnd/ankatheteEnd);
-	 * angleEnd=(360/(2*Math.PI))*angleEnd; System.out.println(angleStart+ " "+
-	 * angleEnd); Shape angle= new
-	 * Arc2D.Double(x,y,width,height,angleEnd,angleStart, Arc2D.PIE); Roi
-	 * region= new ShapeRoi(angle); region.setStrokeWidth(1);
-	 * region.setStrokeColor(Color.orange); double cangle=
-	 * (360/(2*Math.PI))*this.concavityAngle; cangle=Math.round(cangle); Roi
-	 * text= new
-	 * TextRoi(cI.getMaxDistCoord().getX(),cI.getMaxDistCoord().getY(),cangle+""
-	 * ); text.setStrokeColor(Color.orange); Clump.overlayAngleCtrl.add(region);
-	 * Clump.overlayAngleCtrl.add(text);
-	 */
-
-	// Clump.overlaySplitLines.clear();
-	/*
-	 * Line polygonRoi = new Line((int) sl.getCI().getMaxDistCoord().getX(),
-	 * (int) sl.getCI().getMaxDistCoord().getY(), (int)
-	 * sl.getCJ().getMaxDistCoord().getX(), (int)
-	 * sl.getCJ().getMaxDistCoord().getY()); polygonRoi.setStrokeWidth(5);
-	 * polygonRoi.setStrokeColor(Color.BLUE);
-	 * 
-	 * // Roi.setColor(Color.red); Clump.overlayAngleCtrl.add(polygonRoi);
-	 * 
-	 * double ccAlignment=
-	 * ((360)/(2*Math.PI))*sl.getConcavityConcavityAlignment(); double
-	 * clAlignment= ((360)/(2*Math.PI))*sl.getConcavityLineAlignment();
-	 * 
-	 * String st= "Saliency: "+Math.round(sl.getSaliency()) +"\n"+
-	 * " Concavity-Concavity-Alignment: "+ Math.round(ccAlignment)+"\n"+
-	 * " Concavity-Line-Alignment: "+ Math.round(clAlignment); return null;
-	 */
-	/*
-	 * return ""; }
-	 */
-
+	@Override
 	public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
-			Clump c, ImageProcessor ip)
+			Clump c, ImageProcessor ip, ImageProcessor binary)
 	{
-		// ArrayList<AbstractSplitLine> possibleSplitLinesAll=new
-		// ArrayList<AbstractSplitLine>();
 		StraightSplitLine bestSplitLine = null;
 		StraightSplitLine allSplitLines = this.calculatePossibleStraightSplitLines(concavityRegionList, c);
 		if (allSplitLines != null)
@@ -254,19 +91,18 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 					AbstractSplitLineCalculator mmislc = new MaximumIntensitySplitLineCalculator(
 							bestSplitLine.getStartConcavityPixel().getPosition(),
 							bestSplitLine.getEndConcavityPixel().getPosition());
-					possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, c, ip);
+					possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, c, ip, binary);
 				}
 			} else
 			{
 				if (Clump_Splitting.SPLITLINETYPE == SplitLineType.GEODESICDISTANCESPLITLINE)
 				{
-					// System.out.println(bestSplitLine);
 					if (bestSplitLine != null)
 					{
 						GeodesicDistanceSplitLineCalculator gdslc = new GeodesicDistanceSplitLineCalculator(
 								bestSplitLine.getStartConcavityPixel().getPosition(),
 								bestSplitLine.getEndConcavityPixel().getPosition());
-						possibleSplitLines = gdslc.calculatePossibleSplitLines(concavityRegionList, c, ip);
+						possibleSplitLines = gdslc.calculatePossibleSplitLines(concavityRegionList, c, ip, binary);
 					}
 				} else
 				{
@@ -277,7 +113,7 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 							AbstractSplitLineCalculator mmislc = new MinimumIntensitySplitLineCalculator(
 									bestSplitLine.getStartConcavityPixel().getPosition(),
 									bestSplitLine.getEndConcavityPixel().getPosition());
-							possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, c, ip);
+							possibleSplitLines = mmislc.calculatePossibleSplitLines(concavityRegionList, c, ip, binary);
 						}
 
 					}
@@ -288,12 +124,20 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		return possibleSplitLines;
 	}
 
+	/**
+	 * Calculates best SplitLines for a Clump
+	 * 
+	 * @param concavityRegionList
+	 *            all ConcavityRegions of a Clump
+	 * @param c
+	 *            Clump
+	 * @return bestSplitLine
+	 */
 	private StraightSplitLine calculatePossibleStraightSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
 			Clump c)
 	{
 		ArrayList<StraightSplitLine> possibleSplitLines = this
 				.computeStraigthSplitLineBetweenTwoConcavityRegions(concavityRegionList);
-		/* TODO */
 		StraightSplitLine bestSplitLine = null;
 
 		if (possibleSplitLines.size() >= 1)
@@ -341,10 +185,6 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 				}
 			}
 
-			/*
-			 * if(maxChi>0.5) { // return bestSplitLine; } else{
-			 * possibleSplitLines.clear(); }
-			 */
 		}
 		if (possibleSplitLines.size() == 0)
 		{
@@ -353,12 +193,9 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 			if (splitLineList.size() > 0)
 			{
 				bestSplitLine = splitLineList.get(0);
-				// bestSplitLine.drawInformation();
-				// return bestSplitLine;
 			}
 
 		}
-		// manageSplitLineInformation();
 		return bestSplitLine;
 	}
 
@@ -385,35 +222,15 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 			{
 
 				ConcavityRegion cTwo = concavityRegionList.get(j);
-
-				// System.out.println(cOne.getMaxDistCoord().getX()+" "+
-				// cOne.getMaxDistCoord().getY()+ " "+
-				// cTwo.getMaxDistCoord().getX()+" " +
-				// cTwo.getMaxDistCoord().getY());
 				if (!cOne.equals(cTwo))
 				{
 
-					// System.out.println(
-					// cOne.getMaxDistCoord().size() + " " +
-					// cTwo.getMaxDistCoord().size() + "SIIIIIIIIIIIIZE");
 					for (ConcavityPixel cpOne : cOne.getConcavityPixelList())
 					{
 
 						for (ConcavityPixel cpTwo : cTwo.getConcavityPixelList())
 						{
 
-							// String str= cOne.getMaxDistCoord().getX()+", "+
-							// cOne.getMaxDistCoord().getY()+",
-							// "+cTwo.getMaxDistCoord().getX()+",
-							// "+cTwo.getMaxDistCoord().getY()+", "+maxDistSum+
-							// ", "+ distance;
-							/*
-							 * try { System.out.println(str);
-							 * Clump_Splitting.bw.write("\n");
-							 * Clump_Splitting.bw.write(str); } catch
-							 * (IOException e) { // TODO Auto-generated catch
-							 * block e.printStackTrace(); }
-							 */
 							double chi = this.computeChi(cOne, cTwo, cpOne, cpTwo);
 							double distance = cpOne.getPosition().distance(cpTwo.getPosition());
 							distance = distance * 1000;
@@ -423,56 +240,9 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 							maxDistSum = maxDistSum * 1000;
 							maxDistSum = Math.round(maxDistSum);
 							maxDistSum = maxDistSum / 1000;
-
-							// System.out.println(c);
-							/*
-							 * if (chi > 0.8) { double saliency =
-							 * this.computeSaliency(cOne, cTwo, cpOne, cpTwo);
-							 * // IJ.log(saliency+""); double
-							 * concavityConcavityAlignment =
-							 * this.computeConcavityConcavityAlignment(cOne,
-							 * cTwo, cpOne.getPosition(), cpTwo.getPosition());
-							 * double concavityLineAlignment =
-							 * this.computeConcavityLineAlignment(cOne, cTwo,
-							 * cpOne.getPosition(), cpTwo.getPosition());
-							 * 
-							 * possibleSplitLines.clear();
-							 * StraightSplitLineBetweenTwoConcavityRegions
-							 * splitLineAll = new
-							 * StraightSplitLineBetweenTwoConcavityRegions(
-							 * cOne, cTwo, saliency,
-							 * concavityConcavityAlignment,
-							 * concavityLineAlignment, chi, cpOne, cpTwo); /*
-							 * double[] values= new double[2]; double
-							 * maxDistSum=cOne.getMaxDist()+cTwo .getMaxDist();
-							 * maxDistSum=maxDistSum*1000;
-							 * maxDistSum=Math.round(maxDistSum) ;
-							 * maxDistSum=maxDistSum/1000; double distance=
-							 * cOne.getMaxDistCoord().distance(
-							 * cTwo.getMaxDistCoord()); distance= distance*1000;
-							 * distance= Math.round(distance); distance=
-							 * distance/1000; values[0]=maxDistSum;
-							 * values[1]=distance; Vector v= new
-							 * DenseVector(values); LabeledPoint lp= new
-							 * LabeledPoint(1,v); Clump_Splitting.
-							 * listOfAllLabeledPoints.add(lp);
-							 */
-
-							/*
-							 * try { Clump_Splitting.bw.write(
-							 * ", Trennungslinie"); } catch (IOException e) { //
-							 * TODO Auto-generated catch block
-							 * e.printStackTrace(); }
-							 */
-							/*
-							 * possibleSplitLines.add(splitLineAll); return
-							 * possibleSplitLines; }
-							 */
 							double saliency = this.computeSaliency(cOne, cTwo, cpOne, cpOne);
-							// IJ.log(saliency+"");
 							if (saliency > Clump_Splitting.SALIENCY_THRESHOLD)
 							{
-								// IJ.log("Nicht aussortiert");
 								double concavityConcavityAlignment = this.computeConcavityConcavityAlignment(cOne, cTwo,
 										cpOne.getPosition(), cpTwo.getPosition());
 
@@ -483,35 +253,6 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 
 									if (concavityLineAlignment < Clump_Splitting.CONCAVITYLINE_THRESHOLD)
 									{
-										/*
-										 * double[] values= new double[2];
-										 * double
-										 * maxDistSum=cOne.getMaxDist()+cTwo
-										 * .getMaxDist();
-										 * maxDistSum=maxDistSum*1000;
-										 * maxDistSum=Math.round(maxDistSum) ;
-										 * maxDistSum=maxDistSum/1000; double
-										 * distance=
-										 * cOne.getMaxDistCoord().distance(
-										 * cTwo.getMaxDistCoord()); distance=
-										 * distance*1000; distance=
-										 * Math.round(distance); distance=
-										 * distance/1000; values[0]=maxDistSum;
-										 * values[1]=distance; Vector v= new
-										 * DenseVector(values); LabeledPoint lp=
-										 * new LabeledPoint(1,v);
-										 * 
-										 * Clump_Splitting.
-										 * listOfAllLabeledPoints.add(lp);
-										 */
-
-										/*
-										 * try { Clump_Splitting.bw.write(
-										 * ", Trennungslinie"); } catch
-										 * (IOException e) { // TODO
-										 * Auto-generated catch block
-										 * e.printStackTrace(); }
-										 */
 										if (chi > Clump_Splitting.CHI_THRESHOLD)
 										{
 											StraightSplitLineBetweenTwoConcavityRegions splitLineAll = new StraightSplitLineBetweenTwoConcavityRegions(
@@ -545,23 +286,32 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 
 	}
 
+	/**
+	 * Computes chi value
+	 * 
+	 * @param cI
+	 *            First ConcavityRegion to Split
+	 * @param cJ
+	 *            Second ConcavityRegion to Split
+	 * @param cpOne
+	 *            ConcavityPixel of First ConcavityRegion to Split which is
+	 *            choosed to Split
+	 * @param cpTwo
+	 *            ConcavityPixel of Second ConcavityRegion to Split which is
+	 *            choosed to Split
+	 * @return chi value
+	 */
+
 	private double computeChi(ConcavityRegion cI, ConcavityRegion cJ, ConcavityPixel cpOne, ConcavityPixel cpTwo)
 	{
 		double distance;
 		Point2D pOne = cpOne.getPosition();
 		Point2D pTwo = cpTwo.getPosition();
-		/*
-		 * double distX; double distY; distX = Math.abs(pOne.getX() -
-		 * pTwo.getX()); distY = Math.abs(pOne.getY() - pTwo.getY()); distance =
-		 * Math.sqrt((distX * distX) + (distY * distY));
-		 */
 		distance = pOne.distance(pTwo);
 		double chi = ((Clump_Splitting.C1 * cpOne.distance() + Clump_Splitting.C1 * cpTwo.distance()
 				+ Clump_Splitting.C2)
 				/ (distance + Clump_Splitting.C1 * cpOne.distance() + Clump_Splitting.C1 * cpTwo.distance()
 						+ Clump_Splitting.C2));
-		// System.out.println(chi);
-		// IJ.log(chi+" ");
 		return chi;
 	}
 
@@ -626,7 +376,13 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 *            the ConcavityPoint of this ConcavityRegion
 	 * @param cJ
 	 *            second ConcavityRegion. The possible SplitLine is computed for
-	 *            the ConcavityPoint of this ConcavityRegion
+	 *            the ConcavityPoint of this ConcavityRegion * @param cpOne
+	 *            ConcavityPixel of First ConcavityRegion to Split which is
+	 *            choosed to Split
+	 * @param cpTwo
+	 *            ConcavityPixel of Second ConcavityRegion to Split which is
+	 *            choosed to Split
+	 * 
 	 * @return value of saliency
 	 */
 	private double computeSaliency(ConcavityRegion cI, ConcavityRegion cJ, ConcavityPixel cpOne, ConcavityPixel cpTwo)
@@ -663,13 +419,17 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 * 
 	 * @param cI
 	 *            the concavityRegion of Interest
+	 * @param pointCI
+	 *            ConcavityPixel of ConcavityRegion to Split which is choosed to
+	 *            Split
+	 * 
 	 * @return the Vector between the middelpoint of the convexhull and the
 	 *         concavityPoint of the ConcavityRegion
 	 */
 
 	private Vector2d computeVi(ConcavityRegion cI, Point2D pointcI)
 	{
-		Point2D midPointI = cI.getMidPointOfConvexHull();
+		Point2D midPointI = cI.getMidPointOfConcavityRegion();
 		Point2D maxPointI = pointcI;
 		double xPointDistOne = maxPointI.getX() - midPointI.getX();
 		double yPointDistOne = maxPointI.getY() - midPointI.getY();
@@ -688,6 +448,13 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 * @param cJ
 	 *            second ConcavityRegion. The possible SplitLine is computed for
 	 *            the ConcavityPoint of this ConcavityRegion
+	 * @param pointCI
+	 *            ConcavityPixel of First ConcavityRegion to Split which is
+	 *            choosed to Split
+	 * @param PointCJ
+	 *            ConcavityPixel of Second ConcavityRegion to Split which is
+	 *            choosed to Split
+	 * 
 	 * @return value of concavityConcavityAlignment
 	 */
 	private double computeConcavityConcavityAlignment(ConcavityRegion cI, ConcavityRegion cJ, Point2D pointCI,
@@ -716,6 +483,13 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 * @param cJ
 	 *            second ConcavityRegion. The possible SplitLine is computed for
 	 *            the ConcavityPoint of this ConcavityRegion
+	 * @param pointCI
+	 *            ConcavityPixel of First ConcavityRegion to Split which is
+	 *            choosed to Split
+	 * @param PointCJ
+	 *            ConcavityPixel of Second ConcavityRegion to Split which is
+	 *            choosed to Split
+	 * 
 	 * @return value of concavityLineAlignment
 	 */
 
@@ -758,6 +532,11 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 *            The possible SplitLine is computed for the ConcavityPoint of
 	 *            this ConcavityRegion. The concavityRegion cI should be the
 	 *            ConcavityRegion with the largest concavityDepth
+	 * @param pointCI
+	 *            ConcavityPixel of ConcavityRegion to Split which is choosed to
+	 *            Split
+	 *
+	 * 
 	 * @return value of concavityAngle
 	 */
 	private double computeConcavityAngle(ConcavityRegion cI, Point2D pointCI)
@@ -790,6 +569,10 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 *            The possible SplitLine is computed for the ConcavityPoint of
 	 *            this ConcavityRegion. The concavityRegion cI should be the
 	 *            ConcavityRegion with the largest concavityDepth
+	 * @param cpOne
+	 *            ConcavityPixel of ConcavityRegion to Split which is choosed to
+	 *            Split
+	 * 
 	 * @return value of concavityRatio
 	 */
 	private double computeConcavityRatio(Clump c, ConcavityPixel cpOne)
@@ -813,12 +596,17 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 	 *            the concavityAngle computed for the concavityRegion
 	 * @param concavityRatio
 	 *            the concavityRatio computed for the concavityRegion
+	 * @param cpOne
+	 *            ConcavityPixel of ConcavityRegion to Split which is choosed to
+	 *            Split
+	 * 
 	 * @return Straight SplitLine for the concavityRegion
+	 * 
 	 */
 	private StraightSplitLineBetweenConcavityRegionAndPoint computeSplitLineBetweenConcavityPointAndPoint(
 			ConcavityRegion cI, Clump c, double concavityAngle, double concavityRatio, ConcavityPixel cpOne)
 	{
-		Point2D midPoint = cI.getMidPointOfConvexHull();
+		Point2D midPoint = cI.getMidPointOfConcavityRegion();
 		Point2D concavityPoint = cpOne.getPosition();
 		Line2D.Double line = new Line2D.Double(midPoint, concavityPoint);
 		Polygon p = c.getBoundary();
@@ -830,7 +618,6 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 		test.removeAll(cI.getBoundaryPointList());
 
 		double minDist = 10000;
-		// int indexMinDist = 0;
 		double dist = 0;
 		java.util.Iterator<Point2D.Double> it = test.iterator();
 		Point2D.Double minDistPoint = null;
@@ -845,7 +632,6 @@ public class StraightSplitLineCalculator implements AbstractSplitLineCalculator
 
 					minDist = dist;
 					minDistPoint = point;
-					// indexMinDist = i;
 				}
 			}
 		}

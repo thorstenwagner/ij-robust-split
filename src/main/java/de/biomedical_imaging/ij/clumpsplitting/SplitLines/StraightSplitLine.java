@@ -48,6 +48,7 @@ import de.biomedical_imaging.ij.clumpsplitting.ConcavityPixel;
 
 public abstract class StraightSplitLine implements AbstractSplitLine
 {
+	
 	public abstract ConcavityPixel getStartConcavityPixel();
 	public abstract ConcavityPixel getEndConcavityPixel();
 	

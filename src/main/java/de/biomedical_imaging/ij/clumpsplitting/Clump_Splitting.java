@@ -35,10 +35,13 @@ SOFTWARE.
 package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.AWTEvent;
+import java.awt.Component;
 import java.awt.Polygon;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.swing.JFileChooser;
 
 import de.biomedical_imaging.ij.clumpsplitting.SplitLines.SplitLineAssignmentSVM;
 import ij.IJ;
@@ -72,6 +75,13 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 */
 	public static int STOP = 0;
 
+	/**
+	 * parameter to estabish in which range the detection of the innercontour
+	 * Convex Hulls should be detected. If the inner Contours are small you
+	 * should choose a small value. If your inner Contours are larger maybe less
+	 * points are detected. It could be helpful to increase
+	 * innercontourparameter default-value: 2
+	 */
 	public static int INNERCONTOURPARAMETER = 2;
 	/**
 	 * List To Train SVM for SplitLineParameters C1 and C2. It contains the sum
@@ -81,17 +91,16 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * splitline or not.
 	 */
 	public static ArrayList<SplitLineAssignmentSVM> listOfAllPossibleSplitLinesAndClassForSVM = new ArrayList<SplitLineAssignmentSVM>();
+	/**
+	 * Type of the ConcavityPixelDetector Type. Values are described and
+	 * established in enum ConcavityPixel detector type
+	 */
 	public static ConcavityPixelDetectorType CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
 	/**
 	 * represents the status of the Plugin, if ok button is pressed it is true,
 	 * shows if preview is running or if the final decision is made
 	 */
 	public static boolean WASOKED = false;
-	/**
-	 * TextBox to write Information about the ConcavityRegions into
-	 */
-	// public static JTextArea textAreaForConcavityInformation = new
-	// JTextArea();
 	/**
 	 * List for all possible ConcavityRegions to show parameter for it to choose
 	 * best parameter for the Clump splitting
@@ -105,17 +114,21 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 */
 	public static int done = 0;
 	/**
-	 * List of rois, which manages the overlay for the Orientation
+	 * List of ROIs, which manages the overlay for the Orientation
 	 */
 	public static ArrayList<Roi> overlayForOrientation = new ArrayList<Roi>();
+	/**
+	 * List of ROIs, which manages description Texts for each concavityRegion to
+	 * optimize parameters
+	 */
 	public static ArrayList<Roi> overlayTextConvexHull = new ArrayList<Roi>();
 	/**
-	 * List of rois, which manages the overlay for the ConvexHulls
+	 * List of ROIs, which manages the overlay for the ConvexHulls
 	 */
 	public static ArrayList<Roi> overlayConvexHull = new ArrayList<Roi>();
 
 	/**
-	 * List of rois, which manages the overlay for the SplitPoints
+	 * List of ROIs, which manages the overlay for the SplitPoints
 	 */
 	public static ArrayList<Roi> overlaySplitPoints = new ArrayList<Roi>();
 
@@ -127,18 +140,13 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 	private static boolean isReady;
 	/**
-	 * if it is true and the ok button was pressed Data of
+	 * if it is true and the OK button was pressed Data of
 	 * StraightSplitLineBetweenTwoConcavityRegions is written to a LibSVM file
-	 * to analyse it by a SVM
+	 * to analyze and optimize it by a SVM
 	 */
 	public static boolean WRITEDATAINFILE = false;
 	/**
-	 * Type of the splitLine 0 corresponds to StraightSplitLine, 1 corresponds
-	 * to Maximum-Intensity-Split-Line, 2 corresponds to
-	 * Minimum-Intensity-Split-Line, 3 corresponds to
-	 * Geodesic-Distance-Split-Line, 4 corresponds to
-	 * Maximum-Intensity-Split-Line Farhan and 5 corresponds to
-	 * Minimum-Intensity-Split-Line Farhan"))
+	 * Type of the splitLine, types are specified by enum SplitLineType
 	 */
 	public static SplitLineType SPLITLINETYPE = SplitLineType.STRAIGHTSPLITLINE;
 	/**
@@ -177,6 +185,12 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * valid SplitLine
 	 */
 	public static double CONCAVITYANGLE_THRESHOLD = 1.5707963;
+	/**
+	 * threshold Chi, which specifies if a SplitLine is valid or not. A high
+	 * chi-Value represents a high ratio between concavityDepths of the
+	 * ConcavityRegions and Distance between the Splitpoints. The Chi value
+	 * depends on the Values of parameters C1 and C2
+	 */
 	public static double CHI_THRESHOLD = 0.5;
 	/**
 	 * used for SplitLinesBetweenConcavityRegionAndPoint. ratio between the
@@ -185,20 +199,27 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * valid SplitLine
 	 */
 	public static double CONCAVITYRATIO_THRESHOLD = 6;
+	/**
+	 * specifies if a picture is already preprocessed, to prevent another
+	 * preprocession to recieve the size of the inner Contours
+	 */
 	public static boolean ISPREPROCESSED = false;
 	/**
 	 * user choosed parameter/ optimized by SVM for Nanoparticles to find the
-	 * best splitLine of an actual Clump
+	 * best splitLine of an actual Clump is C1 influences the value of chi of
+	 * the Actual splitLine
 	 */
 	public static double C1 = 1.73;
 	/**
 	 * user choosed parameter/ optimized by SVM for Nanoparticles to find the
-	 * best splitLine of an actual Clump
+	 * best splitLine of an actual Clump C2 influences the value of chi of the
+	 * Actual splitLine
 	 */
 	public static double C2 = -4.72;
 
 	/**
-	 * if show ConcavityDepth is true the ConvexHull is drawn into the picture
+	 * if show ConcavityDepth is true the ConvexHull is added to static
+	 * overlayConvexHull
 	 */
 	public static boolean SHOWCONVEXHULL = false;
 
@@ -215,8 +236,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 */
 	public static int count;
 	/**
-	 * establish if the binary backgroundcolor of an image is black(0) or
-	 * white(1)
+	 * establish if the binary backgroundcolor of an image is black(=0) or
+	 * white(=1) by default background color will be assumed as white
 	 */
 	public static int BACKGROUNDCOLOR = 1;
 
@@ -224,8 +245,6 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * instance of the actual image
 	 */
 	public static ImagePlus imp;
-
-	// public static ImageProcessor binary;
 
 	@Override
 	public int setup(String arg, ImagePlus imp)
@@ -264,30 +283,33 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			imageProcessorBinary.blurGaussian(2.0);
 		}
 
+		// preprocessing
 		AutoThresholder at = new AutoThresholder();
-		// imageProcessorBinary.blurGaussian(0.9);
 
 		int[] histogram = imageProcessorBinary.getHistogram();
-
+		// computes the binary image of the input image
 		int threshold = at.getThreshold(Method.Default, histogram);
-
-		// pre-processing
-
 		imageProcessorBinary.threshold(threshold);
-		
-		 /* ShapeSmoothingUtil ssu= new ShapeSmoothingUtil();
-		  ssu.setBlackBackground(true);
-		  ssu.fourierFilter(imageProcessorBinary,40, true,false);
+
+		/*
+		 * ShapeSmoothingUtil ssu= new ShapeSmoothingUtil();
+		 * ssu.setBlackBackground(true);
+		 * ssu.fourierFilter(imageProcessorBinary,40, true,false);
 		 */
 
 		ImageProcessor binary = imageProcessorBinary;
 		do
 		{
+			// iteratively computes the Splitlines
 			clumpList = Clump_Splitting.computeClumps(ip, binary);
+			/*
+			 * Crash condition stops if no possible ConcavityRegions are found
+			 * in an iteration for all Clumps
+			 */
 		} while (clumpList.size() > Clump_Splitting.STOP);
 
 		/*
-		 * writes data of each StraightSplitLine into a LibSVM file
+		 * writes data of each StraightSplitLine into a csv file
 		 */
 		if (Clump_Splitting.WASOKED)
 		{
@@ -309,7 +331,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		 */
 		Clump_Splitting.showOverlay();
 		/*
-		 * adds MouseListener to each ConcavityRegion for the Bounding Box to
+		 * adds MouseListeners to each ConcavityRegion for the Bounding Box to
 		 * show information about the ConcavityRegions
 		 */
 		for (int n = 0; n < Clump_Splitting.allRegions.size(); n++)
@@ -321,6 +343,21 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 	}
 
+	/**
+	 * private Method to compute the SplitLines of a Clump (normally one
+	 * SplitLine is computed per iteration)(the one with the best chi value) and
+	 * is drawn into the image
+	 * 
+	 * @param ip
+	 *            ImageProcessor, which contains the original Image, used to
+	 *            show SplitLines and to compute Geodesic-/Maximum-/ Minimum-
+	 *            Splitlines
+	 * @param binary
+	 *            ImageProcessor of the binarized and preprocessed image to
+	 *            analyse the Contour of a Clump to find concavity Regions and
+	 *            ConcavityPixel to Split a Clump
+	 * @return List of all detected Clumps
+	 */
 	private static ArrayList<Clump> computeClumps(ImageProcessor ip, ImageProcessor binary)
 	{
 		ManyBlobs blobList = new ManyBlobs(new ImagePlus("", binary));
@@ -329,7 +366,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		/*
 		 * Counter of ready Clumps has to be zero at the beginning of each step,
 		 * because all Clumps are detected at first. Counts the number of Clumps
-		 * for which no possible splitlines can be found
+		 * for which no possible splitlines can be found the instantiation of a
+		 * Clump already computes the SplitLines for the Clump
 		 */
 		Clump_Splitting.STOP = 0;
 
@@ -356,9 +394,6 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			Clump_Splitting.count = clumpList.size();
 			Clump_Splitting.isReady = true;
 		}
-		/*
-		 * crash condition stops, if no more possible best SplitLines are found
-		 */
 
 		return clumpList;
 
@@ -373,26 +408,26 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 */
 	private void writeDataInFile()
 	{
-
-		/*
-		 * SparkConf conf = new
-		 * SparkConf().setAppName("Test").setMaster("local"); JavaSparkContext
-		 * sc = new JavaSparkContext(conf);
-		 * 
-		 * ArrayList<LabeledPoint> listOfAllLabeledPoints = new
-		 * ArrayList<LabeledPoint>();
-		 */
-
 		FileWriter writer = null;
 		try
 		{
-			String title = imp.getTitle();
+			String filename="";
+			  JFileChooser chooser = new JFileChooser();
+		        // Dialog zum Oeffnen von Dateien anzeigen
+		        int rueckgabeWert = chooser.showSaveDialog(null);
+		        
+		        /* Abfrage, ob auf "Öffnen" geklickt wurde */
+		        if(rueckgabeWert == JFileChooser.APPROVE_OPTION)
+		        {
+		             // Ausgabe der ausgewaehlten Datei
+		            filename=chooser.getSelectedFile().getAbsolutePath();
+		        }//String title = imp.getTitle();
 
-			String st = "test/" + title.split("\\.")[0] + "ConcavityRegionInformationForSVM.csv";
+			
+			String st =  filename+".csv";
 			writer = new FileWriter(st);
 		} catch (IOException e1)
 		{
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
@@ -414,7 +449,6 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				writer.write(entrie[0] + "," + entrie[1] + "," + entrie[2] + "\n");
 			} catch (IOException e)
 			{
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -424,7 +458,6 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			writer.close();
 		} catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -531,7 +564,9 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	}
 
 	/**
-	 * Dialogue where you can decide which one is your backgroundcolor
+	 * Opens 2 Dialogs. In the first dialog you have to decide what kind of
+	 * Splitline and ConcavityPixel you want to use and the second one manages
+	 * the parameters of the choosed Types
 	 */
 	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
@@ -699,13 +734,12 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 	}
 
+	/**
+	 * manages which ROIs should be shown into overlay
+	 */
 	public static void showOverlay()
 	{
 		Overlay o = new Overlay();
-		/*
-		 * for (Roi overlay : Clump.overlayForOrientation) {
-		 * o.addElement(overlay); }
-		 */
 		for (Roi overlay : Clump_Splitting.overlayConvexHull)
 		{
 			o.addElement(overlay);

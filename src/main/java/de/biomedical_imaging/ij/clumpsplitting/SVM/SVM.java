@@ -1,3 +1,37 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2016 Louise Bloch (louise.bloch001@stud.fh-dortmund.de), Thorsten Wagner (wagner@b
+iomedical-imaging.de)
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy
+of this software and associated documentation files (the "Software"),
+to deal
+in the Software without restriction, including without limitation the
+rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE
+SOFTWARE.
+*/
 package de.biomedical_imaging.ij.clumpsplitting.SVM;
 
 import java.awt.GridLayout;
@@ -7,7 +41,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 import libsvm.svm;
@@ -15,15 +51,56 @@ import libsvm.svm_model;
 import libsvm.svm_node;
 import libsvm.svm_parameter;
 import libsvm.svm_problem;
+import net.sf.javaml.tools.sampling.NormalBootstrapping;
 
+/**
+ * Calculates an SVM
+ * 
+ * @author Louise
+ *
+ */
 public class SVM
 {
+	/**
+	 * executes a bootstrapping
+	 * 
+	 * @param featureList
+	 *            List of all Features
+	 * @return Training data
+	 */
+	private static ArrayList<Double[]> bootstrap(ArrayList<Double[]> featureList)
+	{
+		ArrayList<Integer> positions = new ArrayList<Integer>();
+		for (int i = 0; i < featureList.size(); i++)
+		{
+			positions.add(i);
+		}
+		NormalBootstrapping nb = new NormalBootstrapping();
+		int size = featureList.size();
+		List<Integer> sampleInt = nb.sample(positions, size, Math.round(Math.random() * 200));
+		ArrayList<Double[]> sample = new ArrayList<Double[]>();
+		for (int i : sampleInt)
+		{
+			if (!sample.contains(featureList.get(i)))
+			{
+				sample.add(featureList.get(i));
+			}
+		}
+		return sample;
+	}
 
-	public static void svm()
+	/**
+	 * reads data from all CSV Files in a directory to train a SVM for the data
+	 * 
+	 * @param directoryPath
+	 *            path of the Directory
+	 * @return returns List of all feature traing data
+	 */
+	private static ArrayList<Double[]> readDataFromFile(String directoryPath)
 	{
 		ArrayList<Double[]> featureList = new ArrayList<Double[]>();
 
-		File f = new File("D:/Bachelorthesis/GitHubThesis/ij-robust-split/test/");
+		File f = new File(directoryPath);
 		if (f.isDirectory())
 		{
 			File[] files = f.listFiles();
@@ -35,7 +112,6 @@ public class SVM
 					fr = new FileReader(files[i]);
 				} catch (FileNotFoundException e)
 				{
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				BufferedReader br = new BufferedReader(fr);
@@ -51,17 +127,28 @@ public class SVM
 					}
 				} catch (NumberFormatException e)
 				{
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e)
 				{
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
 			}
-			
+
 		}
+		return featureList;
+	}
+
+	/**
+	 * trains LibSVM for a Linear Problem for the classification of the
+	 * featureList in 2D
+	 * 
+	 * @param featureList
+	 *            Trainingsdata List
+	 * @return trained model
+	 */
+	private static svm_model svm(ArrayList<Double[]> featureList)
+	{
 		svm_parameter param = new svm_parameter();
 		param.probability = 1;
 		param.gamma = 0.5;
@@ -69,10 +156,8 @@ public class SVM
 		param.C = 2;
 		param.svm_type = svm_parameter.NU_SVC;
 		param.kernel_type = svm_parameter.LINEAR;
-		param.cache_size = 20000;
+		param.cache_size = 2000000;
 		param.eps = 0.001;
-
-		// param.nr_weight=2;
 
 		svm_problem prob = new svm_problem();
 
@@ -85,7 +170,6 @@ public class SVM
 
 			Double[] features = featureList.get(i);
 
-//			System.out.println(features[0] + " " + features[1]);
 			prob.x[i] = new svm_node[features.length - 1];
 			for (int j = 1; j < features.length; j++)
 			{
@@ -94,16 +178,24 @@ public class SVM
 				node.value = features[j];
 
 				prob.x[i][j - 1] = node;
-			//	System.out.println(i + " " + j + " " + node.value + "test");
 			}
-		//	System.out.println(features[0]);
 			prob.y[i] = features[0];
-			// if()
-			// prob.y[i] = features[0];
 		}
 		svm_model model = svm.svm_train(prob, param);
-	//	System.out.println(model.SV.length + " " + model.SV[0].length);
-				double[] weights = new double[model.SV[0].length];
+		return model;
+	}
+
+	/**
+	 * 
+	 * @param model
+	 *            trained svm_model
+	 * @return double array --> position 0 contains the negative gradient of the
+	 *         separating line position 1 contains the intercept of separating
+	 *         line
+	 */
+	private static Double[] getSVMModelParameters(svm_model model)
+	{
+		double[] weights = new double[model.SV[0].length];
 		for (int i = 0; i < model.SV[0].length; i++)
 		{
 			for (int j = 0; j < model.SV.length; j++)
@@ -123,23 +215,39 @@ public class SVM
 		x[1].index = 2;
 		x[1].value = 0;
 		double intercept = 0;
-		
+
 		do
 		{
 
 			svm.svm_predict_values(model, x, prob_estimates);
-			
-				x[1].index = 2;
-				x[1].value += prob_estimates[0];
-				intercept = x[1].value;
-			//	before = prob_estimates[0];
-			
-			
-			} while (prob_estimates[0] > 0.01 || prob_estimates[0] < -0.01);
-		double derivate=weights[0]/weights[1];
-		System.out.println(derivate);
-System.out.println(intercept);
-		SVMPanel panel = new SVMPanel(featureList, weights, intercept);
+
+			x[1].index = 2;
+			x[1].value += prob_estimates[0];
+			intercept = x[1].value;
+
+		} while (prob_estimates[0] > 0.01 || prob_estimates[0] < -0.01);
+		double gradient = weights[0] / weights[1];
+		System.out.println(gradient);
+		System.out.println(intercept);
+		Double[] parameters =
+		{ gradient, intercept };
+		return parameters;
+	}
+
+	/**
+	 * shows the SVM in a JFrame to visualize the result of the SVM blue points
+	 * are valid and red Points are unvalid SplitLines
+	 * 
+	 * @param featureList
+	 *            List of all classified features
+	 * @param gradient
+	 *            negative gradient of the separating line of the SVM
+	 * @param intercept
+	 *            intercept of the separating line of the SVM
+	 */
+	private static void showSVM(ArrayList<Double[]> featureList, double gradient, double intercept)
+	{
+		SVMPanel panel = new SVMPanel(featureList, gradient, intercept);
 		JFrame frame = new JFrame("Oval Sample");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -153,7 +261,136 @@ System.out.println(intercept);
 
 	public static void main(String[] args)
 	{
-		svm();
+		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(new java.io.File("."));
+		chooser.setDialogTitle("choosertitle");
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setAcceptAllFileFilterUsed(false);
+
+		// Dialog zum Oeffnen von Dateien anzeigen
+		int rueckgabeWert = chooser.showOpenDialog(null);
+		String dirName = "";
+		/* Abfrage, ob auf "Öffnen" geklickt wurde */
+		if (rueckgabeWert == JFileChooser.APPROVE_OPTION)
+		{
+			// Ausgabe der ausgewaehlten Datei
+			dirName = chooser.getSelectedFile().getAbsolutePath();
+		}
+
+		ArrayList<Double[]> featureList = SVM.readDataFromFile(dirName);
+		double gradient = 0;
+		double intercept = 0;
+		double accuracy = 0;
+		double accuracyMinus1 = 0;
+		double accuracyPlus1 = 0;
+		int anz = 50;
+		int durchgefuehrt = anz;
+
+		for (int i = 0; i < anz; i++)
+		{
+			ArrayList<Double[]> training = SVM.bootstrap(featureList);
+			ArrayList<Double[]> test = new ArrayList<Double[]>();
+			int anzTraining = SVM.countAnzPlus1(training);
+			test.addAll(featureList);
+			test.removeAll(training);
+			int anzTest = SVM.countAnzPlus1(test);
+			System.out.println(anzTraining + " " + anzTest);
+			svm_model model = svm(training);
+			if (model.nSV[0] != 0)
+			{
+				Double[] parameters = SVM.getSVMModelParameters(model);
+				gradient += parameters[0];
+				intercept += parameters[1];
+				Double accuracies[] = SVM.test(model, test);
+				accuracy += accuracies[0];
+				accuracyMinus1 += accuracies[1];
+				accuracyPlus1 += accuracies[2];
+			} else
+			{
+				durchgefuehrt--;
+			}
+
+		}
+		showSVM(featureList, (gradient / durchgefuehrt), (intercept / durchgefuehrt));
+
+		System.out.println(-(gradient / durchgefuehrt)+ " "+ (intercept / durchgefuehrt));
+		System.out.println((accuracy / durchgefuehrt) + " " + (accuracyMinus1 / durchgefuehrt) + " "
+				+ (accuracyPlus1 / durchgefuehrt) + " ");
+		System.out.println(durchgefuehrt + "durchgefuehrt");
+	}
+
+	private static int countAnzPlus1(ArrayList<Double[]> training)
+	{
+		int n = 0;
+		for (Double[] doubleArray : training)
+		{
+			if (doubleArray[0] == 1)
+			{
+				n++;
+			}
+		}
+		return n;
+
+	}
+
+	private static Double[] test(svm_model model, ArrayList<Double[]> featureList)
+	{
+		double rightMinus1 = 0;
+		double rightPlus1 = 0;
+		double anzMinus1 = 0;
+		double anzPlus1 = 0;
+		double n = featureList.size();
+		double right = 0;
+
+		for (int i = 0; i < featureList.size(); i++)
+		{
+
+			svm_problem prob = new svm_problem();
+
+			prob.y = new double[featureList.size()];
+			prob.l = featureList.size();
+			prob.x = new svm_node[featureList.size()][];
+
+			Double[] features = featureList.get(i);
+
+			prob.x[i] = new svm_node[features.length - 1];
+			for (int j = 1; j < features.length; j++)
+			{
+				svm_node node = new svm_node();
+				node.index = j;
+				node.value = features[j];
+
+				prob.x[i][j - 1] = node;
+			}
+			double predicted = svm.svm_predict(model, prob.x[i]);
+			if (features[0] == -1)
+			{
+				anzMinus1++;
+				if (predicted == features[0])
+				{
+					rightMinus1++;
+					right++;
+
+				}
+			} else
+			{
+				anzPlus1++;
+				if (predicted == features[0])
+				{
+					rightPlus1++;
+					right++;
+
+				}
+			}
+		}
+
+		double accuracy = (right / n);
+
+		double accuracyMinus1 = (rightMinus1 / anzMinus1);
+		double accuracyPlus1 = (rightPlus1 / anzPlus1);
+		Double[] accuracies =
+		{ accuracy, accuracyMinus1, accuracyPlus1 };
+		return accuracies;
 	}
 
 }

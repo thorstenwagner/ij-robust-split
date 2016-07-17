@@ -55,7 +55,8 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 {
 
 	/**
-	 * 
+	 * startX is the x-Coordinate of the StartingPoint of the ConcavityRegion
+	 * the StartingPoint is detected by a point of the ConvexHull
 	 */
 
 	private int startX;
@@ -75,8 +76,9 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	 */
 	private int endY;
 	/**
-	 * indexMax is the index of the Point with the largest concavityDepth of the
-	 * ConcavityRegion based on the boundaryPointList
+	 * List of all concavityPixels detected in a ConcavityRegion. The result
+	 * depends on the method they are detected. They are explained in enum
+	 * ConcavityPixelDetectorType
 	 */
 	private ArrayList<ConcavityPixel> concavityPixelList;
 	/**
@@ -85,7 +87,8 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	 */
 	private ArrayList<Double> distList;
 	/**
-	 * represents the point in the middle of the convexHull
+	 * represents the point in the middle of the convexHull. On this points many
+	 * angle features depend to evaluate the SplitLine
 	 */
 	private Point2D midPointOfConvexHull;
 	/**
@@ -116,17 +119,6 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 
 			Clump_Splitting.overlaySplitPoints.add(polygonRoi);
 		}
-		// ip.setColor(Color.gray);
-		// ip.setLineWidth(10);
-		// ip.drawDot((int) p.getX(), (int) p.getY());
-		// ip.setLineWidth(1);
-		// if(Clump_Splitting.BACKGROUNDCOLOR==0)
-		// {
-		// ip.setColor(Color.black);
-		// }
-		// else{
-		// ip.setColor(Color.white);
-		// }
 	}
 
 	/**
@@ -135,12 +127,11 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	 * @param ip
 	 *            ImageProcessor to mark the Pixel
 	 */
-	public void markMidPointOfConvexHull()
+	public void markMidPointOfConcavityRegion()
 	{
-		// ip.setColor(Color.gray);
-		Line polygonRoi = new Line((int) this.getMidPointOfConvexHull().getX(),
-				(int) this.getMidPointOfConvexHull().getY(), (int) this.getMidPointOfConvexHull().getX(),
-				(int) this.getMidPointOfConvexHull().getY());
+		Line polygonRoi = new Line((int) this.getMidPointOfConcavityRegion().getX(),
+				(int) this.getMidPointOfConcavityRegion().getY(), (int) this.getMidPointOfConcavityRegion().getX(),
+				(int) this.getMidPointOfConcavityRegion().getY());
 
 		polygonRoi.setStrokeWidth(3);
 		polygonRoi.setStrokeColor(Color.green);
@@ -149,10 +140,18 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 
 	}
 
+	/**
+	 * Method to compute Orientation of a Convex HUll, the orientation is
+	 * defined as the angle between horizontal and the Line Between midPoint Of
+	 * ConcavityRegion and ConcavityPixel
+	 * 
+	 * @param maxPointI
+	 *            ConcavityPixel for which Orientation should be computed
+	 * @return Orientation as radians
+	 */
 	public double getOrientation(Point2D maxPointI)
 	{
-		Point2D midPointI = this.getMidPointOfConvexHull();
-		// Point2D maxPointI = this.getMaxDistCoord();
+		Point2D midPointI = this.getMidPointOfConcavityRegion();
 		double xPointDistOne = midPointI.getX() - maxPointI.getX();
 		double yPointDistOne = midPointI.getY() - maxPointI.getY();
 
@@ -162,9 +161,6 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		m.setStrokeColor(Color.red);
 		Clump_Splitting.overlayForOrientation.add(l);
 		Clump_Splitting.overlayForOrientation.add(m);
-		// System.out.println("WICHTIG" + midPointI.getX() + " " +
-		// midPointI.getY() + " " + maxPointI.getX() + " "
-		// + maxPointI.getY());
 		Vector2d vi = new Vector2d(xPointDistOne, yPointDistOne);
 		Vector2d vj = new Vector2d(10, 0);
 		vi.normalize();
@@ -189,11 +185,11 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 
 		return angle;
 	}
-	/**
-	 * marks the Distance between the MidPointOfConvexHull and the maxDistCoord
+	/*
+	 * /** marks the Distance between the MidPointOfConvexHull and the
+	 * maxDistCoord
 	 * 
-	 * @param ip
-	 *            ImageProcessor to mark the Line
+	 * @param ip ImageProcessor to mark the Line
 	 */
 	/*
 	 * public void markConcavityDepth() { double x1=this.getStartX(); double
@@ -287,11 +283,8 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	 * @param distList
 	 *            List of the concavityDepth of all points of the part of the
 	 *            boundary included by the ConcavityRegion
-	 * @param max
-	 *            largest concavityDepth of the ConcavityRegion
-	 * @param maxIndex
-	 *            index of the point with the largest concavityDepth based by
-	 *            the boundaryPointList
+	 * @param concavityPixelList
+	 *            List of All ConcavityPixels of the ConvexHull
 	 */
 	public ConcavityRegion(int startX, int startY, int endX, int endY, ArrayList<Point2D> boundaryPointList,
 			ArrayList<Double> distList, ArrayList<ConcavityPixel> concavityPixelList)
@@ -304,10 +297,30 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		this.boundaryPointList = boundaryPointList;
 		this.distList = distList;
 		this.concavityPixelList = concavityPixelList;
-		this.midPointOfConvexHull = this.computeMidPointOfConvexHull();
+		this.midPointOfConvexHull = this.computeMidPointOfConcavityRegion();
 
 	}
 
+	/**
+	 * produces a ConcavityRegion without ConcavityPixels, because it is a
+	 * bidirectionally relation, ConcavityPixel can be added by
+	 * setConcavityPixelList or by add concavityPixel
+	 * 
+	 * @param startX
+	 *            x-Coordinate of the StartingPoint of the ConcavityRegion
+	 * @param startY
+	 *            y-Coordinate of the StartingPoint of the ConcavityRegion
+	 * @param endX
+	 *            x-Coordinate of the endPoint of the ConcavityRegion
+	 * @param endY
+	 *            y-Coordinate of the endPoint of the ConcavityRegion
+	 * @param boundaryPointList
+	 *            List of all Pixels of the part of the boundary included by the
+	 *            ConcavityRegion
+	 * @param distList
+	 *            List of the concavityDepth of all points of the part of the
+	 *            boundary included by the ConcavityRegion
+	 */
 	public ConcavityRegion(int startX, int startY, int endX, int endY, ArrayList<Point2D> boundaryPointList,
 			ArrayList<Double> distList)
 	{
@@ -319,7 +332,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		this.concavityPixelList = new ArrayList<ConcavityPixel>();
 		this.boundaryPointList = boundaryPointList;
 		this.distList = distList;
-		this.midPointOfConvexHull = this.computeMidPointOfConvexHull();
+		this.midPointOfConvexHull = this.computeMidPointOfConcavityRegion();
 
 	}
 
@@ -365,8 +378,6 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		ArrayList<Point2D> maxDistList = new ArrayList<Point2D>();
 		for (int i = 0; i < concavityPixelList.size(); i++)
 		{
-			// System.out.println(boundaryPointList.get(indexMax.get(i))+
-			// "MaxDistKoords"+ indexMax.get(i));
 			maxDistList.add((concavityPixelList.get(i).getPosition()));
 		}
 		return maxDistList;
@@ -377,6 +388,14 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		return boundaryPointList;
 	}
 
+	/**
+	 * Collects all information about a Concavity Region and formats it to show
+	 * it at an overlay to optimize Parmeters
+	 * 
+	 * @param maxDistPoint
+	 *            ConcavityPixel with maximum DIst to ConcavityRegion
+	 * @return formatted String with all information
+	 */
 	public String getInformation(ConcavityPixel maxDistPoint)
 	{
 
@@ -414,7 +433,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	 * 
 	 * @return Point in the middle of the ConvexHull
 	 */
-	private Point2D computeMidPointOfConvexHull()
+	private Point2D computeMidPointOfConcavityRegion()
 	{
 		double xDist = ((double) endX - (double) startX) / 2;
 		double yDist = ((double) endY - (double) startY) / 2;
@@ -424,7 +443,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		return midPoint;
 	}
 
-	public Point2D getMidPointOfConvexHull()
+	public Point2D getMidPointOfConcavityRegion()
 	{
 		return midPointOfConvexHull;
 	}
@@ -466,6 +485,11 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		}
 	}
 
+	/**
+	 * Computes the Bounding box of a Concavity Region to register Mouse
+	 * Listener in this area of the Image
+	 * 
+	 */
 	public Rectangle getRectangle()
 	{
 		Polygon p = new Polygon();

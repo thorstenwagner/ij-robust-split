@@ -1,3 +1,38 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2016 Louise Bloch (louise.bloch001@stud.fh-dortmund.de), Thorsten Wagner (wagner@b
+iomedical-imaging.de)
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy
+of this software and associated documentation files (the "Software"),
+to deal
+in the Software without restriction, including without limitation the
+rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE
+SOFTWARE.
+*/
+
 package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
 import java.awt.geom.Point2D;
@@ -8,157 +43,179 @@ import de.biomedical_imaging.ij.clumpsplitting.Clump;
 import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegionAdministration;
-import ij.process.AutoThresholder;
+
 import ij.process.ImageProcessor;
-import ij.process.AutoThresholder.Method;
+
+/**
+ * Class to compute MaximumIntensity SplitLine, a maximumintensity SplitLine
+ * follows the path between start and endPoint of maximum intensity
+ * 
+ * the idea of Farhan et al. is, to follow the adjacent Pixel in the direction
+ * of the computed orientation of the ConcavityRegion, the pixel with the
+ * largest ConcavityValue in this direction is choosed, as long, as another
+ * boundaryPoint of the Countour is reached
+ *
+ * @author Louise
+ *
+ */
 
 public class MaximumIntensitySplitLineCalculatorFarhan implements AbstractSplitLineCalculator
 {
 
-	static final int[][] NULLTONINETY={{1,1,1},{0,0,1},{0,0,0}};
-	static final int[][] NINETYTOHUNDREDEIGHTY={{1,1,0},{1,0,0},{1,0,0}};
-	static final int[][] HUNDREDEIGHTYTOTWOHUNDREDSEVENTY={{0,0,0},{1,0,0},{1,1,1}};
-	static final int[][] TWOHUNDREDSEVENTTOTHREEHUNDREDSIXTY={{0,0,1},{0,0,1},{0,1,1}};
-	
-	
+	/**
+	 * neighborhood to check if the orientation of the ConcavityRegion is
+	 * between 0 and 90 degrees to the horizontal
+	 */
+	static final int[][] NULLTONINETY =
+	{
+			{ 1, 1, 1 },
+			{ 0, 0, 1 },
+			{ 0, 0, 0 } };
+
+	/**
+	 * neighborhood to check if the orientation of the ConcavityRegion is
+	 * between 90 and 180 degrees to the horizontal
+	 */
+
+	static final int[][] NINETYTOHUNDREDEIGHTY =
+	{
+			{ 1, 1, 0 },
+			{ 1, 0, 0 },
+			{ 1, 0, 0 } };
+
+	/**
+	 * neighborhood to check if the orientation of the ConcavityRegion is
+	 * between 180 and 270 degrees to the horizontal
+	 */
+
+	static final int[][] HUNDREDEIGHTYTOTWOHUNDREDSEVENTY =
+	{
+			{ 0, 0, 0 },
+			{ 1, 0, 0 },
+			{ 1, 1, 1 } };
+
+	/**
+	 * neighborhood to check if the orientation of the ConcavityRegion is
+	 * between 270 and 360 degrees to the horizontal
+	 */
+
+	static final int[][] TWOHUNDREDSEVENTTOTHREEHUNDREDSIXTY =
+	{
+			{ 0, 0, 1 },
+			{ 0, 0, 1 },
+			{ 0, 1, 1 } };
+
+	/**
+	 * calculates a possible splitLine by first compute the orientation of the
+	 * ConcavityRegion and than looks for adjacent points in this direction to
+	 * find pixel with high Intensity to calculate SplitLine
+	 */
 	@Override
 	public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
-			Clump c, ImageProcessor ip)
+			Clump c, ImageProcessor ip, ImageProcessor binary)
 	{
-		ArrayList<AbstractSplitLine> splitLines=new ArrayList<AbstractSplitLine>();
+		ArrayList<AbstractSplitLine> splitLines = new ArrayList<AbstractSplitLine>();
+		// take SplitLine with largest concavityDepth of the Clump
 		Collections.sort(concavityRegionList);
-		
-			ArrayList<Point2D> points=new ArrayList<Point2D>();
-			if(concavityRegionList.size()>0)
-			{
-			ConcavityRegion cr=concavityRegionList.get(concavityRegionList.size()-1);
-			ArrayList<Point2D> maxDistList= cr.getMaxDistCoord();
-			Point2D aktuellerPunkt= maxDistList.get(maxDistList.size()/2);
-		//	System.out.println("Startpunkt: "+aktuellerPunkt.getX()+" "+aktuellerPunkt.getY()+" "+ ip.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY()));
+
+		ArrayList<Point2D> points = new ArrayList<Point2D>();
+		if (concavityRegionList.size() > 0)
+		{
+			ConcavityRegion cr = concavityRegionList.get(concavityRegionList.size() - 1);
+			ArrayList<Point2D> maxDistList = cr.getMaxDistCoord();
+			Point2D aktuellerPunkt = maxDistList.get(maxDistList.size() / 2);
 			points.add(aktuellerPunkt);
-			double orientation=cr.getOrientation(aktuellerPunkt);
+			// compute orientation of the ConcavityRegion
+			double orientation = cr.getOrientation(aktuellerPunkt);
 			int[][] filter;
-		//	System.out.println(orientation);
-			if(orientation>0&&orientation<=(Math.PI/2))
+			if (orientation > 0 && orientation <= (Math.PI / 2))
 			{
-				filter=MaximumIntensitySplitLineCalculatorFarhan.NULLTONINETY;
-			//	System.out.println("0-90");
-			}
-			else{
-				if(orientation>(Math.PI/2)&&orientation<=(Math.PI))
+				filter = MaximumIntensitySplitLineCalculatorFarhan.NULLTONINETY;
+			} else
+			{
+				if (orientation > (Math.PI / 2) && orientation <= (Math.PI))
 				{
-					filter=MaximumIntensitySplitLineCalculatorFarhan
-							.NINETYTOHUNDREDEIGHTY;
-			//		System.out.println("90-180");
-					
-				}
-				else{
-					if(orientation>(Math.PI)&&orientation<=((Math.PI)*1.5))
+					filter = MaximumIntensitySplitLineCalculatorFarhan.NINETYTOHUNDREDEIGHTY;
+
+				} else
+				{
+					if (orientation > (Math.PI) && orientation <= ((Math.PI) * 1.5))
 					{
-					filter=MaximumIntensitySplitLineCalculatorFarhan.HUNDREDEIGHTYTOTWOHUNDREDSEVENTY;
-				//	System.out.println("180-270");
-					
-					}
-					else{
-						filter=MaximumIntensitySplitLineCalculatorFarhan.TWOHUNDREDSEVENTTOTHREEHUNDREDSIXTY;
-					//	System.out.println("270-360");
-						
+						filter = MaximumIntensitySplitLineCalculatorFarhan.HUNDREDEIGHTYTOTWOHUNDREDSEVENTY;
+
+					} else
+					{
+						filter = MaximumIntensitySplitLineCalculatorFarhan.TWOHUNDREDSEVENTTOTHREEHUNDREDSIXTY;
+
 					}
 				}
 			}
-	/*		ip.blurGaussian(2.0);
-			ip.autoThreshold();
-			ip.erode();
-			
-			ip.dilate();*/	
-			ImageProcessor binary= ip.duplicate();
-			AutoThresholder at= new AutoThresholder();
-			int[] histogram = binary.getHistogram();
-			int threshold=at.getThreshold(Method.Default, histogram);
-			
-			binary.blurGaussian(3.0);
-			binary.threshold(threshold);
-		//	binary.autoThreshold();
-			/*if(Clump_Splitting.BACKGROUNDCOLOR==1)
-			{
-			binary.erode();
-			
-			binary.dilate();
-			} else{
-				binary.invert();
-				binary.erode();
-				
-				binary.dilate();
-				binary.invert();
-				
-			}*/
-		
-			
-//			System.out.println(binary.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY())+ " "+Clump_Splitting.BACKGROUNDCOLOR);
 			int value;
-			if(Clump_Splitting.BACKGROUNDCOLOR==1)
+			if (Clump_Splitting.BACKGROUNDCOLOR == 1)
 			{
-				value=255;
-			}
-			else{
-				value =0;
-			}
-			boolean equals=(binary.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY())==value);
-		//	System.out.println(equals);
-			while(!equals&&aktuellerPunkt.getX()>0&&aktuellerPunkt.getY()>0&&aktuellerPunkt.getX()<ip.getWidth()&aktuellerPunkt.getY()<ip.getHeight())
+				value = 255;
+			} else
 			{
-				int max=-10;
-				Point2D temp=null;
-				for(int m=-1;m<=1;m++)
+				value = 0;
+			}
+			boolean equals = (binary.getPixel((int) aktuellerPunkt.getX(), (int) aktuellerPunkt.getY()) == value);
+			/*
+			 * search for largest Intensity Path by taking the next neighbor in
+			 * the computed direction with the largest intensity, as long as it
+			 * hasn't reached the Contour of the Clump
+			 */
+			while (!equals && aktuellerPunkt.getX() > 0 && aktuellerPunkt.getY() > 0
+					&& aktuellerPunkt.getX() < ip.getWidth() & aktuellerPunkt.getY() < ip.getHeight())
+			{
+				int max = -10;
+				Point2D temp = null;
+				for (int m = -1; m <= 1; m++)
 				{
-					for(int n=-1;n<=1;n++)
+					for (int n = -1; n <= 1; n++)
 					{
-						if(filter[m+1][n+1]==1)
+						if (filter[m + 1][n + 1] == 1)
 						{
-				//			System.out.println("max"+max+"Pixelwert: "+ ip.getPixel((int)aktuellerPunkt.getX()+m, (int)aktuellerPunkt.getY()+n));
-							if((orientation>0&&orientation<=(Math.PI/2)&&m==-1 &&n==1)||(orientation>(Math.PI/2)&&orientation<=(Math.PI)&&m==-1 &&n==-1)||(orientation>(Math.PI)&&orientation<=((Math.PI)*1.5)&&m==1 &&n==-1)||(orientation>((Math.PI)*1.5)&&orientation<=((Math.PI)*2)&&m==1 &&n==1))
+							if ((orientation > 0 && orientation <= (Math.PI / 2) && m == -1 && n == 1)
+									|| (orientation > (Math.PI / 2) && orientation <= (Math.PI) && m == -1 && n == -1)
+									|| (orientation > (Math.PI) && orientation <= ((Math.PI) * 1.5) && m == 1
+											&& n == -1)
+									|| (orientation > ((Math.PI) * 1.5) && orientation <= ((Math.PI) * 2) && m == 1
+											&& n == 1))
 							{
-						//		System.out.println(ip.getPixel((int)aktuellerPunkt.getX()+m, (int)aktuellerPunkt.getY()+n));
-								if(ip.getPixel((int)aktuellerPunkt.getX()+n, (int)aktuellerPunkt.getY()+m)>=max)
+								if (ip.getPixel((int) aktuellerPunkt.getX() + n,
+										(int) aktuellerPunkt.getY() + m) >= max)
 								{
-								max= ip.getPixel((int)aktuellerPunkt.getX()+n, (int)aktuellerPunkt.getY()+m);
-								temp=new Point2D.Double(aktuellerPunkt.getX()+n, aktuellerPunkt.getY()+m);
+									max = ip.getPixel((int) aktuellerPunkt.getX() + n, (int) aktuellerPunkt.getY() + m);
+									temp = new Point2D.Double(aktuellerPunkt.getX() + n, aktuellerPunkt.getY() + m);
 								}
-							}else{
-								if(ip.getPixel((int)aktuellerPunkt.getX()+n, (int)aktuellerPunkt.getY()+m)<max)
+							} else
+							{
+								if (ip.getPixel((int) aktuellerPunkt.getX() + n, (int) aktuellerPunkt.getY() + m) < max)
 								{
-								max= ip.getPixel((int)aktuellerPunkt.getX()+n, (int)aktuellerPunkt.getY()+m);
-								temp=new Point2D.Double(aktuellerPunkt.getX()+n, aktuellerPunkt.getY()+m);
+									max = ip.getPixel((int) aktuellerPunkt.getX() + n, (int) aktuellerPunkt.getY() + m);
+									temp = new Point2D.Double(aktuellerPunkt.getX() + n, aktuellerPunkt.getY() + m);
 								}
 							}
 						}
 					}
 				}
-				//ip.autoThreshold();
-		/*		if(t<100)
-				{
-				System.out.println(temp.getX()+" "+ temp.getY()+" "+ip.getPixel((int)temp.getX(), (int)temp.getY())+ " "+ binary.getPixel((int)temp.getX(), (int)temp.getY()));
-				t++;
-				}*/
 				points.add(temp);
-				aktuellerPunkt=temp;
-		//		ip.drawDot((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY());
-		//		System.out.println(aktuellerPunkt.getX()+ " "+ aktuellerPunkt.getY());
-				equals=(binary.getPixel((int)aktuellerPunkt.getX(), (int)aktuellerPunkt.getY())==value);
+				aktuellerPunkt = temp;
+				equals = (binary.getPixel((int) aktuellerPunkt.getX(), (int) aktuellerPunkt.getY()) == value);
 			}
-			}
-			if(points.size()>3)
-			{
-				if(points.get(points.size()-1).getX()==0||points.get(points.size()-1).getY()==0||points.get(points.size()-1).getX()>=ip.getWidth()||points.get(points.size()-1).getY()>=ip.getHeight()||ConcavityRegionAdministration.allConcavityRegionPoints.contains(points.get(points.size()-1)))
-				{
-					MaximumMinimumIntensitySplitLine mmis=new MaximumMinimumIntensitySplitLine(points);
-				//	System.out.println(mmis.getStartPoint().getX()+" "+ mmis.getStartPoint().getY()+" "+mmis.getEndPoint().getX()+" "+ mmis.getEndPoint().getY());
-			
-					splitLines.add(mmis);
-				}
-			}
-		return splitLines;
 		}
-	
+		if (points.size() > 3)
+		{
+			if (points.get(points.size() - 1).getX() == 0 || points.get(points.size() - 1).getY() == 0
+					|| points.get(points.size() - 1).getX() >= ip.getWidth()
+					|| points.get(points.size() - 1).getY() >= ip.getHeight()
+					|| ConcavityRegionAdministration.allConcavityRegionPoints.contains(points.get(points.size() - 1)))
+			{
+				PointSplitLine mmis = new PointSplitLine(points);
+				splitLines.add(mmis);
+			}
+		}
+		return splitLines;
+	}
 
 }

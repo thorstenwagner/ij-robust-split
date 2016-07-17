@@ -53,8 +53,12 @@ import ij.process.ImageProcessor;
  */
 public class Clump
 {
-
-	private ArrayList<AbstractSplitLine> splitLineList=null;
+	/**
+	 * List of all detected best SplitLines. Fitness of a SplitLine is detected
+	 * by the Chi value. The higher the chi-Value, the higher the probability
+	 * that it is a good SplitLine
+	 */
+	private ArrayList<AbstractSplitLine> splitLineList = null;
 	/**
 	 * List of all innerContours of a Clump
 	 */
@@ -71,13 +75,17 @@ public class Clump
 	 * the convexHull is detected by Class ij.gui.PolygonRoi
 	 */
 	private Polygon convexHull;
-	
+	/**
+	 * Data of the largest concavityPixel of the Clump to realize a
+	 * SplitLineBetweenConcavityPixelAndPoint
+	 */
 	private ConcavityPixel largestConcavityPixel;
 	/**
 	 * the variable secondMaxConcavityDepth represents the distance of the
 	 * concavityRegion with the second largest distance from boundary to
 	 * convexHull. It is used to detect a SplitLine between a concavityRegion
-	 * and a boundarypoint
+	 * and a boundarypoint to compare it to the largest ConcavityPixel (to
+	 * compute ConcavityRatio)
 	 */
 	private double secondMaxConcavityDepth;
 
@@ -92,6 +100,9 @@ public class Clump
 	 * @param ip
 	 *            ImageProcessor to visualize the detected Points and lines of
 	 *            the Image
+	 * @param binary
+	 *            binarized and Preprocessed image to draw SplitLines at and to
+	 *            compute ConcavityRegions and ConcavityPixels
 	 */
 	public Clump(Polygon boundary, ArrayList<Polygon> innerContours, ImageProcessor ip, ImageProcessor binary)
 	{
@@ -102,6 +113,10 @@ public class Clump
 			for (Polygon innerContour : innerContours)
 			{
 				Polygon p = new Polygon();
+				/*
+				 * innerContour is computed counter clockwise and convexHull
+				 * computation runs better for clockwise Polygons
+				 */
 				for (int i = innerContour.npoints - 1; i >= 0; i--)
 				{
 					p.addPoint(innerContour.xpoints[i], innerContour.ypoints[i]);
@@ -155,9 +170,8 @@ public class Clump
 			}
 
 		}
-		this.splitLineList=new ArrayList<AbstractSplitLine>();
-		this.splitLineList.addAll(this.computeSplitLines(ip,binary));
-		System.out.println(this.splitLineList.get(0));
+		this.splitLineList = new ArrayList<AbstractSplitLine>();
+		this.splitLineList.addAll(this.computeSplitLines(ip, binary));
 	}
 
 	/**
@@ -170,13 +184,18 @@ public class Clump
 	{
 		PolygonRoi pr = new PolygonRoi(contour, Roi.POLYGON);
 		Polygon convexHull = pr.getConvexHull();
-		// System.out.println(convexHull.npoints-1+ "aaaar");
 		return convexHull;
 	}
 
 	/**
+	 * 
 	 * computes the areas with high concavity
 	 * 
+	 * @param binary
+	 *            ImageProcessor of the binarized and preprocessed Image to
+	 *            identify ConcavityRegions of a Clump Color information is not
+	 *            needed for this step because it depends on the form of the
+	 *            object
 	 * @return returns the valid concavityRegions detected in the Clump
 	 */
 	private ArrayList<ConcavityRegion> computeConcavityRegions(ImageProcessor binary)
@@ -203,11 +222,17 @@ public class Clump
 	}
 
 	/**
+	 * 
 	 * computes the SplitLines of the Clump to compute SplitLines SplitLineType
 	 * has to be chosen
 	 * 
 	 * @param ip
 	 *            ImageProcessor to draw the detectedSplitLine
+	 * @param binary
+	 *            ImageProcessor of the binarized and preprocessed image to draw
+	 *            SplitLines to it
+	 * @return ArrayList of the bestSplitLines (normally only the one with the
+	 *         best chi-value)
 	 */
 
 	private ArrayList<AbstractSplitLine> computeSplitLines(ImageProcessor ip, ImageProcessor binary)
@@ -224,30 +249,25 @@ public class Clump
 				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.GEODESICDISTANCESPLITLINE)
 		{
 			AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
-			possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this, ip);
+			possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this, ip, binary);
 		} else
 		{
 			if (Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINEFARHAN)
 			{
 				AbstractSplitLineCalculator mislcf = new MaximumIntensitySplitLineCalculatorFarhan();
-				possibleSplitLines = mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip);
+				possibleSplitLines = mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip,binary);
 
 			} else
 			{
 				if (Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINEFARHAN)
 				{
 					AbstractSplitLineCalculator mislcf = new MinimumIntensitySplitLineCalculatorFarhan();
-					possibleSplitLines = mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip);
+					possibleSplitLines = mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip, binary);
 
 				}
 			}
 		}
 
-		// System.out.println(possibleSplitLines.get(0));
-		// IJ.log(possibleSplitLines.size()+"Anzahl trennungslinien");
-		// IJ.log(possibleSplitLines.get(0)+"Erste Stelle");
-		// System.out.println("PossibleSplitLineSize: " +
-		// possibleSplitLines.size());
 		if (possibleSplitLines.size() == 0)
 		{
 			Clump_Splitting.STOP++;
@@ -263,7 +283,7 @@ public class Clump
 		{
 			if (asl != null)
 			{
-				this.drawSplitLine(ip,binary, asl);
+				this.drawSplitLine(ip, binary, asl);
 			}
 		}
 
@@ -271,14 +291,20 @@ public class Clump
 	}
 
 	/**
+	 * 
 	 * draws the splitLine
 	 * 
 	 * @param ip
 	 *            ImageProcessor to draw the SplitLine
+	 * @param binary
+	 *            binarized and preprocessed image to draw SplitLine to use new
+	 *            Clumps in the Plugin
 	 * @param asl
 	 *            SplitLine to draw
+	 * 
+	 * 
 	 */
-	private void drawSplitLine(ImageProcessor ip,ImageProcessor binary, AbstractSplitLine asl)
+	private void drawSplitLine(ImageProcessor ip, ImageProcessor binary, AbstractSplitLine asl)
 	{
 
 		asl.drawLine(ip, binary);
@@ -288,7 +314,7 @@ public class Clump
 	 * draws the ConvexHull
 	 * 
 	 * @param ip
-	 *            ImageProcessor to draw the ConvexHull
+	 *            adds the ConvexHull to List to show it at the overlay
 	 */
 
 	private void drawConvexHull(ImageProcessor ip)
@@ -296,23 +322,8 @@ public class Clump
 		PolygonRoi polygonRoi = new PolygonRoi(convexHull, Roi.POLYGON);
 
 		polygonRoi.setStrokeWidth(1);
-		;
-		// Roi.setColor(Color.cyan);
 		polygonRoi.setStrokeColor(Color.cyan);
 		Clump_Splitting.overlayConvexHull.add(polygonRoi);
-
-		// o.setStrokeColor(Color.red);
-		// o.addElement(polygonRoi);
-		// ip.setOverlay(o);
-		// ip.drawOverlay(o);
-		// ImageProcessor imapr=Clump_Splitting.imp.getProcessor();
-		// imapr.setOverlay(o);
-		// imapr.drawOverlay(o);
-		// Clump_Splitting.imp.setOverlay(o);
-		// o.
-		// ip.setColor(Color.gray);
-		// ip.setLineWidth(1);
-		// ip.draw(polygonRoi);
 	}
 
 	/**
@@ -358,7 +369,7 @@ public class Clump
 	}
 
 	/**
-	 * returns the concavityRegion with the largest ConcavityDepth computet by
+	 * returns the concavityRegion with the largest ConcavityDepth computed by
 	 * method computeFirstAndSecondLargestConcavityDepth
 	 * 
 	 * @return the concavityRegion with the largest ConcavityDepth of the Clump
@@ -368,17 +379,12 @@ public class Clump
 
 		return this.largestConcavityPixel;
 	}
+
 	public ArrayList<ConcavityRegion> getConcavityRegionList()
 	{
 		return this.concavityRegionList;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @return returns the concavityDepth of the concavityRegion with the second
-	 *         Largest concavityDepth
-	 */
 	public double getSecondMaxConcavityRegionDepth()
 	{
 		return secondMaxConcavityDepth;
@@ -398,6 +404,7 @@ public class Clump
 	{
 		return innerList;
 	}
+
 	public ArrayList<AbstractSplitLine> getSplitLines()
 	{
 		return splitLineList;

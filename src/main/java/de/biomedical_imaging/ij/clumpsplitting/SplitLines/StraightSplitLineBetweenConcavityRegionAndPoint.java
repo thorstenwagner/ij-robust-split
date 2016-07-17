@@ -70,10 +70,12 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 	 */
 	double concavityRatio;
 	/**
-	 * the selected Point to split the Clump
+	 * the selected Point to split the Clump at the boundary
 	 */
 	private ConcavityPixel endConcavityPixel;
-
+	/**
+	 * StartPoint for the SplitLine, which contains to a ConcavityRegion
+	 */
 	private ConcavityPixel startConcavityPixel;
 
 	/**
@@ -81,16 +83,23 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 	 * @param cI
 	 *            concavityRegion with the largest concavityDepth of the Clump
 	 *            which should be used to split the Clump with a boundaryPoint
+	 * 
 	 * @param concavityAngle
 	 *            angle between startPoint of the concavityRegion, endPoint of
 	 *            the concavityRegion and the Point with the largest
 	 *            concavityDepth of the concavityRegion
 	 * 
 	 * @param concavityRatio
-	 *            ratio between the actual largest concavityDepth and the
-	 *            sencond largest concavityDepth
-	 * @param point
-	 *            the selected Point to split the Clump
+	 *            ratio between the actual largest concavityDepth and the second
+	 *            largest concavityDepth
+	 * 
+	 * @param endConcavityPixel
+	 *            the selected Point to split the Clump at the boundary
+	 *
+	 * @param startConcavityPixel
+	 *            StartPoint for the SplitLine, which contains to a
+	 *            ConcavityRegion
+	 * 
 	 */
 	public StraightSplitLineBetweenConcavityRegionAndPoint(ConcavityRegion cI, double concavityAngle,
 			double concavityRatio, Point2D endConcavityPixel, ConcavityPixel startConcavityPixel)
@@ -102,12 +111,6 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 		this.startConcavityPixel = startConcavityPixel;
 	}
 
-	/*
-	 * public boolean contains(Point2D p) { Line2D.Double linie=new
-	 * Line2D.Double((int) cI.getMaxDistCoord().getX(), (int)
-	 * cI.getMaxDistCoord().getY(), (int) point.getX(), (int) point.getY());
-	 * if(linie.contains(p)) { return true; } else{ return false; } }
-	 */
 	public double getConcavityAngle()
 	{
 		return concavityAngle;
@@ -125,7 +128,7 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 
 	public ConcavityPixel getStartConcavityPixel()
 	{
-		// ArrayList<Point2D> pointList= cI.getMaxDistCoord();
+
 		return this.startConcavityPixel;
 	}
 
@@ -135,19 +138,18 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 	}
 
 	/**
-	 * draws the Splitline
+	 * draws the Splitline as a Straight Line Between the selected Points
 	 * 
 	 * @param ip
 	 *            ImageProcessor to draw the SplitLine
 	 */
+	@Override
 	public void drawLine(ImageProcessor ip, ImageProcessor binary)
 	{
-		// System.out.println("ConcAndPoint Error");
 		if (cI != null)
 		{
 			if (this.getEndConcavityPixel().getPosition() != null)
 			{
-				// ip.setLineWidth(3);
 				if (Clump_Splitting.BACKGROUNDCOLOR == 0)
 				{
 					binary.setColor(Color.black);
@@ -170,27 +172,16 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 
 				if (Clump_Splitting.SHOWPIXELS)
 				{
-					// ip.setColor(Color.gray);
-					// ip.setLineWidth(10);
 
 					Line polygonRoi = new Line(this.getEndConcavityPixel().getPosition().getX(),
 							this.getEndConcavityPixel().getPosition().getY(),
 							this.getEndConcavityPixel().getPosition().getX(),
 							this.getEndConcavityPixel().getPosition().getY());
 
-					polygonRoi.setStrokeWidth(10);
+					polygonRoi.setStrokeWidth(3);
 					polygonRoi.setStrokeColor(Color.red);
 
-					// Roi.setColor(Color.red);
-
 					Clump_Splitting.overlaySplitPoints.add(polygonRoi);
-					/*
-					 * ip.drawDot((int) point.getX(), (int) point.getY());
-					 * ip.setLineWidth(1);
-					 * if(Clump_Splitting.BACKGROUNDCOLOR==0) {
-					 * ip.setColor(Color.black); } else{
-					 * ip.setColor(Color.white); }
-					 */
 				} else
 				{
 					Clump_Splitting.overlaySplitPoints.clear();
@@ -203,8 +194,8 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 	@Override
 	public String toString()
 	{
-		return "StraightSplitLineBetweenConcavityRegionAndPointX: " + this.getEndConcavityPixel().getPosition().getX() + " Y: "
-				+ this.getEndConcavityPixel().getPosition().getY() + " MaxX: "
+		return "StraightSplitLineBetweenConcavityRegionAndPointX: " + this.getEndConcavityPixel().getPosition().getX()
+				+ " Y: " + this.getEndConcavityPixel().getPosition().getY() + " MaxX: "
 				+ this.getStartConcavityPixel().getPosition().getX() + " MaxY: "
 				+ this.getStartConcavityPixel().getPosition().getY();
 
@@ -226,10 +217,10 @@ public class StraightSplitLineBetweenConcavityRegionAndPoint extends StraightSpl
 	@Override
 	public double distance()
 	{
-	
-		double distX= Math.abs(this.getStartPoint().getX()-this.getEndPoint().getX());
-		double distY=Math.abs(this.getStartPoint().getY()-this.getEndPoint().getY());
-		double dist=Math.sqrt(distX*distX+distY*distY);
+
+		double distX = Math.abs(this.getStartPoint().getX() - this.getEndPoint().getX());
+		double distY = Math.abs(this.getStartPoint().getY() - this.getEndPoint().getY());
+		double dist = Math.sqrt(distX * distX + distY * distY);
 		return dist;
 	}
 

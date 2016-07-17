@@ -1,5 +1,39 @@
-package de.biomedical_imaging.ij.clumpsplitting.SVM;
+/*
+The MIT License (MIT)
 
+Copyright (c) 2016 Louise Bloch (louise.bloch001@stud.fh-dortmund.de), Thorsten Wagner (wagner@b
+iomedical-imaging.de)
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy
+of this software and associated documentation files (the "Software"),
+to deal
+in the Software without restriction, including without limitation the
+rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE
+SOFTWARE.
+*/
+
+package de.biomedical_imaging.ij.clumpsplitting.SVM;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -8,71 +42,80 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
+/**
+ * visualizes an SVM
+ * 
+ * @author Louise
+ *
+ */
 public class SVMPanel extends JPanel
 {
 
+	private static final long serialVersionUID = 1L;
+	ArrayList<Double[]> featureList = null;
+	private double weight;
+	private double bias;
+
 	/**
 	 * 
+	 * @param featureList
+	 *            List of all Features classified by the SVM
+	 * @param weight
+	 *            negative gradient of the separating line of the SVM
+	 * @param bias
+	 *            intercept of the separating line of the SVM
 	 */
-	private static final long serialVersionUID = 1L;
-	ArrayList<Double[]> featureList=null;
-	private double[] weight;
-	private double bias;
-	public SVMPanel(ArrayList<Double[]> featureList, double[] weight, double bias)
+	public SVMPanel(ArrayList<Double[]> featureList, double weight, double bias)
 	{
-		this.featureList=featureList;
-		  this.setBackground(Color.white);
-		  this.setPreferredSize(new Dimension(500,500));
-		   
-		this.weight=weight;
-		this.bias=bias;
-		  System.out.println("1:"+featureList.size());
-		    
+		this.featureList = featureList;
+		this.setBackground(Color.white);
+		this.setPreferredSize(new Dimension(500, 500));
+
+		this.weight = weight;
+		this.bias = bias;
+
 	}
+
+	/**
+	 * Paints Coordinate system and Points and separating Line of the SVM
+	 */
+	@Override
 	public void paintComponent(Graphics g)
-	   {
-	      super.paintComponent(g);
-	      //x-Achse
-	      g.drawLine(0, this.getHeight()-20, this.getWidth(), this.getHeight()-20);
-	      //y-Achse
-	      g.drawLine(20, 0,20, this.getHeight());
-	      
-	     // System.out.println(labeledPoints.size());
-	      for(int i=0;i<this.getWidth();i+=50)
-	      {
-	    	  //Beschriftung x Achse
-	    	  g.drawString(String.valueOf(i), i+20-3, this.getHeight()-5);
-	    	  //Beschriftung y Achse
-	    	  g.drawString(String.valueOf(i), 0, this.getHeight()-i-20+5);
-	      }
-	      g.setColor(Color.red);
-	      for(Double[] data:featureList)
-	      {
-	    	  double[] features={data[1],data[2]};
-	    	  if(data[0]==-1)
-	    	  {
-	    	  g.setColor(Color.red);
-	    	  }
-	    	  else{
-	    		  g.setColor(Color.blue);
-	    	  }
-	    	  g.drawRect((int)features[0]+20-3, this.getHeight()-(int)features[1]-20-3, 6,6);
-	    	  
-	    	 
-	      }
-	      g.setColor(Color.green);
-    	 /* double m= array[0]/array[1];
-    	  double b=this.bias;
-    	  double x1=0;
-    	  double x2=this.getWidth();
-    	  double y1=-m*x1+b;
-    	  double y2=-m*x2+b;
-    	  
-    	  System.out.println(x1+" "+ y1+ " "+ x2+ " "+ y2);*/
-    	  double y =-(weight[0]/weight[1]);
-    	  System.out.println(this.getWidth()+ " "+ y+ "weight");
-    	  double wert= y*this.getWidth();
-    	  System.out.println(wert);
-    	  g.drawLine((int)20, (int)(this.getHeight()-20-Math.round(bias)), this.getWidth()+20, (int)((this.getHeight()-20-(Math.round(wert)+Math.round(bias)))));
-	   }
+	{
+		super.paintComponent(g);
+		// x-Axis
+		g.drawLine(0, this.getHeight() - 20, this.getWidth(), this.getHeight() - 20);
+		// y-Axis
+		g.drawLine(20, 0, 20, this.getHeight());
+
+		for (int i = 0; i < this.getWidth(); i += 50)
+		{
+			// labels the x Axis
+			g.drawString(String.valueOf(i), i + 20 - 3, this.getHeight() - 5);
+			// labels the y Axis
+			g.drawString(String.valueOf(i), 0, this.getHeight() - i - 20 + 5);
+		}
+		g.setColor(Color.red);
+		for (Double[] data : featureList)
+		{
+			double[] features =
+			{ data[1], data[2] };
+			if (data[0] == -1)
+			{
+				g.setColor(Color.red);
+			} else
+			{
+				g.setColor(Color.blue);
+			}
+			// draws all Points
+			g.drawRect((int) features[0] + 20 - 3, this.getHeight() - (int) features[1] - 20 - 3, 6, 6);
+
+		}
+		//draws separating line of the SVMF
+		g.setColor(Color.green);
+		double y = -weight;
+		double wert = y * this.getWidth();
+		g.drawLine((int) 20, (int) (this.getHeight() - 20 - Math.round(bias)), this.getWidth() + 20,
+				(int) ((this.getHeight() - 20 - (Math.round(wert) + Math.round(bias)))));
+	}
 }

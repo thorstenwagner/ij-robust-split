@@ -32,36 +32,80 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE
 SOFTWARE.
 */
-
 package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
+import java.awt.Color;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
+import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
 import ij.process.ImageProcessor;
 
 /**
- * interface for different SplitLineTypes, implemented suclasses are explained
- * in the enum SplitLineType
+ * Represents a SplitLine consisting of constituend Points in a 4 point
+ * neigbourhood
  * 
  * @author Louise
  *
  */
-public interface AbstractSplitLine
+public class PointSplitLine implements AbstractSplitLine
 {
+	/**
+	 * List of all Points of the SplitLine
+	 */
+	private ArrayList<Point2D> cutPoints;
+
+	public PointSplitLine(ArrayList<Point2D> points)
+	{
+		this.cutPoints = points;
+	}
 
 	/**
-	 * Draws a Line to both imageProcessors
-	 * 
-	 * @param ip
-	 *            imageProcessor with the original Data of an image
-	 * @param binary
-	 *            imageProcessor for the binarized and preprocessed image
+	 * draws each point of the cutpoints, so a constituent Line appears between
+	 * the ConcavityPixels
 	 */
-	public void drawLine(ImageProcessor ip, ImageProcessor binary);
+	@Override
+	public void drawLine(ImageProcessor ip, ImageProcessor binary)
+	{
+		if (Clump_Splitting.BACKGROUNDCOLOR == 0)
+		{
 
-	public Point2D getStartPoint();
+			binary.setColor(Color.black);
+			ip.setColor(Color.black);
+		} else
+		{
 
-	public Point2D getEndPoint();
+			binary.setColor(Color.white);
+			ip.setColor(Color.white);
+		}
+		for (Point2D point : cutPoints)
+		{
 
-	public double distance();
+			ip.drawLine4((int) point.getX(), (int) point.getY(), (int) point.getX(), (int) point.getY());
+
+			binary.drawLine4((int) point.getX(), (int) point.getY(), (int) point.getX(), (int) point.getY());
+
+		}
+	}
+
+	@Override
+	public Point2D getStartPoint()
+	{
+
+		return this.cutPoints.get(0);
+	}
+
+	@Override
+	public Point2D getEndPoint()
+	{
+		return this.cutPoints.get(cutPoints.size() - 1);
+	}
+
+	@Override
+	public double distance()
+	{
+
+		return this.cutPoints.size();
+	}
+
 }

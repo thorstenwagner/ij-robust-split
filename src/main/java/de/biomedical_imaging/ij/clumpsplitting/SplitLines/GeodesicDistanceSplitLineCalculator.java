@@ -1,3 +1,38 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2016 Louise Bloch (louise.bloch001@stud.fh-dortmund.de), Thorsten Wagner (wagner@b
+iomedical-imaging.de)
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy
+of this software and associated documentation files (the "Software"),
+to deal
+in the Software without restriction, including without limitation the
+rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE
+SOFTWARE.
+*/
+
 package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
 import java.awt.geom.Point2D;
@@ -7,39 +42,72 @@ import de.biomedical_imaging.ij.clumpsplitting.Clump;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
 import ij.process.ImageProcessor;
 
+/**
+ * Class to compute GeodesicDistance SplitLine, a geodesic SplitLine follows the
+ * path between start and endPoint with the largest local derivative
+ * 
+ * @author Louise
+ *
+ */
 public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCalculator
 {
 
+	/**
+	 * Start Point, computed by StraightSplitLineCalculator
+	 */
 	private Point2D startPoint;
+	/**
+	 * end Point, computed by StraightSplitLineCalculator
+	 */
 	private Point2D endPoint;
+	/**
+	 * convolutional horizontal LaPlace kernel to approximate the derivative of
+	 * the image
+	 */
 	private double[][] prewittHor =
 	{
 			{ 1, 2, 1 },
 			{ 0, 0, 0 },
 			{ -1, -2, -1 } };
+	/**
+	 * convolutional vertical LaPlace kernel to approximate the derivative of
+	 * the image
+	 */
 	private double[][] prewittVer =
 	{
 			{ -1, 0, 1 },
 			{ -2, 0, 2 },
 			{ -1, 0, 1 } };
 
+	/**
+	 * 
+	 * @param startPoint
+	 *            defines StartPoint, computed by StraightSplitLineCalculator
+	 * @param endPoint
+	 *            defines endPoint computed by StraightSplitLineCalculator, path
+	 *            search should stop if endPoint is reached
+	 */
 	public GeodesicDistanceSplitLineCalculator(Point2D startPoint, Point2D endPoint)
 	{
 		this.startPoint = startPoint;
 		this.endPoint = endPoint;
 	}
 
+	/**
+	 * calculates the Possible SplitLines of Geodesic distance by first define a
+	 * region between the Points in which we would like to look for the path,
+	 * than compute the local derivative of this region and convert it to a
+	 * format, which is processible for Dijstra algorithm and last execute
+	 * Dijkstra Algorithm
+	 */
 	@Override
 	public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
-			Clump c, ImageProcessor ip)
+			Clump c, ImageProcessor ip, ImageProcessor binary)
 	{
-
 		ArrayList<AbstractSplitLine> splitLineList = new ArrayList<AbstractSplitLine>();
-		/*
-		 * if(startPoint.equals(endPoint)) { return splitLineList; }
-		 */
 		int minX;
 		int maxX;
+		// define region for the splitLine
 		if (startPoint != null && endPoint != null)
 		{
 			if (startPoint.getX() < endPoint.getX())
@@ -70,7 +138,7 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 			}
 			double[][] partialDerivative = new double[maxX - minX + 1][maxY - minY + 1];
 
-			// horizontale Ableitung
+			// horizontal derivative
 			for (int i = minX + 1; i < maxX; i++)
 			{
 				for (int j = minY + 1; j < maxY; j++)
@@ -88,6 +156,7 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 				}
 
 			}
+			// vertical derivative and summation
 			for (int i = minX + 1; i < maxX - 1; i++)
 			{
 				for (int j = minY + 1; j < maxY - 1; j++)
@@ -104,6 +173,7 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 					partialDerivative[i - minX][j - minY] = partialDerivative[i - minX][j - minY] + wert;
 				}
 			}
+			// negate all values
 			double maxi = 0;
 			for (int i = 0; i < partialDerivative.length; i++)
 			{
@@ -117,6 +187,7 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 					partialDerivative[i][j] = -partialDerivative[i][j];
 				}
 			}
+			// transform values to positive
 			maxi = maxi + 1;
 			for (int i = 0; i < partialDerivative.length; i++)
 			{
@@ -129,32 +200,12 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 
 			Point2D aktuellerPunkt = startPoint;
 
-			/*
-			 * ArrayList<Point2D> besuchteNichtAbgearbeitetePunkte= new
-			 * ArrayList<Point2D>(); boolean[][] besucht=new
-			 * boolean[partialDerivative.length][partialDerivative[0].length];
-			 * double [][] distance=new
-			 * double[partialDerivative.length][partialDerivative[0].length];
-			 * 
-			 * Point2D[][] vorgaenger=new
-			 * Point2D[partialDerivative.length][partialDerivative[0].length];
-			 * 
-			 * while(!besucht[(int)endPoint.getX()-minX][(int)endPoint.getY()-
-			 * minY]) {
-			 * besucht[(int)aktuellerPunkt.getX()-minX][(int)aktuellerPunkt.getY
-			 * ()- minY]=true;
-			 * distance[(int)aktuellerPunkt.getX()-minX][(int)aktuellerPunkt.
-			 * getY()- minY]=0;
-			 * besuchteNichtAbgearbeitetePunkte.add(aktuellerPunkt);
-			 */
-			// Hier vor muss noch das berechnen des Pfades
-
+			// Dijkstra
 			ArrayList<AccessiblePoint> unusedPoints = new ArrayList<AccessiblePoint>();
 			ArrayList<AccessiblePoint> usedPoints = new ArrayList<AccessiblePoint>();
 			AccessiblePoint first = new AccessiblePoint(aktuellerPunkt, 0, null);
 			usedPoints.add(first);
 
-			// While
 			while (!(aktuellerPunkt.getX() == endPoint.getX() && aktuellerPunkt.getY() == endPoint.getY()))
 			{
 				for (int i = -1; i <= 1; i++)
@@ -223,80 +274,14 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 				}
 			}
 			ArrayList<Point2D> pointList = new ArrayList<Point2D>();
+			// trace back path
 			while (first != null)
 			{
 				pointList.add(first.getPoint());
 				first = first.getPrevious();
 			}
 
-			// System.out.println(pointList.size());
-			/*
-			 * if(pointList.size()<=0) { Clump.STOP++; }
-			 */
-			// for(Point2D punkt:besuchteNichtAbgearbeitetePunkte)
-			/*
-			 * { for(int i=-1;i<=1;i++) { for(int j=-1;j<=1;j++) {
-			 * if(aktuellerPunkt.getX()+i>minX&&aktuellerPunkt.getX()+i<maxX) {
-			 * 
-			 * if(aktuellerPunkt.getY()+j>minY&&aktuellerPunkt.getY()+j<maxY) {
-			 * if(!besucht[(int) (aktuellerPunkt.getX()+i-minX)][(int)
-			 * (aktuellerPunkt.getY()+j-minY)]) { if(partialDerivative[(int)
-			 * (aktuellerPunkt.getX()+i-minX)][(int)
-			 * (aktuellerPunkt.getY()+j-minY)]<min) {
-			 * min=partialDerivative[(int) (aktuellerPunkt.getX()+i-minX)][(int)
-			 * (aktuellerPunkt.getY()+j-minY)]; vorgaenger[(int)
-			 * (aktuellerPunkt.getX()+i-minX)][(int)
-			 * (aktuellerPunkt.getY()+j-minY)]=aktuellerPunkt; } } } } } } } }
-			 * /////////////////////////////////////////////////////
-			 * System.out.println(partialDerivative.length);
-			 * 
-			 * System.out.println(partialDerivative[0].length);
-			 * ArrayList<Point2D> cutPoints=new ArrayList<Point2D>(); Point2D
-			 * aktuellerPunkt= startPoint; //for(int test=0;test<100;test++)
-			 * 
-			 * while(!aktuellerPunkt.equals(endPoint)) { //
-			 * System.out.println((int)aktuellerPunkt.getX()+" "+minX + " "+
-			 * (int)aktuellerPunkt.getY()+" "+minY); double max=0; Point2D
-			 * maxPoint=null; double distXV=0; double distYV=0; double distV=0;
-			 * for(int i=-1;i<=1;i++) { for(int j=-1;j<=1;j++) { if(i!=0||j!=0)
-			 * { if((int)aktuellerPunkt.getX()-minX+i+1>0&&(int)aktuellerPunkt.
-			 * getX()- minX+i+1<partialDerivative.length) {
-			 * 
-			 * if(aktuellerPunkt.getY()-minY+j+1>0&&aktuellerPunkt.getY()-minY+j
-			 * +1< partialDerivative[0].length) {
-			 * 
-			 * if(partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)
-			 * aktuellerPunkt.getY()-minY+j+1]>max||maxPoint==null) {
-			 * max=partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)
-			 * aktuellerPunkt.getY()-minY+j+1]; maxPoint= new
-			 * Point2D.Double(aktuellerPunkt.getX()+i,aktuellerPunkt.getY()+j);
-			 * distXV=Math.abs(aktuellerPunkt.getX()+i-endPoint.getX());
-			 * distYV=Math.abs(aktuellerPunkt.getY()+j-endPoint.getY());
-			 * 
-			 * distV=Math.sqrt(distXV*distXV+distYV*distYV); }else {
-			 * if(partialDerivative[(int)aktuellerPunkt.getX()-minX+i+1][(int)
-			 * aktuellerPunkt.getY()-minY+j+1]==max) { double
-			 * distX=Math.abs(aktuellerPunkt.getX()+i-endPoint.getX()); double
-			 * distY=Math.abs(aktuellerPunkt.getY()+j-endPoint.getY());
-			 * 
-			 * double dist=Math.sqrt(distX*distX+distY*distY); if(dist<distV) {
-			 * maxPoint= new
-			 * Point2D.Double(aktuellerPunkt.getX()+i,aktuellerPunkt.getY()+j);
-			 * 
-			 * } } } } } } } }
-			 * partialDerivative[(int)aktuellerPunkt.getX()-minX+1][(int)
-			 * aktuellerPunkt.getY()-minY+1]=0; // System.out.println(
-			 * "Maximaler Punkt: " +maxPoint.getX()+ " y: " + maxPoint.getY()+
-			 * " Grenzen: "+ minX+ " " + maxX+ " "+ minY+ " "+ maxY );
-			 * cutPoints.add(aktuellerPunkt); aktuellerPunkt=maxPoint;
-			 * 
-			 * 
-			 * 
-			 * 
-			 * }
-			 */
-			// pointList.add(endPoint);
-			GeodesicDistanceSplitLine gdsl = new GeodesicDistanceSplitLine(pointList);
+			PointSplitLine gdsl = new PointSplitLine(pointList);
 			splitLineList.add(gdsl);
 		}
 		return splitLineList;

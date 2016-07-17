@@ -41,9 +41,28 @@ import de.biomedical_imaging.ij.clumpsplitting.Clump;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
 import ij.process.ImageProcessor;
 
+/**
+ * interface for different Types of Abstract SplitLine Calculation, the
+ * CalculationTypes are definded in enum SplitLineTypes
+ * 
+ * @author Louise
+ *
+ */
 public interface AbstractSplitLineCalculator
 {
+	/**
+	 * Calculation of the Possible SplitLines
+	 * 
+	 * @param concavityRegionList
+	 *            List of all ConcavityRegions of a Clump (outer and inner
+	 *            Contours)
+	 * @param c
+	 *            the Clump to Split
+	 * @param ip
+	 *            Image Processor to detect intensityInformation
+	 * @return List of all detected SplitLines
+	 */
 	public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
-			Clump c,ImageProcessor ip);
+			Clump c, ImageProcessor ip, ImageProcessor binary);
 
 }

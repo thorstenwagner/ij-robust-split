@@ -1,3 +1,38 @@
+/*
+The MIT License (MIT)
+
+Copyright (c) 2016 Louise Bloch (louise.bloch001@stud.fh-dortmund.de), Thorsten Wagner (wagner@b
+iomedical-imaging.de)
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy
+of this software and associated documentation files (the "Software"),
+to deal
+in the Software without restriction, including without limitation the
+rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE
+SOFTWARE.
+*/
+
 package ij_robust_split;
 
 import static org.junit.Assert.*;
@@ -63,19 +98,18 @@ public class Test
 		URL url = this.getClass().getClassLoader().getResource("2Objekte.jpg");
 		ImagePlus ip = new ImagePlus(url.getPath());
 
-		
 		ImageProcessor imap = ip.getProcessor();
 
 		// get binary Image
 		ImageProcessor imageProcessorBinary = imap.duplicate();
-		
+
 		AutoThresholder at = new AutoThresholder();
 		int[] histogram = imageProcessorBinary.getHistogram();
 		int threshold = at.getThreshold(Method.Default, histogram);
-		
+
 		imageProcessorBinary.threshold(threshold);
 
-		ManyBlobs mb = new ManyBlobs(new ImagePlus("",imageProcessorBinary));
+		ManyBlobs mb = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 		mb.findConnectedComponents();
 
 		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
@@ -91,7 +125,6 @@ public class Test
 		URL url = this.getClass().getClassLoader().getResource("2Objekte.jpg");
 		ImagePlus ip = new ImagePlus(url.getPath());
 
-	
 		ImageProcessor imap = ip.getProcessor();
 
 		// get binary Image
@@ -101,7 +134,7 @@ public class Test
 		int threshold = at.getThreshold(Method.Default, histogram);
 		imageProcessorBinary.threshold(threshold);
 
-		ManyBlobs mb = new ManyBlobs(new ImagePlus("",imageProcessorBinary));
+		ManyBlobs mb = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 		mb.findConnectedComponents();
 
 		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
@@ -111,12 +144,12 @@ public class Test
 		// extracts Startpoint and endpoint of the SplitLine
 		Point2D[] points =
 		{ asl.getStartPoint(), asl.getEndPoint() };
-		Point2D startPoint = new Point2D.Double(139,114);
+		Point2D startPoint = new Point2D.Double(139, 114);
 		Point2D endPoint = new Point2D.Double(135, 134);
 		Point2D[] comparePoints =
 		{ startPoint, endPoint };
 
-		assertArrayEquals(points,comparePoints);
+		assertArrayEquals(points, comparePoints);
 	}
 
 	/**
@@ -128,7 +161,6 @@ public class Test
 		URL url = this.getClass().getClassLoader().getResource("2Objekte.jpg");
 		ImagePlus ip = new ImagePlus(url.getPath());
 
-	
 		ImageProcessor imap = ip.getProcessor();
 
 		// get binary Image
@@ -157,41 +189,6 @@ public class Test
 		URL url = this.getClass().getClassLoader().getResource("2Objekte.jpg");
 		ImagePlus ip = new ImagePlus(url.getPath());
 
-	
-		ImageProcessor imap = ip.getProcessor();
-
-		// get binary Image
-		ImageProcessor imageProcessorBinary = imap.duplicate();
-		AutoThresholder at = new AutoThresholder();
-		int[] histogram = imageProcessorBinary.getHistogram();
-		int threshold = at.getThreshold(Method.Default, histogram);
-		imageProcessorBinary.threshold(threshold);
-
-		ManyBlobs mb = new ManyBlobs(new ImagePlus("",imageProcessorBinary));
-		mb.findConnectedComponents();
-
-		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
-		// get detected SplitLines
-		AbstractSplitLine asl = c.getSplitLines().get(0);
-
-		
-		AbstractSplitLineCalculator aslc= new GeodesicDistanceSplitLineCalculator(asl.getStartPoint(),asl.getEndPoint());
-	
-		ArrayList<AbstractSplitLine> splitLines=aslc.calculatePossibleSplitLines(c.getConcavityRegionList(), c, imap);
-		
-		assertEquals(27, splitLines.get(0).distance(), 3);
-	}
-
-	/**
-	 * Test to control if MaximumIntensitySplitLine width is correct
-	 */
-	@org.junit.Test
-	public void bestSplitLineWidthTest4()
-	{
-		URL url = this.getClass().getClassLoader().getResource("2Objekte.jpg");
-		ImagePlus ip = new ImagePlus(url.getPath());
-
-	
 		ImageProcessor imap = ip.getProcessor();
 
 		// get binary Image
@@ -208,23 +205,24 @@ public class Test
 		// get detected SplitLines
 		AbstractSplitLine asl = c.getSplitLines().get(0);
 
-		
-		AbstractSplitLineCalculator aslc= new MaximumIntensitySplitLineCalculator(asl.getStartPoint(),asl.getEndPoint());
-	
-		ArrayList<AbstractSplitLine> splitLines=aslc.calculatePossibleSplitLines(c.getConcavityRegionList(), c, imap);
-		
-		assertEquals(26, splitLines.get(0).distance(), 3);
+		AbstractSplitLineCalculator aslc = new GeodesicDistanceSplitLineCalculator(asl.getStartPoint(),
+				asl.getEndPoint());
+
+		ArrayList<AbstractSplitLine> splitLines = aslc.calculatePossibleSplitLines(c.getConcavityRegionList(), c, imap,
+				imageProcessorBinary);
+
+		assertEquals(27, splitLines.get(0).distance(), 3);
 	}
+
 	/**
 	 * Test to control if MaximumIntensitySplitLine width is correct
 	 */
 	@org.junit.Test
-	public void bestSplitLineWidthTest3()
+	public void bestSplitLineWidthTest4()
 	{
 		URL url = this.getClass().getClassLoader().getResource("2Objekte.jpg");
 		ImagePlus ip = new ImagePlus(url.getPath());
 
-	
 		ImageProcessor imap = ip.getProcessor();
 
 		// get binary Image
@@ -234,20 +232,55 @@ public class Test
 		int threshold = at.getThreshold(Method.Default, histogram);
 		imageProcessorBinary.threshold(threshold);
 
-		ManyBlobs mb = new ManyBlobs(new ImagePlus("",imageProcessorBinary));
+		ManyBlobs mb = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 		mb.findConnectedComponents();
 
 		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
 		// get detected SplitLines
 		AbstractSplitLine asl = c.getSplitLines().get(0);
 
-		
-		AbstractSplitLineCalculator aslc= new MinimumIntensitySplitLineCalculator(asl.getStartPoint(),asl.getEndPoint());
-	
-		ArrayList<AbstractSplitLine> splitLines=aslc.calculatePossibleSplitLines(c.getConcavityRegionList(), c, imap);
-		
+		AbstractSplitLineCalculator aslc = new MaximumIntensitySplitLineCalculator(asl.getStartPoint(),
+				asl.getEndPoint());
+
+		ArrayList<AbstractSplitLine> splitLines = aslc.calculatePossibleSplitLines(c.getConcavityRegionList(), c, imap,
+				imageProcessorBinary);
+
+		assertEquals(26, splitLines.get(0).distance(), 3);
+	}
+
+	/**
+	 * Test to control if MaximumIntensitySplitLine width is correct
+	 */
+	@org.junit.Test
+	public void bestSplitLineWidthTest3()
+	{
+		URL url = this.getClass().getClassLoader().getResource("2Objekte.jpg");
+		ImagePlus ip = new ImagePlus(url.getPath());
+
+		ImageProcessor imap = ip.getProcessor();
+
+		// get binary Image
+		ImageProcessor imageProcessorBinary = imap.duplicate();
+		AutoThresholder at = new AutoThresholder();
+		int[] histogram = imageProcessorBinary.getHistogram();
+		int threshold = at.getThreshold(Method.Default, histogram);
+		imageProcessorBinary.threshold(threshold);
+
+		ManyBlobs mb = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
+		mb.findConnectedComponents();
+
+		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
+		// get detected SplitLines
+		AbstractSplitLine asl = c.getSplitLines().get(0);
+
+		AbstractSplitLineCalculator aslc = new MinimumIntensitySplitLineCalculator(asl.getStartPoint(),
+				asl.getEndPoint());
+
+		ArrayList<AbstractSplitLine> splitLines = aslc.calculatePossibleSplitLines(c.getConcavityRegionList(), c, imap, imageProcessorBinary);
+
 		assertEquals(30, splitLines.get(0).distance(), 3);
 	}
+
 	/**
 	 * test to control if number of ConcavityPixels of a Clump is correct
 	 */
@@ -380,9 +413,9 @@ public class Test
 		int threshold = at.getThreshold(Method.Default, histogram);
 		imageProcessorBinary.threshold(threshold);
 
-		ManyBlobs mb = new ManyBlobs(new ImagePlus("",imageProcessorBinary));
+		ManyBlobs mb = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 		mb.findConnectedComponents();
-		
+
 		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
 		// computes all concavityRegions of a Clump
 		ArrayList<ConcavityRegion> concavityRegionList = c.getConcavityRegionList();
@@ -390,7 +423,7 @@ public class Test
 		AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
 		// gets all possible SplitLines
 		ArrayList<AbstractSplitLine> possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, c,
-				imap);
+				imap, imageProcessorBinary);
 
 		StraightSplitLineBetweenTwoConcavityRegions sslbtcr = (StraightSplitLineBetweenTwoConcavityRegions) possibleSplitLines
 				.get(0);
@@ -414,15 +447,15 @@ public class Test
 		int[] histogram = imageProcessorBinary.getHistogram();
 		int threshold = at.getThreshold(Method.Default, histogram);
 		imageProcessorBinary.threshold(threshold);
-		ManyBlobs mb = new ManyBlobs(new ImagePlus("",imageProcessorBinary));
+		ManyBlobs mb = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 		mb.findConnectedComponents();
-		
+
 		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
 		ArrayList<ConcavityRegion> concavityRegionList = c.getConcavityRegionList();
 		AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
 		// all possible SplitLines were detected
 		ArrayList<AbstractSplitLine> possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, c,
-				imap);
+				imap, imageProcessorBinary);
 		StraightSplitLineBetweenTwoConcavityRegions sslbtcr = (StraightSplitLineBetweenTwoConcavityRegions) possibleSplitLines
 				.get(0);
 		double cca = (360 / (2 * Math.PI)) * sslbtcr.getConcavityConcavityAlignment();
@@ -447,12 +480,12 @@ public class Test
 		imageProcessorBinary.threshold(threshold);
 		ManyBlobs mb = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 		mb.findConnectedComponents();
-		
+
 		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
 		ArrayList<ConcavityRegion> concavityRegionList = c.getConcavityRegionList();
 		AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
 		ArrayList<AbstractSplitLine> possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, c,
-				imap);
+				imap, imageProcessorBinary);
 		StraightSplitLineBetweenTwoConcavityRegions sslbtcr = (StraightSplitLineBetweenTwoConcavityRegions) possibleSplitLines
 				.get(0);
 		double ccl = (360 / (2 * Math.PI)) * sslbtcr.getConcavityLineAlignment();
@@ -476,19 +509,19 @@ public class Test
 		int[] histogram = imageProcessorBinary.getHistogram();
 		int threshold = at.getThreshold(Method.Default, histogram);
 		imageProcessorBinary.threshold(threshold);
-		ManyBlobs mb = new ManyBlobs(new ImagePlus("",imageProcessorBinary));
+		ManyBlobs mb = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 		mb.setBackground(0);
-		
+
 		mb.findConnectedComponents();
-		
+
 		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
 		ArrayList<ConcavityRegion> concavityRegionList = c.getConcavityRegionList();
 		AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
 		ArrayList<AbstractSplitLine> possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, c,
-				imap);
+				imap, imageProcessorBinary);
 		StraightSplitLineBetweenConcavityRegionAndPoint sslbtcr = (StraightSplitLineBetweenConcavityRegionAndPoint) possibleSplitLines
 				.get(0);
-		
+
 		double ca = (360 / (2 * Math.PI)) * sslbtcr.getConcavityAngle();
 		assertEquals(33, ca, 1);
 	}
@@ -510,16 +543,16 @@ public class Test
 		int[] histogram = imageProcessorBinary.getHistogram();
 		int threshold = at.getThreshold(Method.Default, histogram);
 		imageProcessorBinary.threshold(threshold);
-		ManyBlobs mb = new ManyBlobs(new ImagePlus("",imageProcessorBinary));
+		ManyBlobs mb = new ManyBlobs(new ImagePlus("", imageProcessorBinary));
 		mb.setBackground(0);
-		
+
 		mb.findConnectedComponents();
-		
+
 		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
 		ArrayList<ConcavityRegion> concavityRegionList = c.getConcavityRegionList();
 		AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
 		ArrayList<AbstractSplitLine> possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, c,
-				imap);
+				imap, imageProcessorBinary);
 		StraightSplitLineBetweenConcavityRegionAndPoint sslbtcr = (StraightSplitLineBetweenConcavityRegionAndPoint) possibleSplitLines
 				.get(0);
 		double cr = sslbtcr.getConcavityRatio();
