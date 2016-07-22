@@ -127,18 +127,19 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 	 * @param ip
 	 *            ImageProcessor to mark the Pixel
 	 */
-	public void markMidPointOfConcavityRegion()
-	{
-		Line polygonRoi = new Line((int) this.getMidPointOfConcavityRegion().getX(),
-				(int) this.getMidPointOfConcavityRegion().getY(), (int) this.getMidPointOfConcavityRegion().getX(),
-				(int) this.getMidPointOfConcavityRegion().getY());
-
-		polygonRoi.setStrokeWidth(3);
-		polygonRoi.setStrokeColor(Color.green);
-
-		Clump_Splitting.overlayConvexHull.add(polygonRoi);
-
-	}
+	/*
+	 * public void markMidPointOfConcavityRegion() { Line polygonRoi = new
+	 * Line((int) this.getMidPointOfConcavityRegion().getX(), (int)
+	 * this.getMidPointOfConcavityRegion().getY(), (int)
+	 * this.getMidPointOfConcavityRegion().getX(), (int)
+	 * this.getMidPointOfConcavityRegion().getY());
+	 * 
+	 * polygonRoi.setStrokeWidth(3); polygonRoi.setStrokeColor(Color.green);
+	 * 
+	 * Clump_Splitting.overlayConvexHull.add(polygonRoi);
+	 * 
+	 * }
+	 */
 
 	/**
 	 * Method to compute Orientation of a Convex HUll, the orientation is

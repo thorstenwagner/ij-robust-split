@@ -35,7 +35,6 @@ SOFTWARE.
 
 package de.biomedical_imaging.ij.clumpsplitting;
 
-import java.awt.Color;
 import java.awt.Polygon;
 import java.util.ArrayList;
 import de.biomedical_imaging.ij.clumpsplitting.SplitLines.*;
@@ -139,18 +138,13 @@ public class Clump
 			 * draws only one ConvexHull for each Clump which is detected in the
 			 * original picture to recieve clarity
 			 */
-			if (Clump_Splitting.SHOWCONVEXHULL && Clump_Splitting.done < Clump_Splitting.count)
-			{
-				this.drawConvexHull(ip);
-				Clump_Splitting.done++;
-			} else
-			{
-				if (!Clump_Splitting.SHOWCONVEXHULL)
-				{
-					Clump_Splitting.done = 0;
-					Clump_Splitting.overlayConvexHull.clear();
-				}
-			}
+			/*
+			 * if (Clump_Splitting.SHOWCONVEXHULL && Clump_Splitting.done <
+			 * Clump_Splitting.count) { this.drawConvexHull(ip);
+			 * Clump_Splitting.done++; } else { if
+			 * (!Clump_Splitting.SHOWCONVEXHULL) { Clump_Splitting.done = 0;
+			 * Clump_Splitting.overlayConvexHull.clear(); } }
+			 */
 		}
 
 		this.concavityRegionList.clear();
@@ -255,7 +249,7 @@ public class Clump
 			if (Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINEFARHAN)
 			{
 				AbstractSplitLineCalculator mislcf = new MaximumIntensitySplitLineCalculatorFarhan();
-				possibleSplitLines = mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip,binary);
+				possibleSplitLines = mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip, binary);
 
 			} else
 			{
@@ -317,15 +311,13 @@ public class Clump
 	 *            adds the ConvexHull to List to show it at the overlay
 	 */
 
-	private void drawConvexHull(ImageProcessor ip)
-	{
-		PolygonRoi polygonRoi = new PolygonRoi(convexHull, Roi.POLYGON);
-
-		polygonRoi.setStrokeWidth(1);
-		polygonRoi.setStrokeColor(Color.cyan);
-		Clump_Splitting.overlayConvexHull.add(polygonRoi);
-	}
-
+	/*
+	 * private void drawConvexHull(ImageProcessor ip) { PolygonRoi polygonRoi =
+	 * new PolygonRoi(convexHull, Roi.POLYGON);
+	 * 
+	 * polygonRoi.setStrokeWidth(1); polygonRoi.setStrokeColor(Color.cyan);
+	 * Clump_Splitting.overlayConvexHull.add(polygonRoi); }
+	 */
 	/**
 	 * computes the concavityRegions with the first and second largest concavity
 	 * Depth and stores it to the variables indexOfMaxConcavityRegion and

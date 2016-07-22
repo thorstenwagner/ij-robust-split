@@ -35,7 +35,7 @@ SOFTWARE.
 package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.AWTEvent;
-import java.awt.Component;
+import java.awt.Color;
 import java.awt.Polygon;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -51,6 +51,7 @@ import ij.blob.Blob;
 import ij.blob.ManyBlobs;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import ij.gui.Line;
 import ij.gui.NonBlockingGenericDialog;
 import ij.gui.Overlay;
 import ij.gui.Roi;
@@ -125,8 +126,9 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	/**
 	 * List of ROIs, which manages the overlay for the ConvexHulls
 	 */
-	public static ArrayList<Roi> overlayConvexHull = new ArrayList<Roi>();
+	// public static ArrayList<Roi> overlayConvexHull = new ArrayList<Roi>();
 
+	public static ArrayList<Roi> overlayConcavityRegion = new ArrayList<Roi>();
 	/**
 	 * List of ROIs, which manages the overlay for the SplitPoints
 	 */
@@ -155,6 +157,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * the concavityRegion is accepted as a valid concavityRegion
 	 */
 
+	public static OuterConcavityRegionDetectorType OUTERCONCAVITYREGIONDETECTORTYPE= OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
 	public static double CONCAVITY_DEPTH_THRESHOLD = 3;
 	/**
 	 * used for SplitLinesBetweenTwoConcavityRegions. SALIENCY evaluates, if the
@@ -221,7 +224,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * if show ConcavityDepth is true the ConvexHull is added to static
 	 * overlayConvexHull
 	 */
-	public static boolean SHOWCONVEXHULL = false;
+	public static boolean SHOWCONCAVITYREGION = false;
 
 	/**
 	 * if show ConcavityDepth is true the ConcavityPixels and the Pixel at the
@@ -265,9 +268,11 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 
 		// overlays are cleared to show actual overlays
 		Clump_Splitting.overlayForOrientation.clear();
-		Clump_Splitting.overlayConvexHull.clear();
+		// Clump_Splitting.overlayConvexHull.clear();
 		Clump_Splitting.overlaySplitPoints.clear();
-
+		Clump_Splitting.overlayConcavityRegion.clear();
+		Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.clear();
+		Clump_Splitting.allRegions.clear();
 		ArrayList<Clump> clumpList = new ArrayList<Clump>();
 
 		ImagePlus imp = IJ.getImage();
@@ -324,12 +329,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		 */
 		if (Clump_Splitting.STOP == clumpList.size())
 		{
-			IJ.log("Die Anzahl der gefundenen Klumpen beträgt: " + clumpList.size());
+			IJ.log("The number of detected objects is: " + clumpList.size());
 		}
-		/*
-		 * manages the overlays
-		 */
-		Clump_Splitting.showOverlay();
 		/*
 		 * adds MouseListeners to each ConcavityRegion for the Bounding Box to
 		 * show information about the ConcavityRegions
@@ -339,7 +340,19 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			ConcavityRegion cr = Clump_Splitting.allRegions.get(n);
 
 			imp.getCanvas().addMouseListener(new MouseListenerConcavityRegions(cr));
+			if(Clump_Splitting.SHOWCONCAVITYREGION)
+			{
+				Line l= new Line(cr.getStartX(),cr.getStartY(),cr.getEndX(), cr.getEndY());
+				l.setStrokeColor(Color.blue);
+				l.setStrokeWidth(1);
+				Clump_Splitting.overlayConcavityRegion.add(l);
+			}
 		}
+		/*
+		 * manages the overlays
+		 */
+		Clump_Splitting.showOverlay();
+	
 
 	}
 
@@ -411,20 +424,19 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		FileWriter writer = null;
 		try
 		{
-			String filename="";
-			  JFileChooser chooser = new JFileChooser();
-		        // Dialog zum Oeffnen von Dateien anzeigen
-		        int rueckgabeWert = chooser.showSaveDialog(null);
-		        
-		        /* Abfrage, ob auf "Öffnen" geklickt wurde */
-		        if(rueckgabeWert == JFileChooser.APPROVE_OPTION)
-		        {
-		             // Ausgabe der ausgewaehlten Datei
-		            filename=chooser.getSelectedFile().getAbsolutePath();
-		        }//String title = imp.getTitle();
+			String filename = "";
+			JFileChooser chooser = new JFileChooser();
+			// Dialog zum Oeffnen von Dateien anzeigen
+			int rueckgabeWert = chooser.showSaveDialog(null);
 
-			
-			String st =  filename+".csv";
+			/* Abfrage, ob auf "Öffnen" geklickt wurde */
+			if (rueckgabeWert == JFileChooser.APPROVE_OPTION)
+			{
+				// Ausgabe der ausgewaehlten Datei
+				filename = chooser.getSelectedFile().getAbsolutePath();
+			} // String title = imp.getTitle();
+
+			String st = filename + ".csv";
 			writer = new FileWriter(st);
 		} catch (IOException e1)
 		{
@@ -469,7 +481,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		gd.setEnabled(true);
 		String selection = gd.getNextRadioButton();
 		boolean isPreprocessed = gd.getNextBoolean();
-		boolean showConvexHull = gd.getNextBoolean();
+		boolean showConcavityRegion = gd.getNextBoolean();
 		boolean showPixels = gd.getNextBoolean();
 		boolean writeDataInFile = false;
 		Double concavityDepthThreshold = gd.getNextNumber();
@@ -516,7 +528,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			}
 
 			Clump_Splitting.ISPREPROCESSED = isPreprocessed;
-			SHOWCONVEXHULL = showConvexHull;
+			SHOWCONCAVITYREGION = showConcavityRegion;
 			Clump_Splitting.WRITEDATAINFILE = writeDataInFile;
 			SHOWPIXELS = showPixels;
 			if (!saliencyThreshold.isNaN())
@@ -578,10 +590,17 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				"Geodesic-Distance-Split-Line", "Maximum-Intensity-Split-Line Farhan",
 				"Minimum-Intensity-Split-Line Farhan" };
 		gd.addChoice("Split-Line-Type:", items, "Straight Split-Line");
+		
 		String[] itemsDetector =
 		{ "Detect all Concavity-Pixels", "Detect all Concavity-Pixels with largest Concavity-Depth" };
 		gd.addChoice("Concavity-Pixel-Detector-Type", itemsDetector, "Detect all Concavity-Pixels");
 
+		String[] itemsDetectorOuter=
+			{
+				"Detect outer Concavity Regions by ConvexHull",
+					"Detect outer Concavity Regions locally"		
+			};
+		gd.addChoice("Outer-Concavity-Region-Detector-Type", itemsDetectorOuter,"Detect outer Concavity Regions locally");
 		gd.showDialog();
 
 		if (gd.wasCanceled())
@@ -596,7 +615,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			 */
 			String splitLineType = gd.getNextChoice();
 			String detectorType = gd.getNextChoice();
-
+			String outerConcavityDetectorType=gd.getNextChoice();
 			if (splitLineType.equals("Straight Split-Line") || splitLineType.equals("Maximum-Intensity-Split-Line")
 					|| splitLineType.equals("Minimum-Intensity-Split-Line")
 					|| splitLineType.equals("Geodesic-Distance-Split-Line"))
@@ -625,6 +644,16 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 					}
 				}
 
+				if(outerConcavityDetectorType.equals("Detect outer Concavity Regions by ConvexHull"))
+				{
+					Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE=OuterConcavityRegionDetectorType.DETECTOUTERCONCOCAVITYREGIONSBYCONVEXHULL;
+				}
+				else{
+					if(outerConcavityDetectorType.equals("Detect outer Concavity Regions locally"))
+					{
+						Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE=OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
+					}
+				}
 				if (detectorType.equals("Detect all Concavity-Pixels"))
 				{
 					Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
@@ -642,7 +671,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				dialog1.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
 
 				dialog1.addCheckbox("Is already pre-processed", false);
-				dialog1.addCheckbox("Show Convex Hull", false);
+				dialog1.addCheckbox("Show ConcavityRegion", false);
 				dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
 				dialog1.addCheckbox("Write data in file to train SVM", false);
 				dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
@@ -687,6 +716,16 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 						}
 					}
 
+					if(outerConcavityDetectorType.equals("Detect outer Concavity Regions by ConvexHull"))
+					{
+						Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE=OuterConcavityRegionDetectorType.DETECTOUTERCONCOCAVITYREGIONSBYCONVEXHULL;
+					}
+					else{
+						if(outerConcavityDetectorType.equals("Detect outer Concavity Regions locally"))
+						{
+							Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE=OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
+						}
+					}
 					if (detectorType.equals("Detect all Concavity-Pixels"))
 					{
 						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
@@ -740,7 +779,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	public static void showOverlay()
 	{
 		Overlay o = new Overlay();
-		for (Roi overlay : Clump_Splitting.overlayConvexHull)
+		for (Roi overlay : Clump_Splitting.overlayConcavityRegion)
 		{
 			o.addElement(overlay);
 		}
