@@ -43,6 +43,7 @@ import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 
+import de.biomedical_imaging.ij.clumpsplitting.SVM.SVM;
 import de.biomedical_imaging.ij.clumpsplitting.SplitLines.SplitLineAssignmentSVM;
 import ij.IJ;
 import ij.ImagePlus;
@@ -157,7 +158,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * the concavityRegion is accepted as a valid concavityRegion
 	 */
 
-	public static OuterConcavityRegionDetectorType OUTERCONCAVITYREGIONDETECTORTYPE= OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
+	public static OuterConcavityRegionDetectorType OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
+	public static boolean runSVM;
 	public static double CONCAVITY_DEPTH_THRESHOLD = 3;
 	/**
 	 * used for SplitLinesBetweenTwoConcavityRegions. SALIENCY evaluates, if the
@@ -173,12 +175,15 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 * the possible SplitLine could be a valid SplitLine
 	 */
 	public static double CONCAVITYCONCAVITY_THRESHOLD = 1.8325957;
+	public static int MAXIMUMSPLITLINELENGTH = 10;
+	public static int MAXIMUMANGLEDIFFERENCE = 20;
 	/**
 	 * used for SplitLinesBetweenTwoConcavityRegions. CONCAVITYLINEALIGNMENT
 	 * evaluates the largest angle between the concavityRegion Orientation and
 	 * the Possible Splitline. If the angle is smaller than the threshold the
 	 * possible SplitLine could be a valid SplitLine
 	 */
+
 	public static double CONCAVITYLINE_THRESHOLD = 1.2217305;
 	/**
 	 * used for SplitLinesBetweenConcavityRegionAndPoint. angle between
@@ -249,14 +254,19 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	 */
 	public static ImagePlus imp;
 
+	private ImageProcessor imageprocessor;
+	private int threshold = 0;
+
 	@Override
 	public int setup(String arg, ImagePlus imp)
 	{
+
 		if (imp == null)
 		{
 			IJ.error("No image open");
 			return DONE;
 		}
+		this.imageprocessor = imp.getProcessor();
 
 		Clump_Splitting.imp = imp;
 		return DOES_8G + DOES_STACKS + FINAL_PROCESSING + PARALLELIZE_STACKS;
@@ -265,95 +275,115 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	@Override
 	public void run(ImageProcessor ip)
 	{
-
-		// overlays are cleared to show actual overlays
-		Clump_Splitting.overlayForOrientation.clear();
-		// Clump_Splitting.overlayConvexHull.clear();
-		Clump_Splitting.overlaySplitPoints.clear();
-		Clump_Splitting.overlayConcavityRegion.clear();
-		Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.clear();
-		Clump_Splitting.allRegions.clear();
-		ArrayList<Clump> clumpList = new ArrayList<Clump>();
-
-		ImagePlus imp = IJ.getImage();
-		imp.setOverlay(null);
-		// int i = 0;
-		/* TODO */
-		IJ.showProgress(0.0);
-
-		ImageProcessor imageProcessorBinary = ip.duplicate();
-
-		if (!Clump_Splitting.ISPREPROCESSED)
+		if (runSVM)
 		{
-			imageProcessorBinary.blurGaussian(2.0);
-		}
-
-		// preprocessing
-		AutoThresholder at = new AutoThresholder();
-
-		int[] histogram = imageProcessorBinary.getHistogram();
-		// computes the binary image of the input image
-		int threshold = at.getThreshold(Method.Default, histogram);
-		imageProcessorBinary.threshold(threshold);
-
-		/*
-		 * ShapeSmoothingUtil ssu= new ShapeSmoothingUtil();
-		 * ssu.setBlackBackground(true);
-		 * ssu.fourierFilter(imageProcessorBinary,40, true,false);
-		 */
-
-		ImageProcessor binary = imageProcessorBinary;
-		do
+			this.trainSVM();
+		} else
 		{
-			// iteratively computes the Splitlines
-			clumpList = Clump_Splitting.computeClumps(ip, binary);
+			// overlays are cleared to show actual overlays
+			Clump_Splitting.overlayForOrientation.clear();
+			// Clump_Splitting.overlayConvexHull.clear();
+			Clump_Splitting.overlaySplitPoints.clear();
+			Clump_Splitting.overlayConcavityRegion.clear();
+			Clump_Splitting.listOfAllPossibleSplitLinesAndClassForSVM.clear();
+			Clump_Splitting.allRegions.clear();
+			Clump_Splitting.overlayTextConvexHull.clear();
+			ArrayList<Clump> clumpList = new ArrayList<Clump>();
+
+			ImagePlus imp = IJ.getImage();
+			imp.setOverlay(null);
+			// int i = 0;
+			/* TODO */
+			IJ.showProgress(0.0);
+
+			ImageProcessor imageProcessorBinary = ip.duplicate();
+
+			imageProcessorBinary.threshold(threshold);
+
+			if (!Clump_Splitting.ISPREPROCESSED)
+			{
+				if (Clump_Splitting.BACKGROUNDCOLOR == 1)
+				{
+					imageProcessorBinary.erode();
+					imageProcessorBinary.blurGaussian(2.0);
+					AutoThresholder a = new AutoThresholder();
+					int[] histogram = imageProcessorBinary.getHistogram();
+					int threshold = a.getThreshold(Method.Default, histogram);
+					imageProcessorBinary.threshold(threshold);
+					imageProcessorBinary.dilate();
+				}else{
+					imageProcessorBinary.dilate();
+					imageProcessorBinary.blurGaussian(2.0);
+					AutoThresholder a = new AutoThresholder();
+					int[] histogram = imageProcessorBinary.getHistogram();
+					int threshold = a.getThreshold(Method.Default, histogram);
+					imageProcessorBinary.threshold(threshold);
+					imageProcessorBinary.erode();
+					
+				}
+
+			}
+
+			// preprocessing
+
 			/*
-			 * Crash condition stops if no possible ConcavityRegions are found
-			 * in an iteration for all Clumps
+			 * ShapeSmoothingUtil ssu= new ShapeSmoothingUtil();
+			 * ssu.setBlackBackground(true);
+			 * ssu.fourierFilter(imageProcessorBinary,40, true,false);
 			 */
-		} while (clumpList.size() > Clump_Splitting.STOP);
 
-		/*
-		 * writes data of each StraightSplitLine into a csv file
-		 */
-		if (Clump_Splitting.WASOKED)
-		{
-			if (Clump_Splitting.WRITEDATAINFILE)
+			ImageProcessor binary = imageProcessorBinary;
+			do
 			{
-				this.writeDataInFile();
-			}
-		}
-		/*
-		 * If the condition is true all Clumps are split and the plugin is
-		 * completed
-		 */
-		if (Clump_Splitting.STOP == clumpList.size())
-		{
-			IJ.log("The number of detected objects is: " + clumpList.size());
-		}
-		/*
-		 * adds MouseListeners to each ConcavityRegion for the Bounding Box to
-		 * show information about the ConcavityRegions
-		 */
-		for (int n = 0; n < Clump_Splitting.allRegions.size(); n++)
-		{
-			ConcavityRegion cr = Clump_Splitting.allRegions.get(n);
+				
+				// iteratively computes the Splitlines
+				clumpList = Clump_Splitting.computeClumps(ip, binary);
+				/*
+				 * Crash condition stops if no possible ConcavityRegions are
+				 * found in an iteration for all Clumps
+				 */
+			} while (clumpList.size() > Clump_Splitting.STOP);
 
-			imp.getCanvas().addMouseListener(new MouseListenerConcavityRegions(cr));
-			if(Clump_Splitting.SHOWCONCAVITYREGION)
+			/*
+			 * writes data of each StraightSplitLine into a csv file
+			 */
+			if (Clump_Splitting.WASOKED)
 			{
-				Line l= new Line(cr.getStartX(),cr.getStartY(),cr.getEndX(), cr.getEndY());
-				l.setStrokeColor(Color.blue);
-				l.setStrokeWidth(1);
-				Clump_Splitting.overlayConcavityRegion.add(l);
+				if (Clump_Splitting.WRITEDATAINFILE)
+				{
+					this.writeDataInFile();
+				}
 			}
-		}
-		/*
-		 * manages the overlays
-		 */
-		Clump_Splitting.showOverlay();
-	
+			/*
+			 * If the condition is true all Clumps are split and the plugin is
+			 * completed
+			 */
+			if (Clump_Splitting.STOP == clumpList.size())
+			{
+				IJ.log("The number of detected objects is: " + clumpList.size());
+			}
+			/*
+			 * adds MouseListeners to each ConcavityRegion for the Bounding Box
+			 * to show information about the ConcavityRegions
+			 */
+			for (int n = 0; n < Clump_Splitting.allRegions.size(); n++)
+			{
+				ConcavityRegion cr = Clump_Splitting.allRegions.get(n);
 
+				imp.getCanvas().addMouseListener(new MouseListenerConcavityRegions(cr));
+				if (Clump_Splitting.SHOWCONCAVITYREGION)
+				{
+					Line l = new Line(cr.getStartX(), cr.getStartY(), cr.getEndX(), cr.getEndY());
+					l.setStrokeColor(Color.blue);
+					l.setStrokeWidth(1);
+					Clump_Splitting.overlayConcavityRegion.add(l);
+				}
+			}
+			/*
+			 * manages the overlays
+			 */
+			Clump_Splitting.showOverlay();
+		}
 	}
 
 	/**
@@ -426,6 +456,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		{
 			String filename = "";
 			JFileChooser chooser = new JFileChooser();
+			chooser.setDialogTitle("Save trainingdata and testdata for SVM");
+
 			// Dialog zum Oeffnen von Dateien anzeigen
 			int rueckgabeWert = chooser.showSaveDialog(null);
 
@@ -484,13 +516,14 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		boolean showConcavityRegion = gd.getNextBoolean();
 		boolean showPixels = gd.getNextBoolean();
 		boolean writeDataInFile = false;
+		Double binaryvalue = gd.getNextNumber();
 		Double concavityDepthThreshold = gd.getNextNumber();
 		Double saliencyThreshold = 0.0;
 		Double concavityConcavityAlignmentThreshold = 0.0;
 		Double concavityLineAlignmentThreshold = 0.0;
 		Double concavityAngleThreshold = 0.0;
 		Double concavityRatioThreshold = 0.0;
-		int innerContourParameter = 0;
+		int innerContourParameter = 2;
 		Double c1 = 0.0;
 		Double c2 = 0.0;
 		Double chi = 0.0;
@@ -534,6 +567,10 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			if (!saliencyThreshold.isNaN())
 			{
 				SALIENCY_THRESHOLD = saliencyThreshold;
+			}
+			if (!binaryvalue.isNaN())
+			{
+				this.threshold = (int) Math.round(binaryvalue);
 			}
 			if (!concavityConcavityAlignmentThreshold.isNaN())
 			{
@@ -583,187 +620,240 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr)
 	{
-		GenericDialog gd = new NonBlockingGenericDialog("Choose your Split-Line-Type");
+		GenericDialog dialog = new NonBlockingGenericDialog("Choose application");
 
-		String[] items =
-		{ "Straight Split-Line", "Maximum-Intensity-Split-Line", "Minimum-Intensity-Split-Line",
-				"Geodesic-Distance-Split-Line", "Maximum-Intensity-Split-Line Farhan",
-				"Minimum-Intensity-Split-Line Farhan" };
-		gd.addChoice("Split-Line-Type:", items, "Straight Split-Line");
-		
-		String[] itemsDetector =
-		{ "Detect all Concavity-Pixels", "Detect all Concavity-Pixels with largest Concavity-Depth" };
-		gd.addChoice("Concavity-Pixel-Detector-Type", itemsDetector, "Detect all Concavity-Pixels");
+		String[] radioboxValues1 =
+		{ "Start Plugin", "Train SVM" };
+		dialog.addRadioButtonGroup("Choose your application", radioboxValues1, 1, 2, "Start Plugin");
+		dialog.showDialog();
 
-		String[] itemsDetectorOuter=
-			{
-				"Detect outer Concavity Regions by ConvexHull",
-					"Detect outer Concavity Regions locally"		
-			};
-		gd.addChoice("Outer-Concavity-Region-Detector-Type", itemsDetectorOuter,"Detect outer Concavity Regions locally");
-		gd.showDialog();
-
-		if (gd.wasCanceled())
+		if (dialog.wasCanceled())
 		{
 			return DONE;
 		}
-
-		if (gd.wasOKed())
+		if (dialog.wasOKed())
 		{
-			/*
-			 * different Menues to chose parameter for each SplitLineType
-			 */
-			String splitLineType = gd.getNextChoice();
-			String detectorType = gd.getNextChoice();
-			String outerConcavityDetectorType=gd.getNextChoice();
-			if (splitLineType.equals("Straight Split-Line") || splitLineType.equals("Maximum-Intensity-Split-Line")
-					|| splitLineType.equals("Minimum-Intensity-Split-Line")
-					|| splitLineType.equals("Geodesic-Distance-Split-Line"))
+			String application = dialog.getNextRadioButton();
+			if (application.equals("Train SVM"))
 			{
-				if (splitLineType.equals("Straight Split-Line"))
-				{
-					Clump_Splitting.SPLITLINETYPE = SplitLineType.STRAIGHTSPLITLINE;
-				} else
-				{
-					if (splitLineType.equals("Maximum-Intensity-Split-Line"))
-					{
-						Clump_Splitting.SPLITLINETYPE = SplitLineType.MAXIMUMINTENSITYSPLITLINE;
-					} else
-					{
-						if (splitLineType.equals("Minimum-Intensity-Split-Line"))
-						{
-							Clump_Splitting.SPLITLINETYPE = SplitLineType.MINIMUMINTENSITYSPLITLINE;
-						} else
-						{
-							if (splitLineType.equals("Geodesic-Distance-Split-Line"))
-							{
-								Clump_Splitting.SPLITLINETYPE = SplitLineType.GEODESICDISTANCESPLITLINE;
-							}
+				Clump_Splitting.runSVM = true;
+			} else
+			{
+				Clump_Splitting.runSVM = false;
+				GenericDialog gd = new NonBlockingGenericDialog("Choose your Split-Line-Type");
 
-						}
-					}
-				}
+				String[] items =
+				{ "Straight Split-Line", "Maximum-Intensity-Split-Line", "Minimum-Intensity-Split-Line",
+						"Geodesic-Distance-Split-Line", "Maximum-Intensity-Split-Line Farhan",
+						"Minimum-Intensity-Split-Line Farhan" };
+				gd.addChoice("Split-Line-Type:", items, "Straight Split-Line");
 
-				if(outerConcavityDetectorType.equals("Detect outer Concavity Regions by ConvexHull"))
-				{
-					Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE=OuterConcavityRegionDetectorType.DETECTOUTERCONCOCAVITYREGIONSBYCONVEXHULL;
-				}
-				else{
-					if(outerConcavityDetectorType.equals("Detect outer Concavity Regions locally"))
-					{
-						Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE=OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
-					}
-				}
-				if (detectorType.equals("Detect all Concavity-Pixels"))
-				{
-					Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
-				} else
-				{
-					if (detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
-					{
-						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH;
-					}
-				}
-				GenericDialog dialog1 = new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");
+				String[] itemsDetector =
+				{ "Detect all Concavity-Pixels", "Detect all Concavity-Pixels with largest Concavity-Depth" };
+				gd.addChoice("Concavity-Pixel-Detector-Type", itemsDetector,
+						"Detect all Concavity-Pixels with largest Concavity-Depth");
 
-				String[] radioboxValues =
-				{ "black", "white" };
-				dialog1.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
+				String[] itemsDetectorOuter =
+				{ "Detect outer Concavity Regions by ConvexHull", "Detect outer Concavity Regions locally","Farhan" };
+				gd.addChoice("Outer-Concavity-Region-Detector-Type", itemsDetectorOuter,
+						"Detect outer Concavity Regions locally");
+				gd.showDialog();
 
-				dialog1.addCheckbox("Is already pre-processed", false);
-				dialog1.addCheckbox("Show ConcavityRegion", false);
-				dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
-				dialog1.addCheckbox("Write data in file to train SVM", false);
-				dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
-				dialog1.addSlider("Saliency threshold", 0, 1, 0.12);
-				dialog1.addSlider("Concavity-Concavity-Alignment threshold in Degrees", 0, 180, 105);
-				dialog1.addSlider("Concavity-Line-Alignment threshold in Degrees", 0, 180, 70);
-				dialog1.addSlider("Concavity-Angle threshold in Degrees", 0, 180, 90);
-				dialog1.addNumericField("Concavity-Ratio threshold", 6, 1);
-				dialog1.addNumericField("Inner-Contour-Parameter", 2, 0);
-				dialog1.addNumericField("C1", 1.73, 3);
-				dialog1.addNumericField("C2", -4.72, 3);
-				dialog1.addNumericField("Chi-Threshold", 0.5, 3);
-				dialog1.addPreviewCheckbox(pfr);
-				dialog1.addDialogListener(this);
-				dialog1.showDialog();
-				dialog1.setFocusable(true);
-				WindowManager.getCurrentImage().getWindow().getCanvas().setFocusable(true);
-
-				gd.setVisible(false);
-				gd.dispose();
-				if (dialog1.wasOKed())
-				{
-					Clump_Splitting.WASOKED = true;
-				}
-				if (dialog1.wasCanceled())
+				if (gd.wasCanceled())
 				{
 					return DONE;
 				}
-			} else
-			{
-				if (splitLineType.equals("Maximum-Intensity-Split-Line Farhan")
-						|| splitLineType.equals("Minimum-Intensity-Split-Line Farhan"))
+
+				if (gd.wasOKed())
 				{
-					if (splitLineType.equals("Maximum-Intensity-Split-Line Farhan"))
+					/*
+					 * different Menues to chose parameter for each
+					 * SplitLineType
+					 */
+					String splitLineType = gd.getNextChoice();
+					String detectorType = gd.getNextChoice();
+					String outerConcavityDetectorType = gd.getNextChoice();
+					if (splitLineType.equals("Straight Split-Line")
+							|| splitLineType.equals("Maximum-Intensity-Split-Line")
+							|| splitLineType.equals("Minimum-Intensity-Split-Line")
+							|| splitLineType.equals("Geodesic-Distance-Split-Line"))
 					{
-						Clump_Splitting.SPLITLINETYPE = SplitLineType.MAXIMUMINTENSITYSPLITLINEFARHAN;
+						if (splitLineType.equals("Straight Split-Line"))
+						{
+							Clump_Splitting.SPLITLINETYPE = SplitLineType.STRAIGHTSPLITLINE;
+						} else
+						{
+							if (splitLineType.equals("Maximum-Intensity-Split-Line"))
+							{
+								Clump_Splitting.SPLITLINETYPE = SplitLineType.MAXIMUMINTENSITYSPLITLINE;
+							} else
+							{
+								if (splitLineType.equals("Minimum-Intensity-Split-Line"))
+								{
+									Clump_Splitting.SPLITLINETYPE = SplitLineType.MINIMUMINTENSITYSPLITLINE;
+								} else
+								{
+									if (splitLineType.equals("Geodesic-Distance-Split-Line"))
+									{
+										Clump_Splitting.SPLITLINETYPE = SplitLineType.GEODESICDISTANCESPLITLINE;
+									}
+
+								}
+							}
+						}
+
+						if (outerConcavityDetectorType.equals("Detect outer Concavity Regions by ConvexHull"))
+						{
+							Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.DETECTOUTERCONCOCAVITYREGIONSBYCONVEXHULL;
+						} else
+						{
+							if (outerConcavityDetectorType.equals("Detect outer Concavity Regions locally"))
+							{
+								Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
+							}else{
+								if (outerConcavityDetectorType.equals("Farhan"))
+								{
+									Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.FARHAN;
+								}
+							}
+						}
+						if (detectorType.equals("Detect all Concavity-Pixels"))
+						{
+							Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
+						} else
+						{
+							if (detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
+							{
+								Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH;
+							}
+						}
+						GenericDialog dialog1 = new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");
+
+						String[] radioboxValues =
+						{ "black", "white" };
+						dialog1.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
+
+						dialog1.addCheckbox("Is already pre-processed", false);
+						dialog1.addCheckbox("Show ConcavityRegion", false);
+						dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
+						dialog1.addCheckbox("Write data in file to train SVM", false);
+						AutoThresholder a = new AutoThresholder();
+						int[] hist = this.imageprocessor.getHistogram();
+						int b = a.getThreshold(Method.Default, hist);
+
+						dialog1.addSlider("Binarization threshold value", 0, 255, b);
+						dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
+						dialog1.addSlider("Saliency threshold", 0, 1, 0.12);
+						dialog1.addSlider("Concavity-Concavity-Alignment threshold in Degrees", 0, 180, 105);
+						dialog1.addSlider("Concavity-Line-Alignment threshold in Degrees", 0, 180, 70);
+						dialog1.addSlider("Concavity-Angle threshold in Degrees", 0, 180, 90);
+						dialog1.addNumericField("Concavity-Ratio threshold", 6, 1);
+						dialog1.addNumericField("Inner-Contour-Parameter", 2, 0);
+						dialog1.addNumericField("C1", 1.73, 3);
+						dialog1.addNumericField("C2", -4.72, 3);
+						dialog1.addNumericField("Chi-Threshold", 0.5, 3);
+						dialog1.addPreviewCheckbox(pfr);
+						dialog1.addDialogListener(this);
+						dialog1.showDialog();
+						dialog1.setFocusable(true);
+						WindowManager.getCurrentImage().getWindow().getCanvas().setFocusable(true);
+
+						gd.setVisible(false);
+						gd.dispose();
+						if (dialog1.wasOKed())
+						{
+							Clump_Splitting.WASOKED = true;
+						}
+						if (dialog1.wasCanceled())
+						{
+							return DONE;
+						}
 					} else
 					{
-						if (splitLineType.equals("Minimum-Intensity-Split-Line Farhan"))
+						if (splitLineType.equals("Maximum-Intensity-Split-Line Farhan")
+								|| splitLineType.equals("Minimum-Intensity-Split-Line Farhan"))
 						{
-							Clump_Splitting.SPLITLINETYPE = SplitLineType.MINIMUMINTENSITYSPLITLINEFARHAN;
+							if (splitLineType.equals("Maximum-Intensity-Split-Line Farhan"))
+							{
+								Clump_Splitting.SPLITLINETYPE = SplitLineType.MAXIMUMINTENSITYSPLITLINEFARHAN;
+							} else
+							{
+								if (splitLineType.equals("Minimum-Intensity-Split-Line Farhan"))
+								{
+									Clump_Splitting.SPLITLINETYPE = SplitLineType.MINIMUMINTENSITYSPLITLINEFARHAN;
+								}
+							}
+
+							if (outerConcavityDetectorType.equals("Detect outer Concavity Regions by ConvexHull"))
+							{
+								Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.DETECTOUTERCONCOCAVITYREGIONSBYCONVEXHULL;
+							} else
+							{
+								if (outerConcavityDetectorType.equals("Detect outer Concavity Regions locally"))
+								{
+									Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
+								}else{
+									if (outerConcavityDetectorType.equals("Farhan"))
+									{
+										Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.FARHAN;
+									}
+								}
+							}
+							if (detectorType.equals("Detect all Concavity-Pixels"))
+							{
+								Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
+							} else
+							{
+								if (detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
+								{
+									Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH;
+								}
+							}
+							GenericDialog dialog1 = new NonBlockingGenericDialog(
+									"Choose Parameters for Clump Splitting");
+
+							String[] radioboxValues =
+							{ "black", "white" };
+							dialog1.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
+
+							dialog1.addCheckbox("Is already pre-processed", false);
+
+							dialog1.addCheckbox("Show Concavity Regions", false);
+							dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
+							AutoThresholder a = new AutoThresholder();
+							int[] hist = this.imageprocessor.getHistogram();
+							int b = a.getThreshold(Method.Default, hist);
+							dialog1.addSlider("Binarization threshold value", 0, 255, b);
+
+							dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
+							dialog1.addNumericField("Inner-Contour-Parameter", 2, 0);
+
+							dialog1.addPreviewCheckbox(pfr);
+							dialog1.addDialogListener(this);
+							dialog1.showDialog();
+							dialog1.setFocusable(true);
+							WindowManager.getCurrentImage().getWindow().getCanvas().setFocusable(true);
+
+							gd.setVisible(false);
+							gd.dispose();
+							if (dialog1.wasCanceled())
+							{
+								return DONE;
+							}
 						}
-					}
-
-					if(outerConcavityDetectorType.equals("Detect outer Concavity Regions by ConvexHull"))
-					{
-						Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE=OuterConcavityRegionDetectorType.DETECTOUTERCONCOCAVITYREGIONSBYCONVEXHULL;
-					}
-					else{
-						if(outerConcavityDetectorType.equals("Detect outer Concavity Regions locally"))
-						{
-							Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE=OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
-						}
-					}
-					if (detectorType.equals("Detect all Concavity-Pixels"))
-					{
-						Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS;
-					} else
-					{
-						if (detectorType.equals("Detect all Concavity-Pixels with largest Concavity-Depth"))
-						{
-							Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE = ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH;
-						}
-					}
-					GenericDialog dialog1 = new NonBlockingGenericDialog("Choose Parameters for Clump Splitting");
-
-					String[] radioboxValues =
-					{ "black", "white" };
-					dialog1.addRadioButtonGroup("Choose your Backgroundcolor", radioboxValues, 1, 2, "white");
-
-					dialog1.addCheckbox("Show Convex Hull", false);
-					dialog1.addCheckbox("Show Concavity Pixel and Split Points", false);
-					dialog1.addNumericField("Concavity-Depth threshold", 3, 0);
-
-					dialog1.addPreviewCheckbox(pfr);
-					dialog1.addDialogListener(this);
-					dialog1.showDialog();
-					dialog1.setFocusable(true);
-					WindowManager.getCurrentImage().getWindow().getCanvas().setFocusable(true);
-
-					gd.setVisible(false);
-					gd.dispose();
-					if (dialog1.wasCanceled())
-					{
-						return DONE;
 					}
 				}
 			}
-
 		}
 
 		return IJ.setupDialog(imp, DOES_8G);
+
+	}
+
+	private void trainSVM()
+	{
+		SVM svm = new SVM();
+		svm.trainSVM();
 	}
 
 	@Override

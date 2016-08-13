@@ -88,127 +88,185 @@ public class MaximumIntensitySplitLineCalculator implements AbstractSplitLineCal
 		ArrayList<AbstractSplitLine> splitLineList = new ArrayList<AbstractSplitLine>();
 		int minX;
 		int maxX;
-		if (startPoint.getX() < endPoint.getX())
+		int konstante = 30;
+		// define region for the splitLine
+		if (startPoint != null && endPoint != null)
 		{
-			// TODO Konstante
-			minX = (int) startPoint.getX();
-			maxX = (int) endPoint.getX();
-
-		} else
-		{
-			minX = (int) endPoint.getX();
-			maxX = (int) startPoint.getX();
-
-		}
-		int minY;
-		int maxY;
-		if (startPoint.getY() < endPoint.getY())
-		{
-			// TODO Konstante
-			minY = (int) startPoint.getY();
-			maxY = (int) endPoint.getY();
-
-		} else
-		{
-			minY = (int) endPoint.getY();
-			maxY = (int) startPoint.getY();
-
-		}
-		double[][] werte = new double[maxX - minX + 2][maxY - minY + 2];
-		// reverse scale of Intensity to make Dijkstra Processable
-		for (int i = 0; i < maxX - minX; i++)
-		{
-
-			for (int j = 0; j < maxY - minY; j++)
+			if (startPoint.getX() < endPoint.getX())
 			{
-				werte[i][j] = -(ip.getPixel(i + minX, j + minY)) + 256;
-			}
-		}
-		Point2D aktuellerPunkt = startPoint;
-		// Dijkstra Algorithm
-		ArrayList<AccessiblePoint> unusedPoints = new ArrayList<AccessiblePoint>();
-		ArrayList<AccessiblePoint> usedPoints = new ArrayList<AccessiblePoint>();
-		AccessiblePoint first = new AccessiblePoint(aktuellerPunkt, 0, null);
-		usedPoints.add(first);
-
-		// While
-		while (!(aktuellerPunkt.getX() == endPoint.getX() && aktuellerPunkt.getY() == endPoint.getY()))
-		{
-			for (int i = -1; i <= 1; i++)
-			{
-				for (int j = -1; j <= 1; j++)
+				if (startPoint.getX() - konstante > 0)
 				{
-					if (j == 0 || i == 0)
-					{
+					// TODO Konstante
+					minX = (int) startPoint.getX() - konstante;
+				} else
+				{
+					minX = 0;
+				}
+				if (endPoint.getX() + konstante < ip.getWidth())
+				{
+					maxX = (int) endPoint.getX() + konstante;
+				} else
+				{
+					maxX = ip.getWidth();
+				}
 
-						if (aktuellerPunkt.getX() + i >= minX && aktuellerPunkt.getX() + i <= maxX)
+			} else
+			{
+				if (endPoint.getX() - konstante > 0)
+				{
+					// TODO Konstante
+					minX = (int) endPoint.getX() - konstante;
+				} else
+				{
+					minX = 0;
+				}
+				if (startPoint.getX() + konstante < ip.getWidth())
+				{
+					maxX = (int) startPoint.getX()+konstante;
+				} else
+				{
+					maxX = ip.getWidth();
+				}
+
+			}
+			int minY;
+			int maxY;
+			if (startPoint.getY() < endPoint.getY())
+			{
+				// TODO Konstante
+				if (startPoint.getY() - konstante > 0)
+				{
+					minY = (int) startPoint.getY() - konstante;
+				} else
+				{
+					minY = 0;
+				}
+				if (endPoint.getY() + konstante < ip.getHeight())
+				{
+					maxY = (int) endPoint.getY() + konstante;
+				} else
+				{
+					maxY = ip.getHeight();
+				}
+
+			} else
+			{
+				if (endPoint.getY() - konstante > 0)
+				{
+					minY = (int) endPoint.getY() - konstante;
+				} else
+				{
+					minY = 0;
+				}
+				if (startPoint.getY() + konstante < ip.getHeight())
+				{
+					maxY = (int) startPoint.getY() + konstante;
+				} else
+				{
+					maxY = ip.getHeight();
+				}
+			}
+			double[][] werte = new double[maxX - minX + 2][maxY - minY + 2];
+			// reverse scale of Intensity to make Dijkstra Processable
+			for (int i = 0; i < maxX - minX+2; i++)
+			{
+
+				for (int j = 0; j < maxY - minY+2; j++)
+				{
+					werte[i][j] = -(ip.getPixel(i + minX, j + minY)) + 256;
+				}
+			}
+			Point2D aktuellerPunkt = startPoint;
+			// Dijkstra Algorithm
+			ArrayList<AccessiblePoint> unusedPoints = new ArrayList<AccessiblePoint>();
+			ArrayList<AccessiblePoint> usedPoints = new ArrayList<AccessiblePoint>();
+			AccessiblePoint first = new AccessiblePoint(aktuellerPunkt, 0, null);
+			usedPoints.add(first);
+
+			// While
+			while (!(aktuellerPunkt.getX() == endPoint.getX() && aktuellerPunkt.getY() == endPoint.getY()))
+			{
+				for (int i = -1; i <= 1; i++)
+				{
+					for (int j = -1; j <= 1; j++)
+					{
+						if (j == 0 || i == 0)
 						{
 
-							if (aktuellerPunkt.getY() + j >= minY && aktuellerPunkt.getY() + j <= maxY)
+							if (aktuellerPunkt.getX() + i >= minX && aktuellerPunkt.getX() + i <= maxX)
 							{
 
-								boolean besucht = false;
-								boolean ready = false;
-								for (AccessiblePoint ap : unusedPoints)
+								if (aktuellerPunkt.getY() + j >= minY && aktuellerPunkt.getY() + j <= maxY)
 								{
-									if (ap.getPoint().getX() == aktuellerPunkt.getX() + i
-											&& ap.getPoint().getY() == aktuellerPunkt.getY() + j)
+
+									boolean besucht = false;
+									boolean ready = false;
+									for (AccessiblePoint ap : unusedPoints)
 									{
-										besucht = true;
-										if (ap.getWeight() > (werte[(int) aktuellerPunkt.getX() + i
-												- minX][(int) aktuellerPunkt.getY() + j - minY] + first.getWeight()))
+										if (ap.getPoint().getX() == aktuellerPunkt.getX() + i
+												&& ap.getPoint().getY() == aktuellerPunkt.getY() + j)
 										{
-											ap.setWeight((werte[(int) aktuellerPunkt.getX() + i
+											besucht = true;
+											if (ap.getWeight() > (werte[(int) aktuellerPunkt.getX() + i
 													- minX][(int) aktuellerPunkt.getY() + j - minY]
-													+ first.getWeight()));
+													+ first.getWeight()))
+											{
+												ap.setWeight((werte[(int) aktuellerPunkt.getX() + i
+														- minX][(int) aktuellerPunkt.getY() + j - minY]
+														+ first.getWeight()));
+											}
 										}
 									}
-								}
-								for (AccessiblePoint ap : usedPoints)
-								{
-									if (ap.getPoint().getX() == aktuellerPunkt.getX() + i
-											&& ap.getPoint().getY() == aktuellerPunkt.getY() + j)
+									for (AccessiblePoint ap : usedPoints)
 									{
-										ready = true;
+										if (ap.getPoint().getX() == aktuellerPunkt.getX() + i
+												&& ap.getPoint().getY() == aktuellerPunkt.getY() + j)
+										{
+											ready = true;
+										}
 									}
-								}
 
-								if (besucht == false && ready == false)
-								{
-									Point2D temp = new Point2D.Double(aktuellerPunkt.getX() + i,
-											aktuellerPunkt.getY() + j);
-									AccessiblePoint ap = new AccessiblePoint(temp,
-											(werte[(int) aktuellerPunkt.getX() + i - minX][(int) aktuellerPunkt.getY()
-													+ j - minY] + first.getWeight()),
-											first);
-									unusedPoints.add(ap);
+									if (besucht == false && ready == false)
+									{
+										Point2D temp = new Point2D.Double(aktuellerPunkt.getX() + i,
+												aktuellerPunkt.getY() + j);
+										AccessiblePoint ap = new AccessiblePoint(temp,
+												(werte[(int) aktuellerPunkt.getX() + i
+														- minX][(int) aktuellerPunkt.getY() + j - minY]
+														+ first.getWeight()),
+												first);
+										unusedPoints.add(ap);
+									}
 								}
 							}
 						}
 					}
 				}
+				Collections.sort(unusedPoints);
+				if (unusedPoints.size() != 0)
+				{
+					aktuellerPunkt = unusedPoints.get(0).getPoint();
+					first = unusedPoints.get(0);
+					usedPoints.add(unusedPoints.get(0));
+					unusedPoints.remove(0);
+				}
 			}
-			Collections.sort(unusedPoints);
-			if (unusedPoints.size() != 0)
+			ArrayList<Point2D> pointList = new ArrayList<Point2D>();
+			// trace back path
+
+			while (first != null)
 			{
-				aktuellerPunkt = unusedPoints.get(0).getPoint();
-				first = unusedPoints.get(0);
-				usedPoints.add(unusedPoints.get(0));
-				unusedPoints.remove(0);
+				pointList.add(first.getPoint());
+				first = first.getPrevious();
 			}
-		}
-		ArrayList<Point2D> pointList = new ArrayList<Point2D>();
-		// trace back path
 
-		while (first != null)
-		{
-			pointList.add(first.getPoint());
-			first = first.getPrevious();
+			PointSplitLine gdsl = new PointSplitLine(pointList);
+			splitLineList.add(gdsl);
+			return splitLineList;
 		}
-
-		PointSplitLine gdsl = new PointSplitLine(pointList);
-		splitLineList.add(gdsl);
-		return splitLineList;
+		else{
+			return null;
+		}
 	}
 
 }

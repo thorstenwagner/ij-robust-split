@@ -34,6 +34,7 @@ SOFTWARE.
 */
 package de.biomedical_imaging.ij.clumpsplitting.SVM;
 
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,6 +46,12 @@ import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.table.TableColumn;
 
 import libsvm.svm;
 import libsvm.svm_model;
@@ -149,39 +156,42 @@ public class SVM
 	 */
 	private static svm_model svm(ArrayList<Double[]> featureList)
 	{
-		svm_parameter param = new svm_parameter();
-		param.probability = 1;
-		param.gamma = 0.5;
-		param.nu = 0.5;
-		param.C = 2;
-		param.svm_type = svm_parameter.NU_SVC;
-		param.kernel_type = svm_parameter.LINEAR;
-		param.cache_size = 2000000;
-		param.eps = 0.001;
+		svm_model model = null;
 
-		svm_problem prob = new svm_problem();
+			svm_parameter param = new svm_parameter();
 
-		prob.y = new double[featureList.size()];
-		prob.l = featureList.size();
-		prob.x = new svm_node[featureList.size()][];
+			param.probability = 1;
+			param.gamma = 0.5;
+			param.nu = 0.5;
+			param.C = 100;
+			param.svm_type = svm_parameter.C_SVC;
+			param.kernel_type = svm_parameter.LINEAR;
+			param.cache_size = 2000000000;
+			param.eps = 0.001;
 
-		for (int i = 0; i < featureList.size(); i++)
-		{
+			svm_problem prob = new svm_problem();
 
-			Double[] features = featureList.get(i);
+			prob.y = new double[featureList.size()];
+			prob.l = featureList.size();
+			prob.x = new svm_node[featureList.size()][];
 
-			prob.x[i] = new svm_node[features.length - 1];
-			for (int j = 1; j < features.length; j++)
+			for (int i = 0; i < featureList.size(); i++)
 			{
-				svm_node node = new svm_node();
-				node.index = j;
-				node.value = features[j];
 
-				prob.x[i][j - 1] = node;
+				Double[] features = featureList.get(i);
+
+				prob.x[i] = new svm_node[features.length - 1];
+				for (int j = 1; j < features.length; j++)
+				{
+					svm_node node = new svm_node();
+					node.index = j;
+					node.value = features[j];
+
+					prob.x[i][j - 1] = node;
+				}
+				prob.y[i] = features[0];
 			}
-			prob.y[i] = features[0];
-		}
-		svm_model model = svm.svm_train(prob, param);
+			model = svm.svm_train(prob, param);
 		return model;
 	}
 
@@ -248,7 +258,7 @@ public class SVM
 	private static void showSVM(ArrayList<Double[]> featureList, double gradient, double intercept)
 	{
 		SVMPanel panel = new SVMPanel(featureList, gradient, intercept);
-		JFrame frame = new JFrame("Oval Sample");
+		JFrame frame = new JFrame("SVM-Model");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		frame.setLayout(new GridLayout(1, 1));
@@ -259,64 +269,64 @@ public class SVM
 
 	}
 
-	public static void main(String[] args)
+	private static JTable getTable(double d, double e, double f, double g)
 	{
-		JFileChooser chooser = new JFileChooser();
-		chooser.setCurrentDirectory(new java.io.File("."));
-		chooser.setDialogTitle("choosertitle");
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setAcceptAllFileFilterUsed(false);
+		d = d * 1000;
+		d = Math.round(d);
+		d = d / 1000;
 
-		// Dialog zum Oeffnen von Dateien anzeigen
-		int rueckgabeWert = chooser.showOpenDialog(null);
-		String dirName = "";
-		/* Abfrage, ob auf "Öffnen" geklickt wurde */
-		if (rueckgabeWert == JFileChooser.APPROVE_OPTION)
+		e = e * 1000;
+		e = Math.round(e);
+		e = e / 1000;
+
+		f = f * 1000;
+		f = Math.round(f);
+		f = f / 1000;
+
+		g = g * 1000;
+		g = Math.round(g);
+		g = g / 1000;
+		double gesamt = d + e;
+
+		double h = e - g;
+		double i = f + h;
+		double j = d - f;
+		double k = j + g;
+		h = h * 1000;
+		h = Math.round(h);
+		h = h / 1000;
+
+		i = i * 1000;
+		i = Math.round(i);
+		i = i / 1000;
+
+		j = j * 1000;
+		j = Math.round(j);
+		j = j / 1000;
+
+		k = k * 1000;
+		k = Math.round(k);
+		k = k / 1000;
+		String[][] rowData =
 		{
-			// Ausgabe der ausgewaehlten Datei
-			dirName = chooser.getSelectedFile().getAbsolutePath();
-		}
+				{ " ", "Splitline", "no Splitline", "sum" },
+				{ "Class Splitline", String.valueOf(f), String.valueOf(h), String.valueOf(i) },
+				{ "Class no Splitline", String.valueOf(j), String.valueOf(g), String.valueOf(k) },
+				{ "sum", String.valueOf(d), String.valueOf(e), String.valueOf(gesamt) } };
+		String[] columnnames =
+		{ " ", "Trennungslinie", "keine Trennungslinie", "Summe" };
+		JTable table = new JTable(rowData, columnnames);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-		ArrayList<Double[]> featureList = SVM.readDataFromFile(dirName);
-		double gradient = 0;
-		double intercept = 0;
-		double accuracy = 0;
-		double accuracyMinus1 = 0;
-		double accuracyPlus1 = 0;
-		int anz = 50;
-		int durchgefuehrt = anz;
-
-		for (int i = 0; i < anz; i++)
+		for (int l = 0; l < 4; l++)
 		{
-			ArrayList<Double[]> training = SVM.bootstrap(featureList);
-			ArrayList<Double[]> test = new ArrayList<Double[]>();
-			int anzTraining = SVM.countAnzPlus1(training);
-			test.addAll(featureList);
-			test.removeAll(training);
-			int anzTest = SVM.countAnzPlus1(test);
-			System.out.println(anzTraining + " " + anzTest);
-			svm_model model = svm(training);
-			if (model.nSV[0] != 0)
-			{
-				Double[] parameters = SVM.getSVMModelParameters(model);
-				gradient += parameters[0];
-				intercept += parameters[1];
-				Double accuracies[] = SVM.test(model, test);
-				accuracy += accuracies[0];
-				accuracyMinus1 += accuracies[1];
-				accuracyPlus1 += accuracies[2];
-			} else
-			{
-				durchgefuehrt--;
-			}
-
+			TableColumn col = table.getColumnModel().getColumn(l);
+			col.setPreferredWidth(100);
 		}
-		showSVM(featureList, (gradient / durchgefuehrt), (intercept / durchgefuehrt));
+		table.setEnabled(false);
 
-		System.out.println(-(gradient / durchgefuehrt)+ " "+ (intercept / durchgefuehrt));
-		System.out.println((accuracy / durchgefuehrt) + " " + (accuracyMinus1 / durchgefuehrt) + " "
-				+ (accuracyPlus1 / durchgefuehrt) + " ");
-		System.out.println(durchgefuehrt + "durchgefuehrt");
+		return table;
+
 	}
 
 	private static int countAnzPlus1(ArrayList<Double[]> training)
@@ -383,14 +393,115 @@ public class SVM
 				}
 			}
 		}
-
-		double accuracy = (right / n);
-
-		double accuracyMinus1 = (rightMinus1 / anzMinus1);
-		double accuracyPlus1 = (rightPlus1 / anzPlus1);
+		/*
+		 * double accuracy = (right / n);
+		 * 
+		 * double accuracyMinus1 = (rightMinus1 / anzMinus1); double
+		 * accuracyPlus1 = (rightPlus1 / anzPlus1);
+		 */
 		Double[] accuracies =
-		{ accuracy, accuracyMinus1, accuracyPlus1 };
+		{ right, anzPlus1, anzMinus1, rightPlus1, rightMinus1 };
 		return accuracies;
+	}
+
+	public void trainSVM()
+	{
+		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(new java.io.File("."));
+		chooser.setDialogTitle("Choose directory with trainingdata and testdata");
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setAcceptAllFileFilterUsed(false);
+
+		// Dialog zum Oeffnen von Dateien anzeigen
+		int rueckgabeWert = chooser.showOpenDialog(null);
+		String dirName = "";
+		/* Abfrage, ob auf "Öffnen" geklickt wurde */
+		if (rueckgabeWert == JFileChooser.APPROVE_OPTION)
+		{
+			// Ausgabe der ausgewaehlten Datei
+			dirName = chooser.getSelectedFile().getAbsolutePath();
+		}
+
+		ArrayList<Double[]> featureList = SVM.readDataFromFile(dirName);
+		double gradient = 0;
+		double intercept = 0;
+		double accuracy = 0;
+		double positive = 0;
+		double negative = 0;
+		double richtigpositive = 0;
+		double richtignegative = 0;
+		int anz = 1;
+		int durchgefuehrt = anz;
+		int insgesamt = 0;
+		for (int i = 0; i < anz; i++)
+		{
+			ArrayList<Double[]> training = SVM.bootstrap(featureList);
+			ArrayList<Double[]> test = new ArrayList<Double[]>();
+			int anzTraining = SVM.countAnzPlus1(training);
+			test.addAll(featureList);
+			test.removeAll(training);
+			int anzTest = SVM.countAnzPlus1(test);
+			System.out.println(anzTraining + " " + anzTest);
+			svm_model model = svm(training);
+			if (model.nSV[0] != 0)
+			{
+				Double[] parameters = SVM.getSVMModelParameters(model);
+				gradient += parameters[0];
+				intercept += parameters[1];
+				Double accuracies[] = SVM.test(model, test);
+				accuracy += accuracies[0];
+				positive += accuracies[1];
+				negative += accuracies[2];
+				insgesamt = (int) (insgesamt + accuracies[1] + accuracies[2]);
+				richtigpositive += accuracies[3];
+				richtignegative += accuracies[4];
+			} else
+			{
+				durchgefuehrt--;
+			}
+
+		}
+		showSVM(featureList, (gradient / durchgefuehrt), (intercept / durchgefuehrt));
+
+		JTable t = SVM.getTable(positive / insgesamt, negative / insgesamt, richtigpositive / insgesamt,
+				richtignegative / insgesamt);
+		JFrame f = new JFrame();
+		f.setSize(100, 200);
+		f.setLayout(new GridLayout(2, 1));
+		JLabel labelc1 = new JLabel("Optimized c1-Value");
+
+		double gradienttemp = -gradient / durchgefuehrt;
+		gradienttemp = gradienttemp * 1000;
+		gradienttemp = Math.round(gradienttemp);
+		gradienttemp = gradienttemp / 1000;
+
+		double intercepttemp = intercept / durchgefuehrt;
+		intercepttemp = intercepttemp * 1000;
+		intercepttemp = Math.round(intercepttemp);
+		intercepttemp = intercepttemp / 1000;
+		JTextField textc1 = new JTextField(String.valueOf(gradienttemp));
+		textc1.setDisabledTextColor(Color.black);
+		JLabel labelc2 = new JLabel("Optimized c2-Value");
+		JTextField textc2 = new JTextField(String.valueOf(intercepttemp));
+		textc2.setDisabledTextColor(Color.black);
+		textc1.setEnabled(false);
+		textc2.setEnabled(false);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JPanel panel = new JPanel(new GridLayout(2, 2));
+
+		panel.add(labelc1);
+		panel.add(textc1);
+		panel.add(labelc2);
+		panel.add(textc2);
+		panel.setVisible(true);
+		f.add(panel);
+		JPanel panel2 = new JPanel();
+
+		panel2.add(t);
+		f.add(panel2);
+		f.pack();
+		f.setVisible(true);
+
 	}
 
 }

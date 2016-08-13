@@ -528,6 +528,13 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		}
 	}
 
+	public Vector2d getOrientationVector(Point2D cr){
+		double x=cr.getX()-this.getMidPointOfConcavityRegion().getX();
+		double y=cr.getY()-this.getMidPointOfConcavityRegion().getY();
+		Vector2d v= new Vector2d(x,y);
+		v.normalize();
+		return v;
+	}
 	@Override
 	public String toString()
 	{

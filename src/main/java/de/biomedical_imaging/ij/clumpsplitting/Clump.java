@@ -237,31 +237,31 @@ public class Clump
 		 * For SplitLineTypes 0-3 first the Concavitypixels of a
 		 * StraightSplitLine are detected
 		 */
+
+		AbstractSplitLineCalculator sslc=null;
 		if (Clump_Splitting.SPLITLINETYPE == SplitLineType.STRAIGHTSPLITLINE
 				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINE
 				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.MINIMUMINTENSITYSPLITLINE
 				|| Clump_Splitting.SPLITLINETYPE == SplitLineType.GEODESICDISTANCESPLITLINE)
 		{
-			AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
-			possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this, ip, binary);
+			sslc = new StraightSplitLineCalculator();
 		} else
 		{
 			if (Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINEFARHAN)
 			{
-				AbstractSplitLineCalculator mislcf = new MaximumIntensitySplitLineCalculatorFarhan();
-				possibleSplitLines = mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip, binary);
-
+				sslc = new MaximumIntensitySplitLineCalculatorFarhan();
+			
 			} else
 			{
-				if (Clump_Splitting.SPLITLINETYPE == SplitLineType.MAXIMUMINTENSITYSPLITLINEFARHAN)
+				if (Clump_Splitting.SPLITLINETYPE == SplitLineType.MINIMUMINTENSITYSPLITLINEFARHAN)
 				{
-					AbstractSplitLineCalculator mislcf = new MinimumIntensitySplitLineCalculatorFarhan();
-					possibleSplitLines = mislcf.calculatePossibleSplitLines(concavityRegionList, this, ip, binary);
-
+					sslc = new MinimumIntensitySplitLineCalculatorFarhan();
+				
 				}
 			}
 		}
-
+		possibleSplitLines = sslc.calculatePossibleSplitLines(concavityRegionList, this, ip, binary);
+		
 		if (possibleSplitLines.size() == 0)
 		{
 			Clump_Splitting.STOP++;

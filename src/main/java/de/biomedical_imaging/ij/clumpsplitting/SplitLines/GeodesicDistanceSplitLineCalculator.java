@@ -1,9 +1,7 @@
 /*
 The MIT License (MIT)
-
 Copyright (c) 2016 Louise Bloch (louise.bloch001@stud.fh-dortmund.de), Thorsten Wagner (wagner@b
 iomedical-imaging.de)
-
 Permission is hereby granted, free of charge, to any person obtaining a
 copy
 of this software and associated documentation files (the "Software"),
@@ -14,11 +12,9 @@ to use, copy, modify, merge, publish, distribute, sublicense, and/or
 sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included
 in all
 copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -107,19 +103,45 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 		ArrayList<AbstractSplitLine> splitLineList = new ArrayList<AbstractSplitLine>();
 		int minX;
 		int maxX;
+		int konstante =30;
 		// define region for the splitLine
 		if (startPoint != null && endPoint != null)
 		{
 			if (startPoint.getX() < endPoint.getX())
 			{
-				// TODO Konstante
-				minX = (int) startPoint.getX();
-				maxX = (int) endPoint.getX();
+				if (startPoint.getX() - konstante > 0)
+				{
+					// TODO Konstante
+					minX = (int) startPoint.getX() - konstante;
+				} else
+				{
+					minX = 0;
+				}
+				if (endPoint.getX() + konstante < ip.getWidth())
+				{
+					maxX = (int) endPoint.getX() + konstante;
+				} else
+				{
+					maxX = ip.getWidth();
+				}
 
 			} else
 			{
-				minX = (int) endPoint.getX();
-				maxX = (int) startPoint.getX();
+				if (endPoint.getX() - konstante > 0)
+				{
+					// TODO Konstante
+					minX = (int) endPoint.getX() - konstante;
+				} else
+				{
+					minX = 0;
+				}
+				if (startPoint.getX() + konstante < ip.getWidth())
+				{
+					maxX = (int) startPoint.getX()+konstante;
+				} else
+				{
+					maxX = ip.getWidth();
+				}
 
 			}
 			int minY;
@@ -127,14 +149,37 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 			if (startPoint.getY() < endPoint.getY())
 			{
 				// TODO Konstante
-				minY = (int) startPoint.getY();
-				maxY = (int) endPoint.getY();
+				if (startPoint.getY() - konstante > 0)
+				{
+					minY = (int) startPoint.getY() - konstante;
+				} else
+				{
+					minY = 0;
+				}
+				if (endPoint.getY() + konstante < ip.getHeight())
+				{
+					maxY = (int) endPoint.getY() + konstante;
+				} else
+				{
+					maxY = ip.getHeight();
+				}
 
 			} else
 			{
-				minY = (int) endPoint.getY();
-				maxY = (int) startPoint.getY();
-
+				if (endPoint.getY() - konstante > 0)
+				{
+					minY = (int) endPoint.getY() - konstante;
+				} else
+				{
+					minY = 0;
+				}
+				if (startPoint.getY() + konstante < ip.getHeight())
+				{
+					maxY = (int) startPoint.getY() + konstante;
+				} else
+				{
+					maxY = ip.getHeight();
+				}
 			}
 			double[][] partialDerivative = new double[maxX - minX + 1][maxY - minY + 1];
 
@@ -274,6 +319,14 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 				}
 			}
 			ArrayList<Point2D> pointList = new ArrayList<Point2D>();
+			if(first.getPoint().getX()==endPoint.getX()&&first.getPoint().getY()==endPoint.getY())
+			{
+				System.out.println("identisch");
+			}
+			else{
+				System.out.println("falsch");
+			}
+			System.out.println();
 			// trace back path
 			while (first != null)
 			{
@@ -286,5 +339,4 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 		}
 		return splitLineList;
 	}
-
 }

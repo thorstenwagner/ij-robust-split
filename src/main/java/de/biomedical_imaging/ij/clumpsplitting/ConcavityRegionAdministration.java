@@ -510,7 +510,15 @@ public class ConcavityRegionAdministration
 		aocrd= new LocalOuterConcavityRegionDetector();	
 		}
 		else{
-			aocrd= new ConvexHullOuterConcavityRegionDetector();
+			if(Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE==OuterConcavityRegionDetectorType.DETECTOUTERCONCOCAVITYREGIONSBYCONVEXHULL)
+			{aocrd= new ConvexHullOuterConcavityRegionDetector();
+			
+			}else{
+				if(Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE==OuterConcavityRegionDetectorType.FARHAN)
+				{
+					aocrd= new OuterConcavityRegionDetectorFarhan();
+				}
+			}
 		}
 		concavityRegionList.addAll(aocrd.computeOuterConcavityRegions(binary, clump));
 		concavityRegionList.addAll(this.computeInnerConcavityRegions(binary));

@@ -7,34 +7,17 @@ import java.util.ArrayList;
 
 import ij.process.ImageProcessor;
 
-public class LocalOuterConcavityRegionDetector implements AbstractOuterConcavityRegionDetector
+public class OuterConcavityRegionDetectorFarhan implements AbstractOuterConcavityRegionDetector
 {
-	/**
-	 * Computes the ConcavityRegions of the Outer Contour by locally check if a
-	 * Contour has a ConcavityRegion by analyse if the Midpoint of a Line
-	 * Between point at positions i+10, i-10 contains to the Contour or doesn't.
-	 * 
-	 * Result depends on the choosed ConcavityPixelDetectorType
-	 * 
-	 * @param binary
-	 *            ImageProcessor of the Binarized image
-	 * @param clump
-	 *            Clump to detect Outer ConcavityRegions
-	 * @return List of all detected ConcavityRegions
-	 */
+
 	@Override
 	public ArrayList<ConcavityRegion> computeOuterConcavityRegions(ImageProcessor binary, Clump clump)
 	{
-
 		Polygon contour = clump.getBoundary();
 
 		int konstante = 10;
-		boolean switched = false;
-		boolean isBackground = false;
 
 		ArrayList<ConcavityRegion> concavityRegionList = new ArrayList<ConcavityRegion>();
-		boolean isStarted = false;
-		ArrayList<Point2D> intList = new ArrayList<Point2D>();
 		/*
 		 * find Concave Regions by iterate about the Contour of the Clump BEGIN
 		 * Region if midPoint of the Line between i+10 and i-10 doesn't contain
@@ -69,138 +52,84 @@ public class LocalOuterConcavityRegionDetector implements AbstractOuterConcavity
 
 				double xDist = iMinus.getX() + iPlus.getX();
 				double yDist = iMinus.getY() + iPlus.getY();
-				
 				Point2D midPoint = new Point2D.Double(Math.round((xDist / 2)), Math.round((yDist / 2)));
-			
-				if (!contour.contains(midPoint)||!this.testintersects(iMinus,iPlus,contour))
+
+				if (!contour.contains(midPoint))
 				{
-					if (isBackground == false)
-					{
-						isBackground = true;
-						switched = true;
-						isStarted = true;
-					}
+					ArrayList<Point2D> embeddedPoints = this.getAllEmbeddedPointsFromBoundaryArc((int) iPlus.getX(),
+							(int) iPlus.getY(), (int) iMinus.getX(), (int) iMinus.getY(), clump);
+					ArrayList<Double> distList = this.computeDistance(embeddedPoints, (int) iMinus.getX(),
+							(int) iMinus.getY(), (int) iPlus.getX(), (int) iPlus.getY());
 
-				} else
-				{
-					if (this.pixelContainsContour(contour, midPoint))
+					LargestDistanceConcavityPixelDetector ldcpd = new LargestDistanceConcavityPixelDetector();
+					ConcavityRegion concavityRegion = new ConcavityRegion((int) iMinus.getX(), (int) iMinus.getY(),
+							(int) iPlus.getX(), (int) iPlus.getY(), embeddedPoints, distList);
+					ArrayList<ConcavityPixel> p = ldcpd.computeConcavityPixel(concavityRegion);
+					if (p.size() > 0)
 					{
-
-						if (isBackground == true)
+						if (p.get(0).distance() > Clump_Splitting.CONCAVITY_DEPTH_THRESHOLD)
 						{
-							isBackground = false;
-							switched = true;
-							isStarted = false;
-						}
-
-					} else
-
-					{
-						if (isBackground == true)
-						{
-							isBackground = false;
-							switched = true;
-							isStarted = false;
-						}
-					}
-				}
-
-				if (switched == true)
-				{
-
-					if (isStarted == true)
-					{
-						ArrayList<Point2D> embeddedPoints = this.getAllEmbeddedPointsFromBoundaryArc(
-								(int) iPlus.getX(), (int) iPlus.getY(),(int) iMinus.getX(), (int) iMinus.getY(),
-								clump);
-						ArrayList<Double> distList = this.computeDistance(embeddedPoints, (int) iMinus.getX(),
-								(int) iMinus.getY(), (int) iPlus.getX(), (int) iPlus.getY());
-						double max = 0;
-						for (int p = 0; p < distList.size(); p++)
-						{
-							if (distList.get(p) > max)
+							int minusX = 0;
+							int minusY = 0;
+							int plusX = 0;
+							int plusY = 0;
+							ConcavityPixel cp = p.get(0);
+							int x = this.getPositionOfPointAtBoundary(contour, cp.getPosition().getX(),
+									cp.getPosition().getY());
+							if (x >= 10)
 							{
-								max = distList.get(p);
-							}
-						}
-						if (max > 1)
-						{
-							intList.add(iMinus);
-						} else
-						{
-							isStarted = false;
-							isBackground = false;
-						}
-					} else
-					{
-						intList.add(iPlus);
-					}
-					switched = false;
+								minusX = contour.xpoints[x - 10];
+								minusY = contour.ypoints[x - 10];
 
-				}
-			}
-		}
-
-		for (int k = 0; k < intList.size(); k++)
-		{
-			int innerStartX = 0;
-			int innerEndX = 0;
-			int innerStartY = 0;
-			int innerEndY = 0;
-			if (k == 0)
-			{
-				innerStartX = (int) intList.get(intList.size() - 1).getX();
-				innerStartY = (int) intList.get(intList.size() - 1).getY();
-				innerEndX = (int) intList.get(k).getX();
-				innerEndY = (int) intList.get(k).getY();
-			} else
-			{
-
-				innerStartX = (int) intList.get(k - 1).getX();
-				innerStartY = (int) intList.get(k - 1).getY();
-				innerEndX = (int) intList.get(k).getX();
-				innerEndY = (int) intList.get(k).getY();
-
-			}
-
-			int midX = Math.round((innerStartX + innerEndX) / 2);
-			int midY = Math.round((innerStartY + innerEndY) / 2);
-
-			Point2D midPoint = new Point2D.Double(midX, midY);
-
-			if (!contour.contains(midPoint))
-			{
-				if (this.getPositionOfConvexHullPointAtBoundary(contour, innerStartX, innerStartY) < this
-						.getPositionOfConvexHullPointAtBoundary(contour, innerEndX, innerEndY) || k == 0)
-				{
-					ArrayList<Point2D> pointList = getAllEmbeddedPointsFromBoundaryArc(innerEndX, innerEndY,
-							innerStartX, innerStartY, clump); //
-					if (pointList.size() > 3)
-					{
-						ArrayList<Double> doubleList = computeDistance(pointList, innerStartX, innerStartY, innerEndX,
-								innerEndY);
-						AbstractConcavityPixelDetector ldcpd = null;
-
-						if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS)
-						{
-							ldcpd = new AllConcavityPixelDetector();
-						} else
-						{
-							if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH)
+							} else
 							{
-								ldcpd = new LargestDistanceConcavityPixelDetector();
+
+								minusX = contour.xpoints[(contour.npoints - 2) + (x - 10)];
+								minusY = contour.ypoints[(contour.npoints - 2) + (x - 10)];
+
 							}
-						}
-						ConcavityRegion concavityRegion = new ConcavityRegion(innerStartX, innerStartY, innerEndX,
-								innerEndY, pointList, doubleList);
+							if (x + 10 <= contour.npoints - 2)
+							{
+								plusX = contour.xpoints[x + 10];
+								plusY = contour.ypoints[x + 10];
 
-						ArrayList<ConcavityPixel> concavityPixelList = ldcpd.computeConcavityPixel(concavityRegion);
+							} else
+							{
+								plusX = contour.xpoints[(x + 10) - (contour.npoints - 2)];
+								plusY = contour.ypoints[(x + 10) - (contour.npoints - 2)];
 
-						if (concavityPixelList.size() > 0)
-						{
-							concavityRegion.setConcavityPixelList(concavityPixelList);
+							}
+							ArrayList<Point2D> pointList = getAllEmbeddedPointsFromBoundaryArc(plusX,
+									plusY,minusX,minusY, clump); //
+							if (pointList.size() > 3)
+							{
+								ArrayList<Double> doubleList = computeDistance(pointList, minusX, minusY, plusX, plusY);
+								AbstractConcavityPixelDetector adcpd = null;
 
-							concavityRegionList.add(concavityRegion);
+								if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == ConcavityPixelDetectorType.DETECTALLCONCAVITYPIXELS)
+								{
+									adcpd = new AllConcavityPixelDetector();
+								} else
+								{
+									if (Clump_Splitting.CONCAVITYPIXELDETECOTORTYPE == ConcavityPixelDetectorType.DETECTCONCAVITYPIXELSWITHLARGESTCONCAVITYDEPTH)
+									{
+										adcpd = new LargestDistanceConcavityPixelDetector();
+									}
+								}
+								ConcavityRegion concavityRegion1 = new ConcavityRegion(minusX, minusY, plusX, plusY,
+										pointList, doubleList);
+
+								ArrayList<ConcavityPixel> concavityPixelList = adcpd
+										.computeConcavityPixel(concavityRegion1);
+
+								if (concavityPixelList.size() > 0)
+								{
+									concavityRegion1.setConcavityPixelList(concavityPixelList);
+
+									concavityRegionList.add(concavityRegion1);
+									i+=10;
+								}
+							}
 						}
 					}
 				}
@@ -209,36 +138,6 @@ public class LocalOuterConcavityRegionDetector implements AbstractOuterConcavity
 		}
 		return concavityRegionList;
 
-	}
-
-	private boolean testintersects(Point2D iMinus, Point2D iPlus, Polygon contour)
-	{
-		Line2D line= new Line2D.Double(iMinus,iPlus);
-		int index1=this.getPositionOfConvexHullPointAtBoundary(contour, iMinus.getX(),iMinus.getY());
-		int index2= this.getPositionOfConvexHullPointAtBoundary(contour, iPlus.getX(), iPlus.getY());
-		for (int i=index1+1;i<index2-1;i++)
-		{
-			Line2D l= new Line2D.Double(contour.xpoints[i],contour.ypoints[i],contour.xpoints[i+1],contour.ypoints[i+1]);
-			if(l.intersectsLine(line))
-			{
-				return true;
-			}
-			
-		}
-		return false;
-	}
-
-	private boolean pixelContainsContour(Polygon contour, Point2D midPoint)
-	{
-
-		for (int i = 0; i < contour.npoints; i++)
-		{
-			if (contour.xpoints[i] == midPoint.getX() && contour.ypoints[i] == midPoint.getY())
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -364,7 +263,7 @@ public class LocalOuterConcavityRegionDetector implements AbstractOuterConcavity
 	 *            Coordinate of specified Point
 	 * @return index of the Point with regard to the Polygon
 	 */
-	private int getPositionOfConvexHullPointAtBoundary(Polygon polygon, double x, double y)
+	private int getPositionOfPointAtBoundary(Polygon polygon, double x, double y)
 	{
 		for (int i = 0; i < polygon.npoints; i++)
 		{
@@ -375,4 +274,5 @@ public class LocalOuterConcavityRegionDetector implements AbstractOuterConcavity
 		}
 		return 0;
 	}
+
 }
