@@ -668,12 +668,12 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 				String[] itemsDetector =
 				{ "Detect all Concavity-Pixels", "Detect all Concavity-Pixels with largest Concavity-Depth" };
 				gd.addChoice("Concavity-Pixel-Detector-Type", itemsDetector,
-						"Detect all Concavity-Pixels with largest Concavity-Depth");
+						"Detect all Concavity-Pixels");
 
 				String[] itemsDetectorOuter =
 				{ "Detect outer Concavity Regions by ConvexHull", "Detect outer Concavity Regions locally", "Farhan" };
 				gd.addChoice("Outer-Concavity-Region-Detector-Type", itemsDetectorOuter,
-						"Detect outer Concavity Regions locally");
+						"Detect outer Concavity Regions by ConvexHull");
 				gd.showDialog();
 
 				if (gd.wasCanceled())
