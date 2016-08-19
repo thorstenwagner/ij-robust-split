@@ -53,6 +53,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableColumn;
 
+import ij.IJ;
 import libsvm.svm;
 import libsvm.svm_model;
 import libsvm.svm_node;
@@ -157,18 +158,22 @@ public class SVM
 	private static svm_model svm(ArrayList<Double[]> featureList)
 	{
 		svm_model model = null;
-
+		
+		svm.svm_set_print_string_function(new libsvm.svm_print_interface(){
+		    @Override public void print(String s) {} // Disables svm output
+		});
+		
 			svm_parameter param = new svm_parameter();
-
+			
 			param.probability = 1;
 			param.gamma = 0.5;
 			param.nu = 0.5;
-			param.C = 100;
+			param.C = 20;
 			param.svm_type = svm_parameter.C_SVC;
 			param.kernel_type = svm_parameter.LINEAR;
 			param.cache_size = 2000000000;
-			param.eps = 0.001;
-
+			param.eps = 0.000001;
+			
 			svm_problem prob = new svm_problem();
 
 			prob.y = new double[featureList.size()];
@@ -435,6 +440,7 @@ public class SVM
 		int insgesamt = 0;
 		for (int i = 0; i < anz; i++)
 		{
+			
 			ArrayList<Double[]> training = SVM.bootstrap(featureList);
 			ArrayList<Double[]> test = new ArrayList<Double[]>();
 			int anzTraining = SVM.countAnzPlus1(training);
@@ -460,6 +466,7 @@ public class SVM
 				durchgefuehrt--;
 			}
 
+		IJ.showProgress(durchgefuehrt/anz);
 		}
 		showSVM(featureList, (gradient / durchgefuehrt), (intercept / durchgefuehrt));
 

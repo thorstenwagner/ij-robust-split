@@ -42,6 +42,7 @@ import java.awt.event.MouseListener;
 
 import ij.ImagePlus;
 import ij.WindowManager;
+import ij.gui.Roi;
 import ij.gui.TextRoi;
 
 /**
@@ -97,9 +98,14 @@ public class MouseListenerConcavityRegions implements MouseListener
 
 					Clump_Splitting.overlayTextConvexHull.clear();
 					TextRoi text = new TextRoi(minX, minY, cr.getInformation(point));
+					
 					TextRoi.setFont("Default", 10, Font.PLAIN);
 					text.setStrokeWidth(5);
-					text.setStrokeColor(Color.red);
+					text.setStrokeColor(Color.darkGray);
+					Rectangle r=text.getBounds();
+					Roi roi= new Roi(r);
+					roi.setFillColor(Color.lightGray);
+					Clump_Splitting.overlayTextConvexHull.add(roi);
 					Clump_Splitting.overlayTextConvexHull.add(text);
 
 					Clump_Splitting.showOverlay();

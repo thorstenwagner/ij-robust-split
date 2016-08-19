@@ -43,6 +43,7 @@ import java.util.ArrayList;
 
 import de.biomedical_imaging.ij.clumpsplitting.AbstractConcavityPixelDetector;
 import de.biomedical_imaging.ij.clumpsplitting.Clump;
+import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityPixel;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
 import de.biomedical_imaging.ij.clumpsplitting.LargestDistanceConcavityPixelDetector;
@@ -459,7 +460,7 @@ public class Test
 		StraightSplitLineBetweenTwoConcavityRegions sslbtcr = (StraightSplitLineBetweenTwoConcavityRegions) possibleSplitLines
 				.get(0);
 		double cca = (360 / (2 * Math.PI)) * sslbtcr.getConcavityConcavityAlignment();
-		assertEquals(8, cca, 1);
+		assertEquals(2, cca, 1);
 	}
 
 	/**
@@ -489,7 +490,7 @@ public class Test
 		StraightSplitLineBetweenTwoConcavityRegions sslbtcr = (StraightSplitLineBetweenTwoConcavityRegions) possibleSplitLines
 				.get(0);
 		double ccl = (360 / (2 * Math.PI)) * sslbtcr.getConcavityLineAlignment();
-		assertEquals(6, ccl, 1);
+		assertEquals(2, ccl, 1);
 	}
 
 	/**
@@ -513,7 +514,9 @@ public class Test
 		mb.setBackground(0);
 
 		mb.findConnectedComponents();
-
+		Clump_Splitting.CONCAVITYRATIO_THRESHOLD=1;
+		Clump_Splitting.CONCAVITYANGLE_THRESHOLD=2*Math.PI;
+	
 		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
 		ArrayList<ConcavityRegion> concavityRegionList = c.getConcavityRegionList();
 		AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
@@ -548,6 +551,8 @@ public class Test
 
 		mb.findConnectedComponents();
 
+		Clump_Splitting.CONCAVITYRATIO_THRESHOLD=1;
+		Clump_Splitting.CONCAVITYANGLE_THRESHOLD=2*Math.PI;
 		Clump c = new Clump(mb.get(0).getOuterContour(), mb.get(0).getInnerContours(), imap, imageProcessorBinary);
 		ArrayList<ConcavityRegion> concavityRegionList = c.getConcavityRegionList();
 		AbstractSplitLineCalculator sslc = new StraightSplitLineCalculator();
@@ -556,7 +561,7 @@ public class Test
 		StraightSplitLineBetweenConcavityRegionAndPoint sslbtcr = (StraightSplitLineBetweenConcavityRegionAndPoint) possibleSplitLines
 				.get(0);
 		double cr = sslbtcr.getConcavityRatio();
-		assertEquals(7, cr, 0.5);
+		assertEquals(6, cr, 0.5);
 	}
 
 }

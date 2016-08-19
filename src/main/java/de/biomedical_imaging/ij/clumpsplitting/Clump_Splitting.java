@@ -275,7 +275,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 	@Override
 	public void run(ImageProcessor ip)
 	{
-		if (runSVM)
+		
+	if (runSVM)
 		{
 			this.trainSVM();
 		} else
@@ -311,7 +312,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 					int threshold = a.getThreshold(Method.Default, histogram);
 					imageProcessorBinary.threshold(threshold);
 					imageProcessorBinary.dilate();
-				}else{
+				} else
+				{
 					imageProcessorBinary.dilate();
 					imageProcessorBinary.blurGaussian(2.0);
 					AutoThresholder a = new AutoThresholder();
@@ -319,7 +321,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 					int threshold = a.getThreshold(Method.Default, histogram);
 					imageProcessorBinary.threshold(threshold);
 					imageProcessorBinary.erode();
-					
+
 				}
 
 			}
@@ -335,7 +337,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 			ImageProcessor binary = imageProcessorBinary;
 			do
 			{
-				
+
 				// iteratively computes the Splitlines
 				clumpList = Clump_Splitting.computeClumps(ip, binary);
 				/*
@@ -549,14 +551,29 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 		} else
 		{
 
-			if (selection.equals("black"))
+			if (imageprocessor.isInvertedLut())
 			{
-				BACKGROUNDCOLOR = 0;
-			} else
-			{
-				if (selection.equals("white"))
+				if (selection.equals("black"))
 				{
 					BACKGROUNDCOLOR = 1;
+				} else
+				{
+					if (selection.equals("white"))
+					{
+						BACKGROUNDCOLOR = 0;
+					}
+				}
+			}
+			else{
+				if (selection.equals("black"))
+				{
+					BACKGROUNDCOLOR = 0;
+				} else
+				{
+					if (selection.equals("white"))
+					{
+						BACKGROUNDCOLOR = 1;
+					}
 				}
 			}
 
@@ -654,7 +671,7 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 						"Detect all Concavity-Pixels with largest Concavity-Depth");
 
 				String[] itemsDetectorOuter =
-				{ "Detect outer Concavity Regions by ConvexHull", "Detect outer Concavity Regions locally","Farhan" };
+				{ "Detect outer Concavity Regions by ConvexHull", "Detect outer Concavity Regions locally", "Farhan" };
 				gd.addChoice("Outer-Concavity-Region-Detector-Type", itemsDetectorOuter,
 						"Detect outer Concavity Regions locally");
 				gd.showDialog();
@@ -710,7 +727,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 							if (outerConcavityDetectorType.equals("Detect outer Concavity Regions locally"))
 							{
 								Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
-							}else{
+							} else
+							{
 								if (outerConcavityDetectorType.equals("Farhan"))
 								{
 									Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.FARHAN;
@@ -792,7 +810,8 @@ public class Clump_Splitting implements ExtendedPlugInFilter, DialogListener
 								if (outerConcavityDetectorType.equals("Detect outer Concavity Regions locally"))
 								{
 									Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.DETECTOUTERCONCAVITYREGIONSLOCAL;
-								}else{
+								} else
+								{
 									if (outerConcavityDetectorType.equals("Farhan"))
 									{
 										Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE = OuterConcavityRegionDetectorType.FARHAN;

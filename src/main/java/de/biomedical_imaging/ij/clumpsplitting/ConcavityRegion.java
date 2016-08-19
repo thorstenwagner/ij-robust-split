@@ -422,7 +422,7 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		gamma = (360 / (2 * Math.PI)) * gamma;
 		gamma = Math.round(gamma * 100);
 		gamma = gamma / 100;
-		String text = "Ausrichtung: " + cangle + "\nKonkavitätstiefe: " + concavityDepth + "\nKonkavitätswinkel: "
+		String text = "Alignment: " + cangle + "\nConcavity-Depth: " + concavityDepth + "\nConcavity-Angle: "
 				+ gamma;
 		return text;
 
