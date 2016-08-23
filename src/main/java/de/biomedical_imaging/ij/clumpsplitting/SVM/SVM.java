@@ -435,7 +435,7 @@ public class SVM
 		double negative = 0;
 		double richtigpositive = 0;
 		double richtignegative = 0;
-		int anz = 1;
+		int anz = 5;
 		int durchgefuehrt = anz;
 		int insgesamt = 0;
 		for (int i = 0; i < anz; i++)

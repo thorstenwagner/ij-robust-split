@@ -541,4 +541,16 @@ public class ConcavityRegion implements Comparable<ConcavityRegion>
 		String st = "StartX:" + this.startX + " StartY:" + this.startY + " EndX:" + this.endX + " EndY:" + this.endY;
 		return st;
 	}
+
+	public Polygon getPolygon()
+	{
+		Polygon p= new Polygon();
+		p.addPoint(endX,endY);
+		p.addPoint(startX, endX);
+		for(Point2D d:boundaryPointList)
+		{
+			p.addPoint((int)d.getX(),(int)d.getY());
+		}
+		return p;
+	}
 }

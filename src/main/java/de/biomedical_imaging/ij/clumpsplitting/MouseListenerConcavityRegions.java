@@ -36,6 +36,7 @@ package de.biomedical_imaging.ij.clumpsplitting;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -83,23 +84,14 @@ public class MouseListenerConcavityRegions implements MouseListener
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{
-		Rectangle boundingBox = cr.getRectangle();
-		double minX = boundingBox.getMinX();
-		double minY = boundingBox.getMinY();
-		double maxX = boundingBox.getMaxX();
-		double maxY = boundingBox.getMaxY();
-
-		if ((this.getImageCoordinateX(e.getX()) > minX) && (this.getImageCoordinateX(e.getX()) < maxX))
+		Polygon boundingBox = cr.getPolygon();
+		if(boundingBox.contains(this.getImageCoordinateX(e.getX()),this.getImageCoordinateY(e.getY())))
 		{
-			if ((this.getImageCoordinateY(e.getY()) > minY) && (this.getImageCoordinateY(e.getY()) < maxY))
-			{
-				for (ConcavityPixel point : cr.getConcavityPixelList())
-				{
-
+				
 					Clump_Splitting.overlayTextConvexHull.clear();
-					TextRoi text = new TextRoi(minX, minY, cr.getInformation(point));
+					TextRoi text = new TextRoi(cr.getStartX(), cr.getStartY(), cr.getInformation(cr.getConcavityPixelList().get(0)));
 					
-					TextRoi.setFont("Default", 10, Font.PLAIN);
+					TextRoi.setFont("Default", 20, Font.PLAIN);
 					text.setStrokeWidth(5);
 					text.setStrokeColor(Color.darkGray);
 					Rectangle r=text.getBounds();
@@ -109,8 +101,7 @@ public class MouseListenerConcavityRegions implements MouseListener
 					Clump_Splitting.overlayTextConvexHull.add(text);
 
 					Clump_Splitting.showOverlay();
-				}
-			}
+				
 		}
 
 	}
