@@ -35,6 +35,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import de.biomedical_imaging.ij.clumpsplitting.Clump;
+import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
 import ij.process.ImageProcessor;
 
@@ -103,7 +104,7 @@ public class GeodesicDistanceSplitLineCalculator implements AbstractSplitLineCal
 		ArrayList<AbstractSplitLine> splitLineList = new ArrayList<AbstractSplitLine>();
 		int minX;
 		int maxX;
-		int konstante =30;
+		int konstante =Clump_Splitting.CONSTANTWANGDETECTION;
 		// define region for the splitLine
 		if (startPoint != null && endPoint != null)
 		{

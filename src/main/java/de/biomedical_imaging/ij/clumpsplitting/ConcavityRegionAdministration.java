@@ -513,11 +513,6 @@ public class ConcavityRegionAdministration
 			if(Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE==OuterConcavityRegionDetectorType.DETECTOUTERCONCOCAVITYREGIONSBYCONVEXHULL)
 			{aocrd= new ConvexHullOuterConcavityRegionDetector();
 			
-			}else{
-				if(Clump_Splitting.OUTERCONCAVITYREGIONDETECTORTYPE==OuterConcavityRegionDetectorType.FARHAN)
-				{
-					aocrd= new OuterConcavityRegionDetectorFarhan();
-				}
 			}
 		}
 		concavityRegionList.addAll(aocrd.computeOuterConcavityRegions(binary, clump));

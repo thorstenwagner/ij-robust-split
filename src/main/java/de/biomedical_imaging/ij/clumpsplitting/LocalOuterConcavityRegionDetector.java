@@ -28,7 +28,7 @@ public class LocalOuterConcavityRegionDetector implements AbstractOuterConcavity
 
 		Polygon contour = clump.getBoundary();
 
-		int konstante = 10;
+		int konstante = Clump_Splitting.OUTERCONTOURPARAMETER;
 		boolean switched = false;
 		boolean isBackground = false;
 

@@ -36,6 +36,8 @@ package de.biomedical_imaging.ij.clumpsplitting.SVM;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,11 +46,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableColumn;
@@ -69,6 +71,9 @@ import net.sf.javaml.tools.sampling.NormalBootstrapping;
  */
 public class SVM
 {
+	private Double c=0.0;
+	private Double epsilon=0.0;
+	private String dirName="";
 	/**
 	 * executes a bootstrapping
 	 * 
@@ -158,45 +163,49 @@ public class SVM
 	private static svm_model svm(ArrayList<Double[]> featureList)
 	{
 		svm_model model = null;
-		
-		svm.svm_set_print_string_function(new libsvm.svm_print_interface(){
-		    @Override public void print(String s) {} // Disables svm output
-		});
-		
-			svm_parameter param = new svm_parameter();
-			
-			param.probability = 1;
-			param.gamma = 0.5;
-			param.nu = 0.5;
-			param.C = 20;
-			param.svm_type = svm_parameter.C_SVC;
-			param.kernel_type = svm_parameter.LINEAR;
-			param.cache_size = 2000000000;
-			param.eps = 0.000001;
-			
-			svm_problem prob = new svm_problem();
 
-			prob.y = new double[featureList.size()];
-			prob.l = featureList.size();
-			prob.x = new svm_node[featureList.size()][];
-
-			for (int i = 0; i < featureList.size(); i++)
+		svm.svm_set_print_string_function(new libsvm.svm_print_interface()
+		{
+			@Override
+			public void print(String s)
 			{
+			} // Disables svm output
+		});
 
-				Double[] features = featureList.get(i);
+		svm_parameter param = new svm_parameter();
 
-				prob.x[i] = new svm_node[features.length - 1];
-				for (int j = 1; j < features.length; j++)
-				{
-					svm_node node = new svm_node();
-					node.index = j;
-					node.value = features[j];
+		param.probability = 1;
+		param.gamma = 0.5;
+		param.nu = 0.5;
+		param.C = 20;
+		param.svm_type = svm_parameter.C_SVC;
+		param.kernel_type = svm_parameter.LINEAR;
+		param.cache_size = 2000000000;
+		param.eps = 0.000001;
 
-					prob.x[i][j - 1] = node;
-				}
-				prob.y[i] = features[0];
+		svm_problem prob = new svm_problem();
+
+		prob.y = new double[featureList.size()];
+		prob.l = featureList.size();
+		prob.x = new svm_node[featureList.size()][];
+
+		for (int i = 0; i < featureList.size(); i++)
+		{
+
+			Double[] features = featureList.get(i);
+
+			prob.x[i] = new svm_node[features.length - 1];
+			for (int j = 1; j < features.length; j++)
+			{
+				svm_node node = new svm_node();
+				node.index = j;
+				node.value = features[j];
+
+				prob.x[i][j - 1] = node;
 			}
-			model = svm.svm_train(prob, param);
+			prob.y[i] = features[0];
+		}
+		model = svm.svm_train(prob, param);
 		return model;
 	}
 
@@ -409,24 +418,8 @@ public class SVM
 		return accuracies;
 	}
 
-	public void trainSVM()
+	public void train(String file,double c, double epsilon)
 	{
-		JFileChooser chooser = new JFileChooser();
-		chooser.setCurrentDirectory(new java.io.File("."));
-		chooser.setDialogTitle("Choose directory with trainingdata and testdata");
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setAcceptAllFileFilterUsed(false);
-
-		// Dialog zum Oeffnen von Dateien anzeigen
-		int rueckgabeWert = chooser.showOpenDialog(null);
-		String dirName = "";
-		/* Abfrage, ob auf "Öffnen" geklickt wurde */
-		if (rueckgabeWert == JFileChooser.APPROVE_OPTION)
-		{
-			// Ausgabe der ausgewaehlten Datei
-			dirName = chooser.getSelectedFile().getAbsolutePath();
-		}
-
 		ArrayList<Double[]> featureList = SVM.readDataFromFile(dirName);
 		double gradient = 0;
 		double intercept = 0;
@@ -438,9 +431,11 @@ public class SVM
 		int anz = 5;
 		int durchgefuehrt = anz;
 		int insgesamt = 0;
+		int numbersvs = 0;
+		int numbertraining = 0;
 		for (int i = 0; i < anz; i++)
 		{
-			
+
 			ArrayList<Double[]> training = SVM.bootstrap(featureList);
 			ArrayList<Double[]> test = new ArrayList<Double[]>();
 			int anzTraining = SVM.countAnzPlus1(training);
@@ -451,6 +446,8 @@ public class SVM
 			svm_model model = svm(training);
 			if (model.nSV[0] != 0)
 			{
+				numbersvs += model.nSV[0];
+				numbertraining += training.size();
 				Double[] parameters = SVM.getSVMModelParameters(model);
 				gradient += parameters[0];
 				intercept += parameters[1];
@@ -466,7 +463,7 @@ public class SVM
 				durchgefuehrt--;
 			}
 
-		IJ.showProgress(durchgefuehrt/anz);
+			IJ.showProgress(durchgefuehrt / anz);
 		}
 		showSVM(featureList, (gradient / durchgefuehrt), (intercept / durchgefuehrt));
 
@@ -490,16 +487,28 @@ public class SVM
 		textc1.setDisabledTextColor(Color.black);
 		JLabel labelc2 = new JLabel("Optimized c2-Value");
 		JTextField textc2 = new JTextField(String.valueOf(intercepttemp));
+		JLabel labelSVs = new JLabel("Number of Support Vectors");
+		JLabel labelData = new JLabel("Number of Trainingdata");
+		JTextField textSVs = new JTextField(String.valueOf(numbersvs / durchgefuehrt));
+		JTextField textData = new JTextField(String.valueOf(numbertraining / durchgefuehrt));
+		textSVs.setDisabledTextColor(Color.black);
+		textData.setDisabledTextColor(Color.black);
 		textc2.setDisabledTextColor(Color.black);
+		textData.setEnabled(false);
+		textSVs.setEnabled(false);
 		textc1.setEnabled(false);
 		textc2.setEnabled(false);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JPanel panel = new JPanel(new GridLayout(2, 2));
+		JPanel panel = new JPanel(new GridLayout(4, 2));
 
 		panel.add(labelc1);
 		panel.add(textc1);
 		panel.add(labelc2);
 		panel.add(textc2);
+		panel.add(labelSVs);
+		panel.add(textSVs);
+		panel.add(labelData);
+		panel.add(textData);
 		panel.setVisible(true);
 		f.add(panel);
 		JPanel panel2 = new JPanel();
@@ -509,6 +518,66 @@ public class SVM
 		f.pack();
 		f.setVisible(true);
 
+	}
+	public void inputDataSVM()
+	{
+		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(new java.io.File("."));
+		chooser.setDialogTitle("Choose directory with trainingdata and testdata");
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setAcceptAllFileFilterUsed(false);
+
+		// Dialog zum Oeffnen von Dateien anzeigen
+		int rueckgabeWert = chooser.showOpenDialog(null);
+		/* Abfrage, ob auf "Öffnen" geklickt wurde */
+		if (rueckgabeWert == JFileChooser.APPROVE_OPTION)
+		{
+			// Ausgabe der ausgewaehlten Datei
+			dirName = chooser.getSelectedFile().getAbsolutePath();
+		}
+
+		final JFrame frame= new JFrame();
+		JLabel label = new JLabel();
+		frame.setSize(300, 100);
+		frame.setLayout(new GridLayout(3, 2));
+	
+		JLabel text4 = new JLabel("Cost-Parameter C:");
+		final JTextField text1 = new JTextField("20");
+		JLabel text2 = new JLabel("Epsilon");
+		final JTextField text3 = new JTextField("0.000001");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		frame.add(text4);
+
+		frame.add(text1);
+		frame.add(text2);
+		frame.add(text3);
+		frame.add(new JPanel());
+		JButton button = new JButton();
+		button.setText("OK");
+		button.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				boolean numberFormat=false;
+				try{
+				SVM.this.c=Double.valueOf(text1.getText());
+				SVM.this.epsilon=Double.valueOf(text3.getText());
+				}catch(NumberFormatException r){
+					numberFormat=true;
+				}
+				if(!numberFormat)
+				{
+				frame.setVisible(false);
+				SVM.this.train(SVM.this.dirName, SVM.this.c, SVM.this.epsilon);
+				}
+			}
+			
+		});
+		frame.add(button);
+		frame.setVisible(true);
+		
 	}
 
 }
