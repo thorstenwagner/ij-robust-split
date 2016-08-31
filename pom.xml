@@ -64,7 +64,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 		<dependency>
 			<groupId>net.sf</groupId>
 			<artifactId>javaml</artifactId>
-			<version>0.1.5</version>
 		</dependency>
 	</dependencies>
 	<developers>
@@ -92,4 +91,13 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 		<developerConnection>scm:git:git@github.com:thorstenwagner/ij-robust-split.git</developerConnection>
 	</scm>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>net.sf</groupId>
+				<artifactId>javaml</artifactId>
+				<version>0.1.5</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
