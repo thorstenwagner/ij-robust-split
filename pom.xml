@@ -65,6 +65,8 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 			<groupId>net.sf</groupId>
 			<artifactId>javaml</artifactId>
 			<version>0.1.5</version>
+			 <scope>system</scope>
+       		 <systemPath>${project.basedir}/jar/javaml-0.1.5.jar</systemPath>
 		</dependency>
 	</dependencies>
 	<developers>
