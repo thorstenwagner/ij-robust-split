@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import de.biomedical_imaging.ij.clumpsplitting.Clump;
-import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegionAdministration;
 
@@ -105,7 +104,7 @@ public class MaximumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 			{ 0, 0, 1 },
 			{ 0, 1, 1 } };
 
-	private static ArrayList<Point2D> allSplitPoints =new ArrayList<Point2D>();
+	private static ArrayList<Point2D> allSplitPoints = new ArrayList<Point2D>();
 
 	/**
 	 * calculates a possible splitLine by first compute the orientation of the
@@ -118,137 +117,150 @@ public class MaximumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 	{
 		ArrayList<AbstractSplitLine> splitLines = new ArrayList<AbstractSplitLine>();
 		// take SplitLine with largest concavityDepth of the Clump
-		Collections.sort(concavityRegionList);
+		// Collections.sort(concavityRegionList);
 
-		ArrayList<Point2D> points = new ArrayList<Point2D>();
 		if (concavityRegionList.size() > 0)
 		{
-			ConcavityRegion cr = concavityRegionList.get(concavityRegionList.size() - 1);
-			ArrayList<Point2D> maxDistList = cr.getMaxDistCoord();
-			Point2D aktuellerPunkt = maxDistList.get(maxDistList.size() / 2);
-			points.add(aktuellerPunkt);
-			// compute orientation of the ConcavityRegion
-			double orientation = cr.getOrientation(aktuellerPunkt);
-			int[][] filter;
-			if (orientation > 0 && orientation <= (Math.PI / 2))
+			for (ConcavityRegion cr : concavityRegionList)
 			{
-				filter = MaximumIntensitySplitLineCalculatorFarhan.NULLTONINETY;
-			} else
-			{
-				if (orientation > (Math.PI / 2) && orientation <= (Math.PI))
+				ArrayList<Point2D> points = new ArrayList<Point2D>();
+				
+				// ConcavityRegion cr =
+				// concavityRegionList.get(concavityRegionList.size() - 1);
+				ArrayList<Point2D> maxDistList = cr.getMaxDistCoord();
+				Point2D aktuellerPunkt = maxDistList.get(maxDistList.size() / 2);
+				points.add(aktuellerPunkt);
+				// compute orientation of the ConcavityRegion
+				double orientation = cr.getOrientation(aktuellerPunkt);
+				int[][] filter;
+				if (orientation > 0 && orientation <= (Math.PI / 2))
 				{
-					filter = MaximumIntensitySplitLineCalculatorFarhan.NINETYTOHUNDREDEIGHTY;
-
+					filter = MaximumIntensitySplitLineCalculatorFarhan.NULLTONINETY;
 				} else
 				{
-					if (orientation > (Math.PI) && orientation <= ((Math.PI) * 1.5))
+					if (orientation > (Math.PI / 2) && orientation <= (Math.PI))
 					{
-						filter = MaximumIntensitySplitLineCalculatorFarhan.HUNDREDEIGHTYTOTWOHUNDREDSEVENTY;
+						filter = MaximumIntensitySplitLineCalculatorFarhan.NINETYTOHUNDREDEIGHTY;
 
 					} else
 					{
-						filter = MaximumIntensitySplitLineCalculatorFarhan.TWOHUNDREDSEVENTTOTHREEHUNDREDSIXTY;
-
-					}
-				}
-			}
-			int value;
-			if (Clump_Splitting.BACKGROUNDCOLOR == 1)
-			{
-				value = 255;
-			} else
-			{
-				value = 0;
-			}
-			boolean equals = (binary.getPixel((int) aktuellerPunkt.getX(), (int) aktuellerPunkt.getY()) == value);
-			/*
-			 * search for largest Intensity Path by taking the next neighbor in
-			 * the computed direction with the largest intensity, as long as it
-			 * hasn't reached the Contour of the Clump
-			 */
-
-			while (!equals && aktuellerPunkt.getX() > 0 && aktuellerPunkt.getY() > 0
-					&& aktuellerPunkt.getX() < ip.getWidth() && aktuellerPunkt.getY() < ip.getHeight())
-			{
-				int max = -10;
-				Point2D temp = null;
-				for (int m = -1; m <= 1; m++)
-				{
-					for (int n = -1; n <= 1; n++)
-					{
-						if (filter[m + 1][n + 1] == 1)
+						if (orientation > (Math.PI) && orientation <= ((Math.PI) * 1.5))
 						{
-							if ((orientation > 0 && orientation <= (Math.PI / 2) && m == -1 && n == 1)
-									|| (orientation > (Math.PI / 2) && orientation <= (Math.PI) && m == -1 && n == -1)
-									|| (orientation > (Math.PI) && orientation <= ((Math.PI) * 1.5) && m == 1
-											&& n == -1)
-									|| (orientation > ((Math.PI) * 1.5) && orientation <= ((Math.PI) * 2) && m == 1
-											&& n == 1))
-							{
-								if (ip.getPixel((int) aktuellerPunkt.getX() + n,
-										(int) aktuellerPunkt.getY() + m) >= max)
-								{
-									max = ip.getPixel((int) aktuellerPunkt.getX() + n, (int) aktuellerPunkt.getY() + m);
-									temp = new Point2D.Double(aktuellerPunkt.getX() + n, aktuellerPunkt.getY() + m);
-								}
-							} else
-							{
-								if (ip.getPixel((int) aktuellerPunkt.getX() + n, (int) aktuellerPunkt.getY() + m) > max)
-								{
-									max = ip.getPixel((int) aktuellerPunkt.getX() + n, (int) aktuellerPunkt.getY() + m);
-									temp = new Point2D.Double(aktuellerPunkt.getX() + n, aktuellerPunkt.getY() + m);
-								}
-							}
-						}
-					}
-				}
-				double difx = aktuellerPunkt.getX() - temp.getX();
-				double dify = aktuellerPunkt.getY() - temp.getY();
-				if (difx != 0 && dify != 0)
-				{
-					Point2D p = null;
-					if (difx == -1 && dify == -1)
-					{
-						p = new Point2D.Double(temp.getX(), aktuellerPunkt.getY());
-					} else
-					{
-						if (difx == -1 && dify == 1)
-						{
-							p = new Point2D.Double(aktuellerPunkt.getX(), temp.getY());
+							filter = MaximumIntensitySplitLineCalculatorFarhan.HUNDREDEIGHTYTOTWOHUNDREDSEVENTY;
+
 						} else
 						{
-							if (difx == 1 && dify == 1)
+							filter = MaximumIntensitySplitLineCalculatorFarhan.TWOHUNDREDSEVENTTOTHREEHUNDREDSIXTY;
+
+						}
+					}
+				}
+				boolean equals = false;
+				/*
+				 * search for largest Intensity Path by taking the next neighbor
+				 * in the computed direction with the largest intensity, as long
+				 * as it hasn't reached the Contour of the Clump
+				 */
+
+				while (!equals && aktuellerPunkt.getX() > 0 && aktuellerPunkt.getY() > 0
+						&& aktuellerPunkt.getX() < ip.getWidth() && aktuellerPunkt.getY() < ip.getHeight())
+				{
+					int max = -10;
+					Point2D temp = null;
+					for (int m = -1; m <= 1; m++)
+					{
+						for (int n = -1; n <= 1; n++)
+						{
+							if (filter[m + 1][n + 1] == 1)
 							{
-								p = new Point2D.Double(temp.getX(), aktuellerPunkt.getY());
-							} else
-							{
-								if (difx == 1 && dify == -1)
+								if ((orientation > 0 && orientation <= (Math.PI / 2) && m == -1 && n == 1)
+										|| (orientation > (Math.PI / 2) && orientation <= (Math.PI) && m == -1
+												&& n == -1)
+										|| (orientation > (Math.PI) && orientation <= ((Math.PI) * 1.5) && m == 1
+												&& n == -1)
+										|| (orientation > ((Math.PI) * 1.5) && orientation <= ((Math.PI) * 2) && m == 1
+												&& n == 1))
 								{
-									p = new Point2D.Double(aktuellerPunkt.getX(), temp.getY());
+									if (ip.getPixel((int) aktuellerPunkt.getX() + n,
+											(int) aktuellerPunkt.getY() + m) >= max)
+									{
+										max = ip.getPixel((int) aktuellerPunkt.getX() + n,
+												(int) aktuellerPunkt.getY() + m);
+										temp = new Point2D.Double(aktuellerPunkt.getX() + n, aktuellerPunkt.getY() + m);
+									}
+								} else
+								{
+									if (ip.getPixel((int) aktuellerPunkt.getX() + n,
+											(int) aktuellerPunkt.getY() + m) > max)
+									{
+										max = ip.getPixel((int) aktuellerPunkt.getX() + n,
+												(int) aktuellerPunkt.getY() + m);
+										temp = new Point2D.Double(aktuellerPunkt.getX() + n, aktuellerPunkt.getY() + m);
+									}
 								}
 							}
 						}
 					}
-					points.add(p);
+					double difx = aktuellerPunkt.getX() - temp.getX();
+					double dify = aktuellerPunkt.getY() - temp.getY();
+					if (difx != 0 && dify != 0)
+					{
+						Point2D p = null;
+						if (difx == -1 && dify == -1)
+						{
+							p = new Point2D.Double(temp.getX(), aktuellerPunkt.getY());
+						} else
+						{
+							if (difx == -1 && dify == 1)
+							{
+								p = new Point2D.Double(aktuellerPunkt.getX(), temp.getY());
+							} else
+							{
+								if (difx == 1 && dify == 1)
+								{
+									p = new Point2D.Double(temp.getX(), aktuellerPunkt.getY());
+								} else
+								{
+									if (difx == 1 && dify == -1)
+									{
+										p = new Point2D.Double(aktuellerPunkt.getX(), temp.getY());
+									}
+								}
+							}
+						}
+						points.add(p);
+					}
+					points.add(temp);
+					aktuellerPunkt = temp;
+					equals = this.isOnContour((int) aktuellerPunkt.getX(), (int) aktuellerPunkt.getY(), c);
 				}
-				points.add(temp);
-				aktuellerPunkt = temp;
-				equals = (binary.getPixel((int) aktuellerPunkt.getX(), (int) aktuellerPunkt.getY()) == value);
-			}
 
-			if (points.size() > 3)
-			{
-				if (ConcavityRegionAdministration.allConcavityRegionPoints.contains(aktuellerPunkt)||MaximumIntensitySplitLineCalculatorFarhan.allSplitPoints.contains(aktuellerPunkt))
+				if (points.size() > 3)
 				{
-					MaximumIntensitySplitLineCalculatorFarhan.allSplitPoints.addAll(points);
-					PointSplitLine mmis = new PointSplitLine(points);
-					splitLines.add(mmis);
+					if (ConcavityRegionAdministration.allConcavityRegionPoints.contains(aktuellerPunkt)
+							|| MaximumIntensitySplitLineCalculatorFarhan.allSplitPoints.contains(aktuellerPunkt))
+					{
+						MaximumIntensitySplitLineCalculatorFarhan.allSplitPoints.addAll(points);
+						PointSplitLine mmis = new PointSplitLine(points);
+						splitLines.add(mmis);
+					}
 				}
-				
 			}
 		}
 
 		return splitLines;
+	}
+
+	private boolean isOnContour(int x, int y, Clump c)
+	{
+		for (int i = 0; i < c.getBoundary().npoints; i++)
+		{
+			if (c.getBoundary().xpoints[i] == x && c.getBoundary().ypoints[i] == y)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

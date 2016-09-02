@@ -27,7 +27,6 @@ public class ConvexHullOuterConcavityRegionDetector implements AbstractOuterConc
 				endY = clump.getConvexHull().ypoints[i];
 
 				ArrayList<Point2D> pointList = getAllEmbeddedPointsFromBoundaryArc(startX, startY, endX, endY,clump);
-				ConcavityRegionAdministration.allConcavityRegionPoints.addAll(pointList);
 				if (pointList.size() > 3)
 				{
 					ArrayList<Double> doubleList = computeDistance(pointList, startX, startY, endX, endY);
@@ -47,6 +46,7 @@ public class ConvexHullOuterConcavityRegionDetector implements AbstractOuterConc
 					ArrayList<ConcavityPixel> concavityPixelList = acpd.computeConcavityPixel(concavityRegion);
 					if (concavityPixelList.size() > 0)
 					{
+						ConcavityRegionAdministration.allConcavityRegionPoints.addAll(pointList);
 						concavityRegion.setConcavityPixelList(concavityPixelList);
 						concavityRegionList.add(concavityRegion);
 					}

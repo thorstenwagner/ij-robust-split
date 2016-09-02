@@ -32,6 +32,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 IN THE
 SOFTWARE.
 */
+
 package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
 import java.awt.geom.Point2D;
@@ -39,25 +40,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import de.biomedical_imaging.ij.clumpsplitting.Clump;
-import de.biomedical_imaging.ij.clumpsplitting.Clump_Splitting;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegionAdministration;
+
 import ij.process.ImageProcessor;
 
 /**
- * Class to compute MinimumIntensity SplitLine, a minimum intensity SplitLine
+ * Class to compute MinimumIntensity SplitLine, a minimumintensity SplitLine
  * follows the path between start and endPoint of minimum intensity
  * 
  * the idea of Farhan et al. is, to follow the adjacent Pixel in the direction
  * of the computed orientation of the ConcavityRegion, the pixel with the
- * minimal ConcavityValue in this direction is choosed, as long, as another
+ * largest ConcavityValue in this direction is choosed, as long, as another
  * boundaryPoint of the Countour is reached
  *
  * @author Louise
  *
  */
+
 public class MinimumIntensitySplitLineCalculatorFarhan implements AbstractSplitLineCalculator
 {
+
 	/**
 	 * neighborhood to check if the orientation of the ConcavityRegion is
 	 * between 0 and 90 degrees to the horizontal
@@ -106,26 +109,26 @@ public class MinimumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 	/**
 	 * calculates a possible splitLine by first compute the orientation of the
 	 * ConcavityRegion and than looks for adjacent points in this direction to
-	 * find pixel with low Intensity to calculate SplitLine
+	 * find pixel with high Intensity to calculate SplitLine
 	 */
 	@Override
 	public ArrayList<AbstractSplitLine> calculatePossibleSplitLines(ArrayList<ConcavityRegion> concavityRegionList,
 			Clump c, ImageProcessor ip, ImageProcessor binary)
 	{
 		ArrayList<AbstractSplitLine> splitLines = new ArrayList<AbstractSplitLine>();
-		Collections.sort(concavityRegionList);
 		// take SplitLine with largest concavityDepth of the Clump
-
+		Collections.sort(concavityRegionList);
 		if (concavityRegionList.size() > 0)
 		{
 			for (ConcavityRegion cr : concavityRegionList)
 			{
 				ArrayList<Point2D> points = new ArrayList<Point2D>();
+				
+				//ConcavityRegion cr = concavityRegionList.get(concavityRegionList.size() - 1);
 				ArrayList<Point2D> maxDistList = cr.getMaxDistCoord();
 				Point2D aktuellerPunkt = maxDistList.get(maxDistList.size() / 2);
 				points.add(aktuellerPunkt);
 				// compute orientation of the ConcavityRegion
-
 				double orientation = cr.getOrientation(aktuellerPunkt);
 				int[][] filter;
 				if (orientation > 0 && orientation <= (Math.PI / 2))
@@ -150,15 +153,7 @@ public class MinimumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 						}
 					}
 				}
-				int value;
-				if (Clump_Splitting.BACKGROUNDCOLOR == 1)
-				{
-					value = 255;
-				} else
-				{
-					value = 0;
-				}
-				boolean equals = (binary.getPixel((int) aktuellerPunkt.getX(), (int) aktuellerPunkt.getY()) == value);
+				boolean equals = false;
 				/*
 				 * search for largest Intensity Path by taking the next neighbor
 				 * in the computed direction with the largest intensity, as long
@@ -166,7 +161,7 @@ public class MinimumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 				 */
 
 				while (!equals && aktuellerPunkt.getX() > 0 && aktuellerPunkt.getY() > 0
-						&& aktuellerPunkt.getX() < ip.getWidth() & aktuellerPunkt.getY() < ip.getHeight())
+						&& aktuellerPunkt.getX() < ip.getWidth() && aktuellerPunkt.getY() < ip.getHeight())
 				{
 					int min = 256;
 					Point2D temp = null;
@@ -233,10 +228,9 @@ public class MinimumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 						}
 						points.add(p);
 					}
-
 					points.add(temp);
 					aktuellerPunkt = temp;
-					equals = (binary.getPixel((int) aktuellerPunkt.getX(), (int) aktuellerPunkt.getY()) == value);
+					equals = this.isOnContour((int) aktuellerPunkt.getX(), (int) aktuellerPunkt.getY(), c);
 				}
 
 				if (points.size() > 3)
@@ -248,11 +242,23 @@ public class MinimumIntensitySplitLineCalculatorFarhan implements AbstractSplitL
 						PointSplitLine mmis = new PointSplitLine(points);
 						splitLines.add(mmis);
 					}
-
 				}
 			}
 		}
+
 		return splitLines;
+	}
+
+	private boolean isOnContour(int x, int y, Clump c)
+	{
+		for (int i = 0; i < c.getBoundary().npoints; i++)
+		{
+			if (c.getBoundary().xpoints[i] == x && c.getBoundary().ypoints[i] == y)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

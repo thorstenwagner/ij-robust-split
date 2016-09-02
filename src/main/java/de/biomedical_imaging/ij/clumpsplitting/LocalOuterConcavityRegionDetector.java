@@ -201,6 +201,8 @@ public class LocalOuterConcavityRegionDetector implements AbstractOuterConcavity
 
 							if (concavityPixelList.size() > 0)
 							{
+								ConcavityRegionAdministration.allConcavityRegionPoints.addAll(pointList);
+								
 								concavityRegion.setConcavityPixelList(concavityPixelList);
 
 								concavityRegionList.add(concavityRegion);
