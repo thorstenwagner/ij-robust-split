@@ -37,7 +37,6 @@ package de.biomedical_imaging.ij.clumpsplitting.SplitLines;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Collections;
 
 import de.biomedical_imaging.ij.clumpsplitting.Clump;
 import de.biomedical_imaging.ij.clumpsplitting.ConcavityRegion;

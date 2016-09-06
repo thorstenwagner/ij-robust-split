@@ -363,7 +363,7 @@ public class SVM
 		double rightPlus1 = 0;
 		double anzMinus1 = 0;
 		double anzPlus1 = 0;
-		double n = featureList.size();
+	//	double n = featureList.size();
 		double right = 0;
 
 		for (int i = 0; i < featureList.size(); i++)
@@ -423,7 +423,7 @@ public class SVM
 		ArrayList<Double[]> featureList = SVM.readDataFromFile(dirName);
 		double gradient = 0;
 		double intercept = 0;
-		double accuracy = 0;
+	//	double accuracy = 0;
 		double positive = 0;
 		double negative = 0;
 		double richtigpositive = 0;
@@ -452,7 +452,7 @@ public class SVM
 				gradient += parameters[0];
 				intercept += parameters[1];
 				Double accuracies[] = SVM.test(model, test);
-				accuracy += accuracies[0];
+		//		accuracy += accuracies[0];
 				positive += accuracies[1];
 				negative += accuracies[2];
 				insgesamt = (int) (insgesamt + accuracies[1] + accuracies[2]);
@@ -537,7 +537,7 @@ public class SVM
 		}
 
 		final JFrame frame= new JFrame();
-		JLabel label = new JLabel();
+	//	JLabel label = new JLabel();
 		frame.setSize(300, 100);
 		frame.setLayout(new GridLayout(3, 2));
 	

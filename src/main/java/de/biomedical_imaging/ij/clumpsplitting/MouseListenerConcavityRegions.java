@@ -40,6 +40,7 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Point2D;
 
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -85,23 +86,35 @@ public class MouseListenerConcavityRegions implements MouseListener
 	public void mouseClicked(MouseEvent e)
 	{
 		Polygon boundingBox = cr.getPolygon();
-		if(boundingBox.contains(this.getImageCoordinateX(e.getX()),this.getImageCoordinateY(e.getY())))
+		if (boundingBox.contains(this.getImageCoordinateX(e.getX()), this.getImageCoordinateY(e.getY())))
 		{
-				
-					Clump_Splitting.overlayTextConvexHull.clear();
-					TextRoi text = new TextRoi(cr.getStartX(), cr.getStartY(), cr.getInformation(cr.getConcavityPixelList().get(0)));
-					
-					TextRoi.setFont("Default", 20, Font.PLAIN);
-					text.setStrokeWidth(5);
-					text.setStrokeColor(Color.darkGray);
-					Rectangle r=text.getBounds();
-					Roi roi= new Roi(r);
-					roi.setFillColor(Color.lightGray);
-					Clump_Splitting.overlayTextConvexHull.add(roi);
-					Clump_Splitting.overlayTextConvexHull.add(text);
+			ConcavityPixel pixel = null;
+			Clump_Splitting.overlayTextConvexHull.clear();
+			double dist = 100000000;
+			Point2D.Double point = new Point2D.Double(this.getImageCoordinateX(e.getX()),
+					this.getImageCoordinateY(e.getY()));
+			for (ConcavityPixel cp : cr.getConcavityPixelList())
+			{
+				double distVergleich = point.distance(cp.getPosition());
+				if (distVergleich < dist)
+				{
+					dist = distVergleich;
+					pixel = cp;
+				}
+			}
+			TextRoi text = new TextRoi(cr.getStartX(), cr.getStartY(), cr.getInformation(pixel));
 
-					Clump_Splitting.showOverlay();
-				
+			TextRoi.setFont("Default", 20, Font.PLAIN);
+			text.setStrokeWidth(5);
+			text.setStrokeColor(Color.darkGray);
+			Rectangle r = text.getBounds();
+			Roi roi = new Roi(r);
+			roi.setFillColor(Color.lightGray);
+			Clump_Splitting.overlayTextConvexHull.add(roi);
+			Clump_Splitting.overlayTextConvexHull.add(text);
+
+			Clump_Splitting.showOverlay();
+
 		}
 
 	}
